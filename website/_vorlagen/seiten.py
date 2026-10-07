@@ -1,0 +1,158 @@
+# Erzeugt die Unterseiten aus einer gemeinsamen Vorlage (Kopf, Fuß, Stil).
+# Aufruf: python3 tayfun/website/_vorlagen/seiten.py
+from pathlib import Path
+
+OUT = Path(__file__).resolve().parent.parent
+DOMAIN = "https://www.tayfun-textilpflege.de"  # TODO Livegang: echte Domain
+
+HEAD = """<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>{title}</title>
+<meta name="description" content="{desc}">
+<link rel="canonical" href="{domain}/{file}">
+{robots}<meta name="theme-color" content="#1B2A41">
+<link rel="icon" href="assets/tayfun-siegel-mini-dunkel.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="preview">Vorschau – Preise, Liefergebiet und Rechtstexte sind noch Entwürfe und werden vor dem Livegang geprüft.</div>
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="./" aria-label="Tayfun Textilpflege, Startseite">
+      <img src="assets/tayfun-siegel-mini-dunkel.svg" alt="" width="44" height="44">
+      <div><span>Tayfun</span><em>feine Textilpflege</em></div>
+    </a>
+    <nav class="nav" aria-label="Hauptnavigation">
+      <a href="./#leistungen">Leistungen</a>
+      <a href="./#abholservice">Abholservice</a>
+      <a href="./#preise">Preise</a>
+      <a href="./#firmen">Firmen</a>
+      <a href="./#kontakt">Kontakt</a>
+      <a class="call" href="tel:+49511464252">0511 464252</a>
+    </nav>
+  </div>
+</header>
+<main>
+<section class="page-head"><div class="wrap"><p class="kicker" style="color:var(--red-on-navy)">{kicker}</p><h1>{h1}</h1><p>{lead}</p></div></section>
+<section><div class="wrap prose">
+"""
+
+FOOT = """
+</div></section>
+</main>
+<footer>
+  <div class="wrap">
+    <div><img src="assets/tayfun-etikett-dunkel.svg" alt="Tayfun, feine Textilpflege, Hannover-Wettbergen" width="210" height="139"></div>
+    <div><h4>Kontakt</h4><p>An der Kirche 10<br>30457 Hannover<br><a href="tel:+49511464252">0511 464252</a></p></div>
+    <div><h4>Leistungen</h4><p><a href="hemden-anzuege.html">Hemden &amp; Anzüge</a><br><a href="gardinenservice.html">Gardinenservice</a><br><a href="teppichreinigung.html">Teppichreinigung</a></p></div>
+    <div class="legal"><span>© Tayfun Textilpflege</span><a href="impressum.html">Impressum</a><a href="datenschutz.html">Datenschutz</a></div>
+  </div>
+</footer>
+</body>
+</html>
+"""
+
+CTA = """
+<h2>Abholung vereinbaren</h2>
+<p>Rufen Sie uns an unter <a href="tel:+49511464252">0511 464252</a> oder nutzen Sie das <a href="./#anfrage">Anfrageformular</a>. Unser Laden: An der Kirche 10, 30457 Hannover-Wettbergen.</p>
+<div class="btns"><a class="btn dark" href="./#anfrage">Abholung anfragen</a></div>
+"""
+
+PAGES = [
+  dict(file="teppichreinigung.html",
+       title="Teppichreinigung Hannover mit Abholung · Tayfun Textilpflege",
+       desc="Teppichreinigung in Hannover: Velours, Shaggy und handgeknüpfte Orientteppiche. Wir rollen auf, holen ab, reinigen und legen wieder aus.",
+       kicker="Teppichreinigung", h1="Teppichreinigung in Hannover – wir holen ab",
+       lead="Vom pflegeleichten Velours bis zum handgeknüpften Orientteppich. Auf Wunsch rollen wir Ihren Teppich zu Hause auf und legen ihn nach der Reinigung wieder aus.",
+       body="""
+<h2>Was wir reinigen</h2>
+<ul>
+<li>Maschinell gefertigte Teppiche, Velours, Läufer und Schmutzfangmatten</li>
+<li>Shaggy- und Hochflorteppiche</li>
+<li>Handgeknüpfte Orientteppiche, Nepal, Gabbeh und Kelim</li>
+</ul>
+<h2>So läuft es ab</h2>
+<p>Wir vereinbaren einen Termin, rollen den Teppich bei Ihnen auf und nehmen ihn mit. Nach der Reinigung bringen wir ihn zurück und legen ihn wieder aus. Das Auf- und Ausrollen berechnen wir je nach Größe und Aufwand gesondert – den Preis nennen wir Ihnen vorher.</p>
+<h2>Preise</h2>
+<p>Maschinell gefertigte Teppiche ab 15,60 €/m², handgeknüpfte Teppiche ab 21,80 €/m². Auf Wunsch mit Fleck- oder Mottenschutz.</p>
+"""),
+  dict(file="gardinenservice.html",
+       title="Gardinen reinigen lassen in Hannover · Ab- und Aufhängen · Tayfun",
+       desc="Gardinenservice in Hannover: Wir hängen Ihre Gardinen und Vorhänge ab, reinigen sie und hängen sie wieder auf. Mit Abholung und Lieferung.",
+       kicker="Gardinenservice", h1="Gardinen ab, sauber, wieder dran",
+       lead="Keine Leiter, kein Schleppen: Wir hängen Ihre Gardinen und Vorhänge ab, reinigen sie schonend und hängen sie wieder auf.",
+       body="""
+<h2>Unser Rundum-Service</h2>
+<ul>
+<li>Abhängen bei Ihnen zu Hause oder im Büro</li>
+<li>Waschen bzw. Reinigen passend zum Material</li>
+<li>Glätten und faltenfrei zurückbringen</li>
+<li>Wieder aufhängen</li>
+</ul>
+<p>Natürlich können Sie Gardinen auch selbst bei uns im Laden abgeben. Der Preis richtet sich nach Größe, Material und Anzahl der Fenster – wir nennen ihn vorher.</p>
+"""),
+  dict(file="hemden-anzuege.html",
+       title="Hemdenservice & Anzugreinigung Hannover · Tayfun Textilpflege",
+       desc="Hemden gewaschen und gebügelt ab 2,50 €, Anzugreinigung ab 14,50 € in Hannover-Wettbergen. Mit Abholservice und Hemden-Abo für Firmen.",
+       kicker="Hemden & Anzüge", h1="Hemden und Anzüge, wie sie sein sollen",
+       lead="Gewaschen, gebügelt, auf dem Bügel – und auf Wunsch abgeholt und zurückgebracht. Für Berufstätige, Firmen und besondere Anlässe.",
+       body="""
+<h2>Hemden &amp; Blusen</h2>
+<p>Hemden waschen und bügeln wir ab 2,50 €. Sie bekommen sie auf dem Bügel zurück, bereit für den Schrank.</p>
+<h2>Anzüge, Sakkos &amp; Kleider</h2>
+<p>Chemische Reinigung mit Dämpfen und Formfinish, zweiteilige Anzüge ab 14,50 €. Auch Wolle, Seide und Abendmode.</p>
+<h2>Hemden-Abo für Firmen</h2>
+<p>Für Kanzleien, Autohäuser, Banken und Praxen: Wir holen an einem festen Tag pro Woche ab, liefern gebügelt zurück und rechnen monatlich ab. Ohne Anfahrtskosten.</p>
+<h2>Messe-Service</h2>
+<p>Vor und nach der Messe in Hannover: Anzüge, Hemden und Standtextilien abholen, reinigen und pünktlich zurückbringen.</p>
+"""),
+  dict(file="impressum.html", robots='<meta name="robots" content="noindex">\n',
+       title="Impressum · Tayfun Textilpflege", desc="Impressum von Tayfun Textilpflege, Hannover-Wettbergen.",
+       kicker="Rechtliches", h1="Impressum", lead="Angaben gemäß § 5 DDG.", cta=False,
+       body="""
+<p><strong>Tayfun Textilpflege</strong><br>
+<span class="placeholder">[Vor- und Nachname des Inhabers]</span><br>
+<span class="placeholder">[Rechtsform, z. B. Einzelunternehmen]</span><br>
+An der Kirche 10<br>30457 Hannover</p>
+<h2>Kontakt</h2>
+<p>Telefon: 0511 464252<br>E-Mail: <span class="placeholder">[E-Mail-Adresse]</span></p>
+<h2>Umsatzsteuer</h2>
+<p>Umsatzsteuer-Identifikationsnummer gemäß § 27a UStG: <span class="placeholder">[USt-IdNr., falls vorhanden – sonst Abschnitt löschen]</span></p>
+<h2>Verbraucherstreitbeilegung</h2>
+<p>Wir sind nicht bereit oder verpflichtet, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.</p>
+"""),
+  dict(file="datenschutz.html", robots='<meta name="robots" content="noindex">\n',
+       title="Datenschutz · Tayfun Textilpflege", desc="Datenschutzerklärung von Tayfun Textilpflege.",
+       kicker="Rechtliches", h1="Datenschutzerklärung", lead="Entwurf – vor dem Livegang mit einem Generator (z. B. eRecht24) oder fachkundig prüfen lassen.", cta=False,
+       body="""
+<h2>Verantwortlicher</h2>
+<p>Tayfun Textilpflege, <span class="placeholder">[Inhaber]</span>, An der Kirche 10, 30457 Hannover, Telefon 0511 464252, E-Mail <span class="placeholder">[E-Mail]</span>.</p>
+<h2>Hosting</h2>
+<p>Diese Website wird bei <span class="placeholder">[Hosting-Anbieter]</span> betrieben. Beim Aufruf werden technisch notwendige Daten (z. B. IP-Adresse, Zeitpunkt, aufgerufene Seite) verarbeitet, um die Seite auszuliefern (Art. 6 Abs. 1 lit. f DSGVO).</p>
+<h2>Schriften</h2>
+<p>Die verwendeten Schriften sind lokal eingebunden. Beim Aufruf der Seite wird keine Verbindung zu Servern von Google oder anderen Schriftanbietern aufgebaut.</p>
+<h2>Anfrageformular</h2>
+<p>Wenn Sie uns über das Formular eine Anfrage senden, verarbeiten wir Ihre Angaben (Name, Telefon, Adresse, Nachricht), um die Anfrage zu bearbeiten und die Abholung zu organisieren (Art. 6 Abs. 1 lit. b DSGVO). Die Daten werden gelöscht, sobald sie nicht mehr benötigt werden und keine gesetzlichen Aufbewahrungspflichten bestehen. <span class="placeholder">[Dienst für den Formularversand ergänzen, sobald eingerichtet]</span></p>
+<h2>Google Maps</h2>
+<p>Der Link „Route in Google Maps“ führt zu Google. Erst wenn Sie ihn anklicken, werden Daten an Google übertragen.</p>
+<h2>Ihre Rechte</h2>
+<p>Sie haben das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit und Widerspruch sowie das Recht, sich bei einer Datenschutz-Aufsichtsbehörde zu beschweren (in Niedersachsen: Die Landesbeauftragte für den Datenschutz Niedersachsen).</p>
+"""),
+]
+
+for p in PAGES:
+    html = HEAD.format(title=p["title"], desc=p["desc"], domain=DOMAIN, file=p["file"], robots=p.get("robots", ""),
+                       kicker=p["kicker"], h1=p["h1"], lead=p["lead"])
+    html += p["body"] + (CTA if p.get("cta", True) else "") + FOOT
+    (OUT / p["file"]).write_text(html, encoding="utf-8")
+    print("✓", p["file"])
+
+urls = ["", "hemden-anzuege.html", "gardinenservice.html", "teppichreinigung.html"]
+(OUT / "sitemap.xml").write_text('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+    + "".join(f"  <url><loc>{DOMAIN}/{u}</loc></url>\n" for u in urls) + "</urlset>\n", encoding="utf-8")
+(OUT / "robots.txt").write_text(f"User-agent: *\nAllow: /\nSitemap: {DOMAIN}/sitemap.xml\n", encoding="utf-8")
+print("✓ sitemap.xml, robots.txt")
