@@ -32,10 +32,12 @@ Jedes Logo gibt es in `dunkel` (auf Nachtblau) und `hell` (transparent, für hel
 ## Website: vor dem Livegang
 
 - [ ] Preise, Leistungen und Liefergebiet in `website/index.html` und den Unterseiten prüfen
-- [ ] Impressum: Inhaber, Rechtsform, E-Mail, ggf. USt-IdNr. eintragen (`website/impressum.html`, Platzhalter sind gelb markiert)
+- [x] Impressum: Inhaber Duran Ince, Einzelunternehmen, info@tayfun-textilpflege.de eingetragen
+- [ ] USt-IdNr. nachtragen (`website/_vorlagen/seiten.py`)
+- [ ] Postfach info@tayfun-textilpflege.de bei ALL-INKL anlegen
 - [ ] Datenschutzerklärung prüfen lassen oder mit einem Generator erstellen
-- [ ] Domain kaufen und in `website/_vorlagen/seiten.py` sowie `index.html` (canonical, JSON-LD) eintragen, dann `python3 website/_vorlagen/seiten.py`
-- [ ] Hosting einrichten (z. B. Netlify, Cloudflare Pages oder Webspace beim Domain-Anbieter)
+- [x] Domain tayfun-textilpflege.de bei ALL-INKL gekauft und überall eingetragen
+- [ ] GitHub Pages aus Branch `tayfun-site` einschalten, dann DNS bei ALL-INKL (4 A-Einträge 185.199.108–111.153, CNAME www → akatince-png.github.io)
 - [ ] Anfrageformular anbinden: Empfänger-Adresse als `data-endpoint` am `<form id="anfrage">` eintragen
 - [ ] Gelben Vorschau-Hinweis oben auf allen Seiten entfernen
 - [ ] Website im Google-Unternehmensprofil eintragen und bei der Google Search Console anmelden

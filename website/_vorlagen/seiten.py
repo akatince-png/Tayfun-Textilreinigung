@@ -115,13 +115,13 @@ PAGES = [
        kicker="Rechtliches", h1="Impressum", lead="Angaben gemäß § 5 DDG.", cta=False,
        body="""
 <p><strong>Tayfun Textilpflege</strong><br>
-<span class="placeholder">[Vor- und Nachname des Inhabers]</span><br>
-<span class="placeholder">[Rechtsform, z. B. Einzelunternehmen]</span><br>
+Inhaber: Duran Ince<br>
+Einzelunternehmen<br>
 An der Kirche 10<br>30457 Hannover</p>
 <h2>Kontakt</h2>
-<p>Telefon: 0511 464252<br>E-Mail: <span class="placeholder">[E-Mail-Adresse]</span></p>
+<p>Telefon: 0511 464252<br>E-Mail: info@tayfun-textilpflege.de</p>
 <h2>Umsatzsteuer</h2>
-<p>Umsatzsteuer-Identifikationsnummer gemäß § 27a UStG: <span class="placeholder">[USt-IdNr., falls vorhanden – sonst Abschnitt löschen]</span></p>
+<p>Umsatzsteuer-Identifikationsnummer gemäß § 27a UStG: <span class="placeholder">[USt-IdNr. folgt]</span></p>
 <h2>Verbraucherstreitbeilegung</h2>
 <p>Wir sind nicht bereit oder verpflichtet, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.</p>
 """),
@@ -130,9 +130,9 @@ An der Kirche 10<br>30457 Hannover</p>
        kicker="Rechtliches", h1="Datenschutzerklärung", lead="Entwurf – vor dem Livegang mit einem Generator (z. B. eRecht24) oder fachkundig prüfen lassen.", cta=False,
        body="""
 <h2>Verantwortlicher</h2>
-<p>Tayfun Textilpflege, <span class="placeholder">[Inhaber]</span>, An der Kirche 10, 30457 Hannover, Telefon 0511 464252, E-Mail <span class="placeholder">[E-Mail]</span>.</p>
+<p>Tayfun Textilpflege, Inhaber Duran Ince, An der Kirche 10, 30457 Hannover, Telefon 0511 464252, E-Mail info@tayfun-textilpflege.de.</p>
 <h2>Hosting</h2>
-<p>Diese Website wird bei <span class="placeholder">[Hosting-Anbieter]</span> betrieben. Beim Aufruf werden technisch notwendige Daten (z. B. IP-Adresse, Zeitpunkt, aufgerufene Seite) verarbeitet, um die Seite auszuliefern (Art. 6 Abs. 1 lit. f DSGVO).</p>
+<p>Diese Website wird über GitHub Pages bereitgestellt (GitHub, Inc., 88 Colin P. Kelly Jr. Street, San Francisco, CA 94107, USA). Beim Aufruf werden technisch notwendige Daten wie IP-Adresse, Zeitpunkt und aufgerufene Seite verarbeitet, um die Seite auszuliefern (Art. 6 Abs. 1 lit. f DSGVO). Dabei können Daten in die USA übertragen werden. GitHub ist nach dem EU-US Data Privacy Framework zertifiziert. <span class="placeholder">[vor Livegang prüfen]</span></p>
 <h2>Schriften</h2>
 <p>Die verwendeten Schriften sind lokal eingebunden. Beim Aufruf der Seite wird keine Verbindung zu Servern von Google oder anderen Schriftanbietern aufgebaut.</p>
 <h2>Anfrageformular</h2>
