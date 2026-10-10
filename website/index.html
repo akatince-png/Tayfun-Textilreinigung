@@ -55,20 +55,30 @@
 <div class="preview">Vorschau – Preise, Liefergebiet und Rechtstexte sind noch Entwürfe und werden vor dem Livegang geprüft.</div>
 
 <header class="top">
-  <div class="wrap">
+  <div class="wrap bar">
     <a class="brand" href="./" aria-label="Tayfun Textilpflege, Startseite">
       <img src="assets/tayfun-siegel-mini-dunkel.svg" alt="" width="44" height="44">
       <div><span>Tayfun</span><em>feine Textilpflege</em></div>
     </a>
-    <nav class="nav" aria-label="Hauptnavigation">
-      <a href="#leistungen">Leistungen</a>
-      <a href="#abholservice">Abholservice</a>
-      <a href="#preise">Preise</a>
-      <a href="#firmen">Firmen</a>
-      <a href="#kontakt">Kontakt</a>
+    <div class="actions">
       <a class="call" href="tel:+49511464252">0511 464252</a>
-    </nav>
+      <a class="order" href="#anfrage">Abholung anfragen</a>
+    </div>
   </div>
+  <nav class="subnav" aria-label="Bereiche">
+    <div class="wrap">
+      <a href="#preise">Preise</a>
+      <a href="#abholservice">Abholservice</a>
+      <a href="hemden-anzuege.html">Hemden &amp; Anzüge</a>
+      <a href="#bettwaren">Bettwaren</a>
+      <a href="gardinenservice.html">Gardinen</a>
+      <a href="teppichreinigung.html">Teppiche</a>
+      <a href="#demnaechst">Sofa &amp; Polster</a>
+      <a href="#firmen">Firmen</a>
+      <a href="leistungen.html">Alle Leistungen</a>
+      <a href="#kontakt">Kontakt</a>
+    </div>
+  </nav>
 </header>
 
 <main>
@@ -95,12 +105,20 @@
     </div>
   </section>
 
-  <div class="photo-band" aria-hidden="true">
-    <img src="assets/fotos/hemden-holzbuegel.jpg" alt="" loading="lazy" width="1000" height="1500">
-    <img src="assets/fotos/anzug-navy.jpg" alt="" loading="lazy" width="1000" height="667">
-    <img src="assets/fotos/brautkleid.jpg" alt="" loading="lazy" width="1000" height="1500">
-    <img src="assets/fotos/mantel-herbst.jpg" alt="" loading="lazy" width="1000" height="1500">
-  </div>
+  <section class="quick" aria-labelledby="q-title">
+    <div class="wrap">
+      <h2 id="q-title">Was dürfen wir für Sie reinigen?</h2>
+      <div class="tiles">
+        <a class="tile" href="hemden-anzuege.html"><img src="assets/fotos/hemden-holzbuegel.jpg" alt="" loading="lazy" width="1000" height="1500"><span>Hemden &amp; Blusen<small>ab 2,50 €</small></span></a>
+        <a class="tile" href="hemden-anzuege.html"><img src="assets/fotos/anzug-navy.jpg" alt="" loading="lazy" width="1000" height="667"><span>Anzüge &amp; Smoking<small>ab 19,90 €</small></span></a>
+        <a class="tile" href="#preise"><img src="assets/fotos/brautkleid.jpg" alt="" loading="lazy" width="1000" height="1500"><span>Kleider &amp; Brautmode<small>ab 12,90 €</small></span></a>
+        <a class="tile" href="#preise"><img src="assets/fotos/mantel-herbst.jpg" alt="" loading="lazy" width="1000" height="1500"><span>Mäntel &amp; Jacken<small>ab 18,90 €</small></span></a>
+        <a class="tile" href="#bettwaren"><img src="assets/fotos/schlafzimmer.jpg" alt="" loading="lazy" width="1600" height="1067"><span>Bettdecken &amp; Kissen<small>ab 15,90 €</small></span></a>
+        <a class="tile" href="gardinenservice.html"><img src="assets/fotos/gardine.jpg" alt="" loading="lazy" width="1200" height="1600"><span>Gardinen<small>ab 3,20 € pro m²</small></span></a>
+      </div>
+      <p class="more">Außerdem: <a href="teppichreinigung.html">Teppiche</a> · <a href="#demnaechst">Sofa &amp; Polster</a> · <a href="#leistungen">Wäsche &amp; Tischwäsche</a> · <a href="leistungen.html">alle Leistungen von A bis Z</a></p>
+    </div>
+  </section>
 
   <section id="leistungen" aria-labelledby="l-title">
     <div class="wrap">
@@ -170,7 +188,7 @@
   </section>
 
 
-  <section class="soon" aria-labelledby="s-title">
+  <section id="demnaechst" class="soon" aria-labelledby="s-title">
     <div class="wrap split">
       <div>
         <p class="kicker">Demnächst neu</p>
@@ -332,6 +350,7 @@
     <div class="legal"><span>© Tayfun Textilpflege</span><a href="impressum.html">Impressum</a><a href="datenschutz.html">Datenschutz</a></div>
   </div>
 </footer>
+<a class="totop" href="#" aria-label="Nach oben">↑</a>
 <script src="script.js" defer></script>
 </body>
 </html>

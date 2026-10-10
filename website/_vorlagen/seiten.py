@@ -21,20 +21,30 @@ HEAD = """<!doctype html>
 <body>
 <div class="preview">Vorschau – Preise, Liefergebiet und Rechtstexte sind noch Entwürfe und werden vor dem Livegang geprüft.</div>
 <header class="top">
-  <div class="wrap">
+  <div class="wrap bar">
     <a class="brand" href="./" aria-label="Tayfun Textilpflege, Startseite">
       <img src="assets/tayfun-siegel-mini-dunkel.svg" alt="" width="44" height="44">
       <div><span>Tayfun</span><em>feine Textilpflege</em></div>
     </a>
-    <nav class="nav" aria-label="Hauptnavigation">
-      <a href="./#leistungen">Leistungen</a>
-      <a href="./#abholservice">Abholservice</a>
-      <a href="./#preise">Preise</a>
-      <a href="./#firmen">Firmen</a>
-      <a href="./#kontakt">Kontakt</a>
+    <div class="actions">
       <a class="call" href="tel:+49511464252">0511 464252</a>
-    </nav>
+      <a class="order" href="./#anfrage">Abholung anfragen</a>
+    </div>
   </div>
+  <nav class="subnav" aria-label="Bereiche">
+    <div class="wrap">
+      <a href="./#preise">Preise</a>
+      <a href="./#abholservice">Abholservice</a>
+      <a href="hemden-anzuege.html">Hemden &amp; Anzüge</a>
+      <a href="./#bettwaren">Bettwaren</a>
+      <a href="gardinenservice.html">Gardinen</a>
+      <a href="teppichreinigung.html">Teppiche</a>
+      <a href="./#demnaechst">Sofa &amp; Polster</a>
+      <a href="./#firmen">Firmen</a>
+      <a href="leistungen.html">Alle Leistungen</a>
+      <a href="./#kontakt">Kontakt</a>
+    </div>
+  </nav>
 </header>
 <main>
 <section class="page-head"><div class="wrap"><p class="kicker" style="color:var(--red-on-navy)">{kicker}</p><h1>{h1}</h1><p>{lead}</p></div></section>
@@ -52,6 +62,8 @@ FOOT = """
     <div class="legal"><span>© Tayfun Textilpflege</span><a href="impressum.html">Impressum</a><a href="datenschutz.html">Datenschutz</a></div>
   </div>
 </footer>
+<a class="totop" href="#" aria-label="Nach oben">↑</a>
+<script src="script.js" defer></script>
 </body>
 </html>
 """

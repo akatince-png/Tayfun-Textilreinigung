@@ -45,3 +45,31 @@
     }
   });
 })();
+
+// Bereichsleiste: aktiven Bereich markieren, „Nach oben“ einblenden
+(function () {
+  const links = [...document.querySelectorAll('.subnav a[href*="#"]')];
+  const map = new Map();
+  links.forEach((a) => {
+    const id = a.getAttribute("href").split("#")[1];
+    const el = id && document.getElementById(id);
+    if (el) map.set(el, a);
+  });
+  if (map.size && "IntersectionObserver" in window) {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (!e.isIntersecting) return;
+        links.forEach((l) => l.classList.remove("active"));
+        const a = map.get(e.target);
+        a.classList.add("active");
+        const bar = a.parentElement;
+        bar.scrollTo({ left: a.offsetLeft - bar.clientWidth / 2 + a.clientWidth / 2, behavior: "smooth" });
+      });
+    }, { rootMargin: "-45% 0px -50% 0px" });
+    map.forEach((_, el) => io.observe(el));
+  }
+  const page = location.pathname.split("/").pop();
+  document.querySelectorAll(".subnav a").forEach((a) => { if (page && a.getAttribute("href") === page) a.classList.add("active"); });
+  const top = document.querySelector(".totop");
+  if (top) addEventListener("scroll", () => top.classList.toggle("show", scrollY > 700), { passive: true });
+})();
