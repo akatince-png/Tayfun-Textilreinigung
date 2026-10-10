@@ -180,3 +180,9 @@ footer p { margin: 0; }
 .legend strong { color: var(--ink); font-weight: 500; }
 @media (max-width: 760px) { .pin b { display: none; } .legend { display: grid; } }
 .page-photo { width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; margin-bottom: 8px; border-radius: 2px; }
+.prose:has(.az) { max-width: var(--wrap); }
+.az { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px 48px; }
+.az h2 { font-size: 28px; margin-top: 24px; }
+.az ul { padding-left: 18px; margin: 0; display: grid; gap: 6px; }
+.az li::marker { color: var(--red); }
+@media (max-width: 860px) { .az { grid-template-columns: 1fr; } }

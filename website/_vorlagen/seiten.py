@@ -48,7 +48,7 @@ FOOT = """
   <div class="wrap">
     <div><img src="assets/tayfun-etikett-dunkel.svg" alt="Tayfun, feine Textilpflege, Hannover-Wettbergen" width="210" height="139"></div>
     <div><h4>Kontakt</h4><p>An der Kirche 10<br>30457 Hannover<br><a href="tel:+49511464252">0511 464252</a></p></div>
-    <div><h4>Leistungen</h4><p><a href="hemden-anzuege.html">Hemden &amp; Anzüge</a><br><a href="gardinenservice.html">Gardinenservice</a><br><a href="teppichreinigung.html">Teppichreinigung</a></p></div>
+    <div><h4>Leistungen</h4><p><a href="hemden-anzuege.html">Hemden &amp; Anzüge</a><br><a href="gardinenservice.html">Gardinenservice</a><br><a href="teppichreinigung.html">Teppichreinigung</a><br><a href="leistungen.html">Alle Leistungen A–Z</a></p></div>
     <div class="legal"><span>© Tayfun Textilpflege</span><a href="impressum.html">Impressum</a><a href="datenschutz.html">Datenschutz</a></div>
   </div>
 </footer>
@@ -112,6 +112,29 @@ PAGES = [
 <h2>Messe-Service</h2>
 <p>Vor und nach der Messe in Hannover: Anzüge, Hemden und Standtextilien abholen, reinigen und pünktlich zurückbringen.</p>
 """),
+  dict(file="leistungen.html",
+       title="Alle Leistungen von A bis Z · Textilreinigung Hannover · Tayfun",
+       desc="Textilreinigung in Hannover-Wettbergen: Hemden, Anzüge, Smoking, Brautkleider, Daunendecken, Matratzen, Gardinen, Teppiche, Tischwäsche, Skianzüge, Pferdedecken und mehr – mit Abholservice.",
+       kicker="Leistungen", h1="Alles, was aus Stoff ist",
+       lead="Was sich tragen, waschen oder reinigen lässt, pflegen wir. Hier finden Sie unsere Leistungen im Überblick. Fehlt etwas? Rufen Sie uns an – fast immer finden wir eine Lösung.",
+       body="""
+<div class="az">
+<div><h2>Kleidung</h2><ul>
+<li>Hemden, Frackhemden &amp; Blusen</li><li>Hosen &amp; Röcke</li><li>Anzüge, Sakkos &amp; Westen</li><li>Smokings &amp; Fracks</li>
+<li>Kleider &amp; Abendkleider</li><li>Brautkleider</li><li>Pullover &amp; Strickwaren</li><li>Krawatten &amp; Schals</li>
+<li>Mäntel &amp; Wollmäntel</li><li>Daunenjacken &amp; Outdoor-Kleidung</li><li>Skianzüge</li><li>Berufskleidung &amp; Uniformen</li><li>Unterwäsche</li></ul></div>
+<div><h2>Bett &amp; Schlafen</h2><ul>
+<li>Daunendecken &amp; Federbetten</li><li>Steppdecken</li><li>Kopf-, Feder- &amp; Daunenkissen</li><li>Wolldecken &amp; Plaids (Lama, Alpaka, Kaschmir)</li>
+<li>Bettwäsche &amp; Laken</li><li>Matratzen</li></ul>
+<h2>Haushalt</h2><ul>
+<li>Tischwäsche &amp; Servietten</li><li>Mangelwäsche</li><li>Handtücher</li><li>Gardinen &amp; Vorhänge – auf Wunsch mit Ab- und Aufhängen</li></ul></div>
+<div><h2>Teppiche</h2><ul>
+<li>Maschinell gefertigte Teppiche &amp; Läufer</li><li>Shaggy &amp; Hochflor</li><li>Orientteppiche &amp; Handgeknüpfte</li><li>Aufrollen, Abholen &amp; Auslegen</li></ul>
+<h2>Besonderes</h2><ul>
+<li>Pferdedecken</li><li>Imprägnieren</li><li>Fleckenentfernung</li><li>Firmenwäsche &amp; Hemden-Abo</li><li>Messe-Service</li></ul></div>
+</div>
+<p class="note">Preise nennen wir Ihnen gern am Telefon oder im Laden. Eine Auswahl finden Sie in unserer <a href="./#preise">Preisübersicht</a>.</p>
+"""),
   dict(file="impressum.html", robots='<meta name="robots" content="noindex">\n',
        title="Impressum · Tayfun Textilpflege", desc="Impressum von Tayfun Textilpflege, Hannover-Wettbergen.",
        kicker="Rechtliches", h1="Impressum", lead="Angaben gemäß § 5 DDG.", cta=False,
@@ -157,7 +180,7 @@ for p in PAGES:
     (OUT / p["file"]).write_text(html, encoding="utf-8")
     print("✓", p["file"])
 
-urls = ["", "hemden-anzuege.html", "gardinenservice.html", "teppichreinigung.html"]
+urls = ["", "leistungen.html", "hemden-anzuege.html", "gardinenservice.html", "teppichreinigung.html"]
 (OUT / "sitemap.xml").write_text('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
     + "".join(f"  <url><loc>{DOMAIN}/{u}</loc></url>\n" for u in urls) + "</urlset>\n", encoding="utf-8")
 (OUT / "robots.txt").write_text(f"User-agent: *\nAllow: /\nSitemap: {DOMAIN}/sitemap.xml\n", encoding="utf-8")
