@@ -131,7 +131,9 @@ PAGES = [
 <div><h2>Teppiche</h2><ul>
 <li>Maschinell gefertigte Teppiche &amp; Läufer</li><li>Shaggy &amp; Hochflor</li><li>Orientteppiche &amp; Handgeknüpfte</li><li>Aufrollen, Abholen &amp; Auslegen</li></ul>
 <h2>Besonderes</h2><ul>
-<li>Pferdedecken</li><li>Imprägnieren</li><li>Fleckenentfernung</li><li>Firmenwäsche &amp; Hemden-Abo</li><li>Messe-Service</li></ul></div>
+<li>Pferdedecken</li><li>Leder &amp; Wildleder (über einen Partnerbetrieb)</li><li>Imprägnieren</li><li>Fleckenentfernung</li><li>Firmenwäsche &amp; Hemden-Abo</li><li>Messe-Service</li></ul>
+<h2>Demnächst bei Ihnen zu Hause</h2><ul>
+<li>Polster- &amp; Sofareinigung vor Ort</li><li>Teppichreinigung vor Ort</li><li>Verleih von Teppich- &amp; Polsterreinigern</li></ul></div>
 </div>
 <p class="note">Preise nennen wir Ihnen gern am Telefon oder im Laden. Eine Auswahl finden Sie in unserer <a href="./#preise">Preisübersicht</a>.</p>
 """),

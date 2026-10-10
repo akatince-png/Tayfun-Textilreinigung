@@ -186,3 +186,10 @@ footer p { margin: 0; }
 .az ul { padding-left: 18px; margin: 0; display: grid; gap: 6px; }
 .az li::marker { color: var(--red); }
 @media (max-width: 860px) { .az { grid-template-columns: 1fr; } }
+.soon { background: var(--navy); color: var(--cream); }
+.soon .kicker { color: var(--red-on-navy); }
+.soon .intro { color: rgba(242,236,225,.82); }
+.soon-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 1px; background: rgba(242,236,225,.15); border: 1px solid rgba(242,236,225,.15); }
+.soon-list li { background: var(--navy); padding: 20px 22px; display: grid; gap: 4px; }
+.soon-list strong { font-family: var(--serif); font-weight: 500; font-size: 24px; }
+.soon-list span { color: rgba(242,236,225,.78); font-size: 16px; }
