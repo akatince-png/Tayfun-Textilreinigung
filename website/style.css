@@ -234,3 +234,57 @@ section[id], main [id] { scroll-margin-top: 130px; }
 .subnav .wrap { padding-top: 0; padding-bottom: 0; height: auto; min-height: 0; }
 @media (min-width: 1100px) { .subnav .wrap { justify-content: space-between; gap: 0; } .subnav a { padding: 13px 6px 11px; letter-spacing: .11em; } }
 @media (max-width: 1099px) { .subnav { -webkit-mask-image: linear-gradient(90deg, #000 88%, transparent); mask-image: linear-gradient(90deg, #000 88%, transparent); } }
+
+/* WhatsApp */
+.btn.wa { background: #1F8A55; color: #fff; display: inline-flex; align-items: center; gap: 8px; }
+.btn.wa:hover { background: #18744A; }
+.btn.wa svg { width: 20px; height: 20px; }
+.btn.outline { border-color: var(--navy); color: var(--navy); }
+.btn.outline:hover { background: var(--navy); color: var(--cream); }
+.contact .btn { margin: 0 8px 10px 0; }
+.wa-float { position: fixed; right: 16px; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); z-index: 21; display: inline-flex; align-items: center; gap: 8px; background: #1F8A55; color: #fff; text-decoration: none; font-weight: 500; font-size: 15px; padding: 11px 16px 11px 13px; border-radius: 999px; box-shadow: 0 6px 18px rgba(0,0,0,.25); }
+.wa-float:hover { background: #18744A; }
+@media (max-width: 560px) { .wa-float span { display: none; } .wa-float { padding: 12px; } }
+.totop { bottom: calc(76px + env(safe-area-inset-bottom, 0px)); }
+.ph { display: inline-block; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; background: #FFF4D6; color: #5A4300; padding: 1px 6px; border-radius: 2px; vertical-align: middle; }
+
+/* So einfach geht's */
+.howto { padding-block: 24px 72px; text-align: center; }
+.howto ol { list-style: none; margin: 32px 0 32px; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; counter-reset: s; }
+.howto li { counter-increment: s; position: relative; padding: 0 12px; }
+.howto li svg { width: 56px; height: 56px; color: var(--navy); margin: 0 auto 10px; display: block; }
+.howto li::before { content: counter(s); position: absolute; top: -6px; left: calc(50% + 22px); width: 24px; height: 24px; border-radius: 50%; background: var(--red); color: #fff; font-size: 13px; line-height: 24px; font-weight: 500; }
+.howto h3 { font-family: var(--serif); font-weight: 500; font-size: 26px; margin: 0 0 6px; }
+.howto p { color: var(--muted); margin: 0 auto; max-width: 30ch; }
+.btns.center { justify-content: center; }
+@media (min-width: 761px) { .howto li + li::after { content: ""; position: absolute; top: 28px; left: -16px; width: 32px; border-top: 1px dashed var(--line); } }
+@media (max-width: 760px) { .howto ol { grid-template-columns: 1fr; gap: 28px; } }
+
+/* Preise mit Reitern */
+.tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.tabs button { font: inherit; font-size: 13px; letter-spacing: .1em; text-transform: uppercase; background: transparent; color: var(--navy); border: 1px solid var(--line); padding: 9px 14px; border-radius: 2px; cursor: pointer; }
+.tabs button[aria-selected="true"] { background: var(--navy); border-color: var(--navy); color: var(--cream); }
+.price-tabs:not(.js) .tabs { display: none; }
+.price-tabs.js .tab-title { display: none; }
+.tab-title { font-family: var(--serif); font-weight: 500; font-size: 22px; margin: 18px 0 6px; }
+
+/* Laden-Fotos (Platzhalter bis eigene Fotos da sind) */
+.story > div { min-width: 0; }
+.shop-photos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 28px; }
+.shop-photos figure { margin: 0; }
+.shop-photos img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; height: auto; }
+.ph-photo div { aspect-ratio: 4 / 3; display: grid; place-items: center; border: 1px dashed #B9B2A3; color: var(--muted); font-size: 13px; letter-spacing: .12em; text-transform: uppercase; background: repeating-linear-gradient(135deg, transparent 0 10px, rgba(27,42,65,.03) 10px 20px); }
+.shop-photos figcaption { font-size: 14px; color: var(--muted); margin-top: 6px; }
+@media (max-width: 560px) { .shop-photos { grid-template-columns: 1fr 1fr; } .shop-photos figure:last-child { grid-column: span 2; } }
+
+/* Bewertungen */
+.reviews { text-align: center; }
+.review-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 28px 0 28px; text-align: left; }
+@media (max-width: 860px) { .review-grid { grid-template-columns: 1fr; } }
+.review { margin: 0; background: #fff; border: 1px solid var(--line); padding: 22px 24px; border-radius: 2px; }
+.review .stars { color: #D9A520; letter-spacing: .12em; font-size: 15px; }
+.review blockquote { margin: 10px 0 12px; font-family: var(--serif); font-size: 21px; line-height: 1.35; }
+.review figcaption { font-size: 14px; color: var(--muted); }
+.ph-review { border-style: dashed; background: transparent; }
+.ph-review .stars, .ph-review blockquote { opacity: .45; }
+.story .shop-photos { grid-column: 1 / -1; }

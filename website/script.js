@@ -73,3 +73,28 @@
   const top = document.querySelector(".totop");
   if (top) addEventListener("scroll", () => top.classList.toggle("show", scrollY > 700), { passive: true });
 })();
+
+// Preise: Reiter Kleidung / Bettwaren / Heimtextilien. Ohne JavaScript stehen alle Tabellen untereinander.
+(function () {
+  const box = document.querySelector(".price-tabs");
+  if (!box) return;
+  const tabs = [...box.querySelectorAll('[role="tab"]')];
+  const select = (t, focus) => {
+    tabs.forEach((b) => {
+      const on = b === t;
+      b.setAttribute("aria-selected", on);
+      b.tabIndex = on ? 0 : -1;
+      document.getElementById(b.getAttribute("aria-controls")).hidden = !on;
+    });
+    if (focus) t.focus();
+  };
+  box.classList.add("js");
+  tabs.forEach((t, i) => {
+    t.addEventListener("click", () => select(t));
+    t.addEventListener("keydown", (e) => {
+      const d = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
+      if (d) select(tabs[(i + d + tabs.length) % tabs.length], true);
+    });
+  });
+  select(tabs[0]);
+})();

@@ -39,6 +39,9 @@ Jedes Logo gibt es in `dunkel` (auf Nachtblau) und `hell` (transparent, für hel
 - [x] Domain tayfun-textilpflege.de bei ALL-INKL gekauft und überall eingetragen
 - [ ] GitHub Pages aus Branch `tayfun-site` einschalten, dann DNS bei ALL-INKL (4 A-Einträge 185.199.108–111.153, CNAME www → akatince-png.github.io)
 - [ ] Anfrageformular anbinden: Empfänger-Adresse als `data-endpoint` am `<form id="anfrage">` eintragen
+- [ ] WhatsApp-Nummer eintragen: Platzhalter `4915100000000` (Link) und `0151 0000 0000` (Anzeige) in `website/index.html` und `website/_vorlagen/seiten.py` ersetzen, danach Unterseiten neu erzeugen, den Hinweis „Platzhalter“ im Kontaktbereich löschen
+- [ ] Eigene Fotos (Theke, Schaufenster, Übergabe) statt „Foto folgt“ im Bereich „Über uns“ einsetzen
+- [ ] Bewertungen: Platzhalter durch echte Google-Bewertungen ersetzen (nur echte, mit Name wie bei Google) oder den Abschnitt bis dahin ausblenden
 - [ ] Gelben Vorschau-Hinweis oben auf allen Seiten entfernen
 - [ ] Website im Google-Unternehmensprofil eintragen und bei der Google Search Console anmelden
 
