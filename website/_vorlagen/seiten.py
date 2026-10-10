@@ -83,6 +83,7 @@ PAGES = [
   dict(file="gardinenservice.html",
        title="Gardinen reinigen lassen in Hannover · Ab- und Aufhängen · Tayfun",
        desc="Gardinenservice in Hannover: Wir hängen Ihre Gardinen und Vorhänge ab, reinigen sie und hängen sie wieder auf. Mit Abholung und Lieferung.",
+       img=("assets/fotos/gardine.jpg","Helle Gardine vor einem sonnigen Fenster"),
        kicker="Gardinenservice", h1="Gardinen ab, sauber, wieder dran",
        lead="Keine Leiter, kein Schleppen: Wir hängen Ihre Gardinen und Vorhänge ab, reinigen sie schonend und hängen sie wieder auf.",
        body="""
@@ -98,6 +99,7 @@ PAGES = [
   dict(file="hemden-anzuege.html",
        title="Hemdenservice & Anzugreinigung Hannover · Tayfun Textilpflege",
        desc="Hemden gewaschen und gebügelt ab 2,50 €, Anzugreinigung ab 14,50 € in Hannover-Wettbergen. Mit Abholservice und Hemden-Abo für Firmen.",
+       img=("assets/fotos/hemden-holzbuegel.jpg","Weiße Hemden auf Holzbügeln"),
        kicker="Hemden & Anzüge", h1="Hemden und Anzüge, wie sie sein sollen",
        lead="Gewaschen, gebügelt, auf dem Bügel – und auf Wunsch abgeholt und zurückgebracht. Für Berufstätige, Firmen und besondere Anlässe.",
        body="""
@@ -149,6 +151,8 @@ An der Kirche 10<br>30457 Hannover</p>
 for p in PAGES:
     html = HEAD.format(title=p["title"], desc=p["desc"], domain=DOMAIN, file=p["file"], robots=p.get("robots", ""),
                        kicker=p["kicker"], h1=p["h1"], lead=p["lead"])
+    if p.get("img"):
+        html += f'<img class="page-photo" src="{p["img"][0]}" alt="{p["img"][1]}" loading="lazy">\n'
     html += p["body"] + (CTA if p.get("cta", True) else "") + FOOT
     (OUT / p["file"]).write_text(html, encoding="utf-8")
     print("✓", p["file"])

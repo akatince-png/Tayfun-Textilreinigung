@@ -162,7 +162,21 @@ footer p { margin: 0; }
   .hero-photo img:first-child { aspect-ratio: 16 / 10; }
   .hero-photo .badge { width: 84px; height: 84px; left: 12px; bottom: -26px; }
 }
-.photo-band { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; background: var(--navy); }
-.photo-band img { width: 100%; height: auto; aspect-ratio: 4 / 3; object-fit: cover; }
-@media (max-width: 600px) { .photo-band { grid-template-columns: 1fr 1fr; } .photo-band img:last-child { display: none; } }
+.photo-band { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; background: var(--navy); }
+.photo-band img { width: 100%; height: auto; aspect-ratio: 3 / 4; object-fit: cover; }
+@media (max-width: 700px) { .photo-band { grid-template-columns: 1fr 1fr; } }
 .zones-photo { width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; object-position: center 40%; margin-bottom: 4px; }
+
+/* Bettwaren mit Beschriftung */
+.callouts { margin: 0; position: relative; }
+.callouts img { width: 100%; height: auto; display: block; border-radius: 2px; }
+.pin { position: absolute; left: var(--x); top: var(--y); display: flex; align-items: center; transform: translate(-11px, -11px); pointer-events: none; }
+.pin i { font-style: normal; width: 22px; height: 22px; border-radius: 50%; background: var(--red); color: #fff; font-size: 12px; font-weight: 500; display: grid; place-items: center; box-shadow: 0 0 0 4px rgba(255,255,255,.55); flex: none; }
+.pin b { font-weight: 500; font-size: 14px; white-space: nowrap; background: rgba(250,248,244,.94); color: var(--navy); padding: 6px 10px; margin-left: 34px; position: relative; box-shadow: 0 4px 14px rgba(27,42,65,.15); }
+.pin b::before { content: ""; position: absolute; right: 100%; top: 50%; width: 28px; height: 1px; background: var(--navy); }
+.legend { display: none; margin: 20px 0 0; padding-left: 0; list-style: none; counter-reset: l; gap: 10px; }
+.legend li { counter-increment: l; display: grid; grid-template-columns: 30px 1fr; gap: 10px; color: var(--muted); font-size: 16px; }
+.legend li::before { content: counter(l); width: 22px; height: 22px; border-radius: 50%; background: var(--red); color: #fff; font-size: 12px; display: grid; place-items: center; margin-top: 2px; }
+.legend strong { color: var(--ink); font-weight: 500; }
+@media (max-width: 760px) { .pin b { display: none; } .legend { display: grid; } }
+.page-photo { width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; margin-bottom: 8px; border-radius: 2px; }
