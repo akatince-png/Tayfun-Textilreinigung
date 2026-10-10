@@ -78,7 +78,7 @@ PAGES = [
 <h2>So läuft es ab</h2>
 <p>Wir vereinbaren einen Termin, rollen den Teppich bei Ihnen auf und nehmen ihn mit. Nach der Reinigung bringen wir ihn zurück und legen ihn wieder aus. Das Auf- und Ausrollen berechnen wir je nach Größe und Aufwand gesondert – den Preis nennen wir Ihnen vorher.</p>
 <h2>Preise</h2>
-<p>Maschinell gefertigte Teppiche ab 15,60 €/m², handgeknüpfte Teppiche ab 21,80 €/m². Auf Wunsch mit Fleck- oder Mottenschutz.</p>
+<p>Maschinell gefertigte Teppiche ab 14,90 €/m², handgeknüpfte Teppiche ab 19,90 €/m². Auf Wunsch mit Fleck- oder Mottenschutz.</p>
 """),
   dict(file="gardinenservice.html",
        title="Gardinen reinigen lassen in Hannover · Ab- und Aufhängen · Tayfun",
@@ -98,15 +98,15 @@ PAGES = [
 """),
   dict(file="hemden-anzuege.html",
        title="Hemdenservice & Anzugreinigung Hannover · Tayfun Textilpflege",
-       desc="Hemden gewaschen und gebügelt ab 2,50 €, Anzugreinigung ab 14,50 € in Hannover-Wettbergen. Mit Abholservice und Hemden-Abo für Firmen.",
+       desc="Hemden gewaschen und gebügelt für 2,90 €, Anzugreinigung für 19,90 € in Hannover-Wettbergen. Mit Abholservice und Hemden-Abo für Firmen.",
        img=("assets/fotos/hemden-holzbuegel.jpg","Weiße Hemden auf Holzbügeln"),
        kicker="Hemden & Anzüge", h1="Hemden und Anzüge, wie sie sein sollen",
        lead="Gewaschen, gebügelt, auf dem Bügel – und auf Wunsch abgeholt und zurückgebracht. Für Berufstätige, Firmen und besondere Anlässe.",
        body="""
 <h2>Hemden &amp; Blusen</h2>
-<p>Hemden waschen und bügeln wir ab 2,50 €. Sie bekommen sie auf dem Bügel zurück, bereit für den Schrank.</p>
+<p>Hemden waschen und bügeln wir für 2,90 €, im 10er-Paket für 2,50 € pro Hemd. Sie bekommen sie auf dem Bügel zurück, bereit für den Schrank.</p>
 <h2>Anzüge, Sakkos &amp; Kleider</h2>
-<p>Chemische Reinigung mit Dämpfen und Formfinish, zweiteilige Anzüge ab 14,50 €. Auch Wolle, Seide und Abendmode.</p>
+<p>Chemische Reinigung mit Dämpfen und Formfinish, zweiteilige Anzüge für 19,90 €, Smokings für 32,90 €. Auch Wolle, Seide und Abendmode.</p>
 <h2>Hemden-Abo für Firmen</h2>
 <p>Für Kanzleien, Autohäuser, Banken und Praxen: Wir holen an einem festen Tag pro Woche ab, liefern gebügelt zurück und rechnen monatlich ab. Ohne Anfahrtskosten.</p>
 <h2>Messe-Service</h2>
