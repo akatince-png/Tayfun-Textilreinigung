@@ -122,6 +122,8 @@ An der Kirche 10<br>30457 Hannover</p>
 <p>Telefon: 0511 464252<br>E-Mail: info@tayfun-textilpflege.de</p>
 <h2>Umsatzsteuer</h2>
 <p>Umsatzsteuer-Identifikationsnummer gemäß § 27a UStG: <span class="placeholder">[USt-IdNr. folgt]</span></p>
+<h2>Bildnachweis</h2>
+<p>Fotos: Unsplash (unsplash.com) und Pexels (pexels.com), lizenzfrei nach den Lizenzen der jeweiligen Plattform. Die abgebildeten Personen und Räume sind nicht Teil unseres Betriebs.</p>
 <h2>Verbraucherstreitbeilegung</h2>
 <p>Wir sind nicht bereit oder verpflichtet, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.</p>
 """),

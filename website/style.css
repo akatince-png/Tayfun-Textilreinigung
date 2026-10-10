@@ -152,3 +152,17 @@ footer p { margin: 0; }
 .prose h2 { font-size: 32px; margin-top: 40px; }
 .prose ul { padding-left: 20px; }
 .placeholder { background: #FFF4D6; padding: 0 4px; }
+
+/* Fotos */
+.hero-photo { margin: 0; position: relative; justify-self: stretch; }
+.hero-photo img:first-child { width: 100%; height: auto; aspect-ratio: 4 / 5; object-fit: cover; border-radius: 2px; }
+.hero-photo .badge { position: absolute; width: 112px; height: 112px; left: -28px; bottom: -28px; border-radius: 50%; box-shadow: 0 8px 24px rgba(0,0,0,.35); }
+@media (max-width: 860px) {
+  .hero-photo { order: -1; margin-bottom: 36px; }
+  .hero-photo img:first-child { aspect-ratio: 16 / 10; }
+  .hero-photo .badge { width: 84px; height: 84px; left: 12px; bottom: -26px; }
+}
+.photo-band { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; background: var(--navy); }
+.photo-band img { width: 100%; height: auto; aspect-ratio: 4 / 3; object-fit: cover; }
+@media (max-width: 600px) { .photo-band { grid-template-columns: 1fr 1fr; } .photo-band img:last-child { display: none; } }
+.zones-photo { width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; object-position: center 40%; margin-bottom: 4px; }
