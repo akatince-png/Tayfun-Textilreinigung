@@ -288,3 +288,17 @@ section[id], main [id] { scroll-margin-top: 130px; }
 .ph-review { border-style: dashed; background: transparent; }
 .ph-review .stars, .ph-review blockquote { opacity: .45; }
 .story .shop-photos { grid-column: 1 / -1; }
+
+/* Tayfun Hauskunde */
+.loyal { background: var(--cream); text-align: center; }
+.loyal .intro { color: var(--muted); max-width: 60ch; margin-inline: auto; }
+.perks { list-style: none; padding: 0; margin: 40px 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.perks li { background: var(--paper); border: 1px solid var(--line); border-radius: 2px; padding: 28px 18px 24px; }
+.perks svg { width: 48px; height: 48px; display: block; margin: 0 auto 12px; color: var(--navy); }
+.perks svg circle[fill="var(--navy)"] { fill: var(--paper); }
+.perks strong { display: block; font-family: var(--serif); font-weight: 500; font-size: 23px; line-height: 1.2; margin-bottom: 6px; }
+.perks span { color: var(--muted); font-size: 16px; }
+@media (max-width: 900px) { .perks { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 520px) { .perks { grid-template-columns: 1fr; } }
+.refer { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 18px 28px; }
+.refer p { margin: 0; max-width: 56ch; }
