@@ -33,7 +33,7 @@ Jedes Logo gibt es in `dunkel` (auf Nachtblau) und `hell` (transparent, für hel
 
 - [ ] Preise, Leistungen und Liefergebiet in `website/index.html` und den Unterseiten prüfen
 - [x] Impressum: Inhaber Duran Ince, Einzelunternehmen, info@tayfun-textilpflege.de eingetragen
-- [ ] USt-IdNr. nachtragen (`website/_vorlagen/seiten.py`)
+- [x] USt-IdNr.: nicht nötig laut Steuerberater, Zeile entfernt. Falls später eine USt-IdNr. oder Wirtschafts-ID zugeteilt wird, im Impressum ergänzen
 - [ ] Postfach info@tayfun-textilpflege.de bei ALL-INKL anlegen
 - [ ] Datenschutzerklärung prüfen lassen oder mit einem Generator erstellen
 - [x] Domain tayfun-textilpflege.de bei ALL-INKL gekauft und überall eingetragen
