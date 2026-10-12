@@ -37,13 +37,23 @@ Jedes Logo gibt es in `dunkel` (auf Nachtblau) und `hell` (transparent, für hel
 - [ ] Postfach info@tayfun-textilpflege.de bei ALL-INKL anlegen
 - [ ] Datenschutzerklärung prüfen lassen oder mit einem Generator erstellen
 - [x] Domain tayfun-textilpflege.de bei ALL-INKL gekauft und überall eingetragen
-- [ ] GitHub Pages aus Branch `tayfun-site` einschalten, dann DNS bei ALL-INKL (4 A-Einträge 185.199.108–111.153, CNAME www → akatince-png.github.io)
+- [ ] GitHub Pages aus Branch `site` einschalten (Settings → Pages), dann DNS bei ALL-INKL (4 A-Einträge 185.199.108–111.153, CNAME www → akatince-png.github.io)
 - [ ] Anfrageformular anbinden: Empfänger-Adresse als `data-endpoint` am `<form id="anfrage">` eintragen
 - [ ] WhatsApp-Nummer eintragen: Platzhalter `4915100000000` (Link) und `0151 0000 0000` (Anzeige) in `website/index.html` und `website/_vorlagen/seiten.py` ersetzen, danach Unterseiten neu erzeugen, den Hinweis „Platzhalter“ im Kontaktbereich löschen
 - [ ] Eigene Fotos (Theke, Schaufenster, Übergabe) statt „Foto folgt“ im Bereich „Über uns“ einsetzen
 - [ ] Bewertungen: Platzhalter durch echte Google-Bewertungen ersetzen (nur echte, mit Name wie bei Google) oder den Abschnitt bis dahin ausblenden
 - [ ] Gelben Vorschau-Hinweis oben auf allen Seiten entfernen
 - [ ] Website im Google-Unternehmensprofil eintragen und bei der Google Search Console anmelden
+
+## Branches
+
+| Branch | Inhalt |
+|---|---|
+| `main` | Quellen: Logos, Website mit Vorlagen, diese Anleitung |
+| `site` | Nur die fertigen Website-Dateien, mit eigener Domain (`CNAME`). Für den Livegang. |
+| `test` | Wie `site`, aber ohne Domain und für Suchmaschinen gesperrt. Zum Ausprobieren unter akatince-png.github.io/Tayfun-Textilreinigung/ |
+
+Änderungen an der Website in `main` unter `website/` machen, Unterseiten mit `python3 website/_vorlagen/seiten.py` erzeugen und die Dateien (ohne `_vorlagen`) nach `site` und `test` übernehmen.
 
 ## Dateien neu erzeugen
 
