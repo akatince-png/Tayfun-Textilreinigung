@@ -39,7 +39,8 @@ PREISE = [
  ("zuschlaege", "Zuschläge (wahlweise)", [
   ("Neuform plus", "1,50"), ("Neuform für Kindersachen, Bluse, Top, Krawatte, Stricksachen", "0,75"),
   ("Imprägnieren", "3,70"), ("Imprägnieren von Kindersachen", "1,90")]),
- ("angebote", "Angebote", [("Mittwoch: 2 Hosen", "16,00"), ("Freitag: 2 Jacken", "19,00")]),
+ ("angebote", "Angebote der Woche", [("Dienstags: Hose", "8,95"), ("Dienstags: Oberhemd, ab 10 Hemden, je Hemd", "2,49"),
+  ("Freitags: Anzug-Reinigung", "19,90")]),
  ("haushalt", "Haushalt", [
   ("Wolldecke", "10,30"), ("Lama-Decke", "14,60"), ("Kissenplatte", "7,40"), ("Tischdecke", "12,30"),
   ("Kleine Tischdecke oder Tischläufer", "6,45"), ("Kleinste Zierdeckchen oder Sets", "4,45"),
@@ -110,7 +111,7 @@ def table(items):
     return f'<div class="table-wrap"><table><tbody>{rows(items)}</tbody></table></div>'
 
 # ---------------------------------------------------------------- Rahmen
-NAV = [("Leistungen", "#leistungen"), ("Preisliste", "preisliste.html"), ("Hemden &amp; Anzüge", "hemden-anzuege.html"),
+NAV = [("Angebote", "#angebote"), ("Leistungen", "#leistungen"), ("Preisliste", "preisliste.html"), ("Hemden &amp; Anzüge", "hemden-anzuege.html"),
        ("Gardinen", "gardinenservice.html"), ("Teppiche", "teppichreinigung.html"), ("Abholservice", "#abholservice"),
        ("Alle Leistungen", "leistungen.html"), ("Kontakt", "#kontakt")]
 
@@ -237,6 +238,19 @@ def index():
     </div>
   </section>
 
+  <section id="angebote" class="deals" aria-labelledby="d-title">
+    <div class="wrap">
+      <p class="kicker">Angebote der Woche</p>
+      <h2 id="d-title">Unsere Tipps im Schaufenster</h2>
+      <div class="deal-grid">
+        <article class="deal"><p class="day">Dienstags</p><h3>Hose</h3><p class="was">statt {P['Hose']} €</p><p class="now">{P['Dienstags: Hose']}<span> €</span></p></article>
+        <article class="deal"><p class="day">Dienstags</p><h3>Oberhemd</h3><p class="was">ab 10 Hemden, je Hemd</p><p class="now">{P['Dienstags: Oberhemd, ab 10 Hemden, je Hemd']}<span> €</span></p></article>
+        <article class="deal"><p class="day">Freitags</p><h3>Anzug-Reinigung</h3><p class="was">Sakko und Hose</p><p class="now">{P['Freitags: Anzug-Reinigung']}<span> €</span></p></article>
+      </div>
+      <p class="note">Gilt bei Abgabe am jeweiligen Tag im Laden An der Kirche 10.</p>
+    </div>
+  </section>
+
   <section id="leistungen" class="alt" aria-labelledby="l-title">
     <div class="wrap">
       <p class="kicker">Leistungen</p>
@@ -303,8 +317,9 @@ def index():
         <h2 id="p-title">Eine Auswahl unserer Preise</h2>
         <p class="intro">Alle Preise in Euro inklusive Mehrwertsteuer. Die vollständige Liste mit Leder, Pelz, Teppichen und Wäschedienst finden Sie in der Preisliste.</p>
         <div class="offers">
-          <div class="offer"><span>Mittwoch: 2 Hosen</span><span>{P['Mittwoch: 2 Hosen']} €</span></div>
-          <div class="offer"><span>Freitag: 2 Jacken</span><span>{P['Freitag: 2 Jacken']} €</span></div>
+          <div class="offer"><span>Dienstags: Hose</span><span>{P['Dienstags: Hose']} €</span></div>
+          <div class="offer"><span>Dienstags ab 10 Hemden: je Hemd</span><span>{P['Dienstags: Oberhemd, ab 10 Hemden, je Hemd']} €</span></div>
+          <div class="offer"><span>Freitags: Anzug-Reinigung</span><span>{P['Freitags: Anzug-Reinigung']} €</span></div>
         </div>
         <div class="btns" style="margin-top:22px"><a class="btn primary" href="preisliste.html">Komplette Preisliste</a></div>
       </div>
@@ -411,7 +426,7 @@ subpage("hemden-anzuege.html", "Hemdendienst & Anzugreinigung Hannover-Wettberge
 <h2>Anzüge, Sakkos und Abendgarderobe</h2>
 {table([(n, P[n]) for n in ["Jacke", "Hose", "Weste", "Krawatte", "Frack oder Smokingjacke", "Frackweste"]])}
 <h2>Angebote</h2>
-{table([(n, P[n]) for n in ["Mittwoch: 2 Hosen", "Freitag: 2 Jacken"]])}
+{table([(n, P[n]) for n in ["Dienstags: Hose", "Dienstags: Oberhemd, ab 10 Hemden, je Hemd", "Freitags: Anzug-Reinigung"]])}
 <p class="note">Alle Preise in Euro inkl. MwSt. Weitere Preise in der <a href="preisliste.html">Preisliste</a>.</p>""",
         img=("assets/fotos/hemden-holzbuegel.jpg", "Weiße Hemden auf Holzbügeln"))
 
