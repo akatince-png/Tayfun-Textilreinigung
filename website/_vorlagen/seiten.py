@@ -502,7 +502,7 @@ subpage("datenschutz.html", "Datenschutz · Tayfun Textilpflege", "Datenschutzer
 <h2>Verantwortlicher</h2>
 <p>Tayfun Textilpflege, Inhaber Duran Ince, An der Kirche 10, 30457 Hannover, Telefon 0511 464252, E-Mail info@tayfun-textilpflege.de.</p>
 <h2>Hosting</h2>
-<p>Diese Website wird über GitHub Pages bereitgestellt (GitHub, Inc., 88 Colin P. Kelly Jr. Street, San Francisco, CA 94107, USA). Beim Aufruf werden technisch notwendige Daten wie IP-Adresse, Zeitpunkt und aufgerufene Seite verarbeitet, um die Seite auszuliefern (Art. 6 Abs. 1 lit. f DSGVO). Dabei können Daten in die USA übertragen werden. GitHub ist nach dem EU-US Data Privacy Framework zertifiziert. <span class="placeholder">[vor Livegang prüfen]</span></p>
+<p>Diese Website wird bei ALL-INKL.COM – Neue Medien Münnich, Inhaber René Münnich, Hauptstraße 68, 02742 Friedersdorf, Deutschland, betrieben. Beim Aufruf der Website verarbeitet der Anbieter technisch notwendige Daten (z. B. IP-Adresse, Datum und Uhrzeit, aufgerufene Seite, Browser) in Server-Protokollen, um die Website auszuliefern und die Sicherheit zu gewährleisten (Art. 6 Abs. 1 lit. f DSGVO). Die Daten werden in Deutschland verarbeitet. Mit dem Anbieter besteht ein Vertrag zur Auftragsverarbeitung. <span class="placeholder">[Auftragsverarbeitungsvertrag im ALL-INKL-Kundenbereich abschließen]</span></p>
 <h2>Schriften</h2>
 <p>Die verwendete Schrift ist lokal eingebunden. Beim Aufruf der Seite wird keine Verbindung zu Servern von Google oder anderen Schriftanbietern aufgebaut.</p>
 <h2>Anfrageformular</h2>

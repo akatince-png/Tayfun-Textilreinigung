@@ -48,7 +48,7 @@ Nachgebaut nach dem Ladenschild An der Kirche 10: rotes Feld, Kreis mit zwei ver
 - [ ] Postfach info@tayfun-textilpflege.de bei ALL-INKL anlegen
 - [ ] Datenschutzerklärung prüfen lassen oder mit einem Generator erstellen
 - [ ] Domain tayfun-textilpflege.de: bei ALL-INKL bestellt, aber noch nicht registriert (Ausweis-Verifizierung des Vertragsinhabers offen)
-- [ ] GitHub Pages aus Branch `site` einschalten (Settings → Pages), dann DNS bei ALL-INKL (4 A-Einträge 185.199.108–111.153, CNAME www → akatince-png.github.io)
+- [ ] Website bei ALL-INKL hochladen (Inhalt von `website/` ohne `_vorlagen`, inkl. `.htaccess`), SSL „Let's Encrypt“ einschalten, AV-Vertrag abschließen. Anleitung im Übergabepaket.
 - [ ] Anfrageformular anbinden: Empfänger-Adresse als `data-endpoint` am `<form id="anfrage">` eintragen
 - [ ] Gelben Vorschau-Hinweis oben auf allen Seiten entfernen
 - [ ] Website im Google-Unternehmensprofil eintragen und bei der Google Search Console anmelden

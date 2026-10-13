@@ -1,0 +1,8 @@
+# Immer über https://www.tayfun-textilpflege.de aufrufen (ohne www und ohne https wird umgeleitet)
+RewriteEngine On
+RewriteCond %{HTTPS} off [OR]
+RewriteCond %{HTTP_HOST} !^www\. [NC]
+RewriteRule ^ https://www.tayfun-textilpflege.de%{REQUEST_URI} [L,R=301]
+
+# Fehlerseite: unbekannte Adressen führen zur Startseite
+ErrorDocument 404 /index.html
