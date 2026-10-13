@@ -6,11 +6,11 @@ Markenauftritt und Website für Tayfun Textilpflege, An der Kirche 10, 30457 Han
 
 | Ordner | Was drin ist |
 |---|---|
-| `marke/svg/` | Logos als SVG (Schrift eingebettet). Für Website und Grafikprogramme. |
+| `marke/svg/` | Logos als SVG (reine Flächen, keine Schrift nötig). Für Website, Grafikprogramme, Schildermacher. |
 | `marke/png/` | Logos als PNG, hochauflösend. Für Google, Word, Canva, WhatsApp-Profilbild. |
 | `marke/pdf/` | Logos als Vektor-PDF. Für Druckerei und Schildermacher. |
-| `marke/schriften/` | Archivo (SIL Open Font License, frei nutzbar). |
-| `marke/_werkzeug/logo.js` | Skript, das alle Logodateien neu erzeugt. |
+| `marke/schriften/` | Schriften des verworfenen Entwurfs (Archiv). Die Website nutzt Archivo aus `website/fonts/`. |
+| `marke/_werkzeug/` | `logo_dateien.py` schreibt die SVGs, `logo.js` erzeugt daraus PNG und PDF. |
 | `marke/archiv/` | Der verworfene Entwurf „feine Textilpflege“ (Siegel in Nachtblau). Nur zur Ablage. |
 | `website/` | Die Website als statische Dateien, ohne Baukasten. Läuft auf jedem Webspace. |
 
@@ -29,8 +29,11 @@ Nachgebaut nach dem Ladenschild An der Kirche 10: rotes Feld, Kreis mit zwei ver
 
 **Farben:** Rot `#D7262E` · Weiß · Anthrazit `#2A2A2A` · Hellgrau `#F4F4F4`
 
-**Schrift:** Archivo, breit (125 %). „TAYFUN“ fett (800), „TEXTILPFLEGE“ leicht (360). Die Original-Schrift des
-Schildes ist nicht bekannt; Archivo kommt ihr nahe. Wenn der Schildermacher die Originaldatei hat, diese bevorzugen.
+**Buchstaben:** „TAYFUN“ und „TEXTILPFLEGE“ sind Buchstabe für Buchstabe nach dem Foto des Schildes gezeichnet
+(breites A mit abgeflachter Spitze, Y aus senkrechtem Strich mit schrägem Arm, breite F, U und N). Die Formen stehen in
+`website/_vorlagen/logo.py`. Hat der Schildermacher die Originaldatei, diese bevorzugen.
+
+**Schrift der Website:** Archivo, breit, lokal eingebunden (SIL Open Font License).
 
 **Wichtig:** „seit 2001“ beschreibt die Familie, nicht diesen Laden. Nie „Gegründet 2001“ oder „Tayfun seit 2001“ schreiben.
 
@@ -63,8 +66,9 @@ Schildes ist nicht bekannt; Archivo kommt ihr nahe. Wenn der Schildermacher die 
 ## Dateien neu erzeugen
 
 ```bash
-# Logos (in marke/_werkzeug)
-NODE_PATH=$(npm root -g) node logo.js
+# Logos
+python3 marke/_werkzeug/logo_dateien.py
+cd marke/_werkzeug && NODE_PATH=$(npm root -g) node logo.js && cd ../..
 
 # Alle Seiten, sitemap.xml, robots.txt
 python3 website/_vorlagen/seiten.py

@@ -6,24 +6,16 @@ OUT = Path(__file__).resolve().parent.parent
 DOMAIN = "https://www.tayfun-textilpflege.de"
 TEL = '<a href="tel:+49511464252">0511 464252</a>'
 
-# ---------------------------------------------------------------- Logo (nach dem Ladenschild)
-MONO = """<circle cx="50" cy="50" r="46" fill="none" stroke="currentColor" stroke-width="2.6"/>
-<rect x="18" y="20" width="35" height="9" fill="currentColor"/>
-<path d="M28 29H38V76H48V84H37Q28 84 28 75Z" fill="currentColor"/>
-<rect x="45" y="31" width="40" height="8.5" fill="currentColor"/>
-<path d="M63 39.5H73V75Q73 84 64 84H53V76H63Z" fill="currentColor"/>"""
+# ---------------------------------------------------------------- Logo (nach dem Ladenschild, siehe logo.py)
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import logo as _logo
 
 def logo(label=True):
-    aria = ' role="img" aria-label="Tayfun Textilpflege"' if label else ' aria-hidden="true"'
-    return (f'<svg viewBox="12 14 536 130"{aria} xmlns="http://www.w3.org/2000/svg">'
-            f'<g transform="translate(16 16) scale(1.24)">{MONO}</g>'
-            '<text x="160" y="94" fill="currentColor" textLength="378" lengthAdjust="spacingAndGlyphs" '
-            'style="font-family:Archivo,Arial,sans-serif;font-weight:800;font-stretch:125%;font-size:84px">TAYFUN</text>'
-            '<text x="162" y="139" fill="currentColor" textLength="374" lengthAdjust="spacing" '
-            'style="font-family:Archivo,Arial,sans-serif;font-weight:360;font-stretch:125%;font-size:37px">TEXTILPFLEGE</text></svg>')
+    return _logo.svg("inline", label)
 
 def mono_svg():
-    return f'<svg viewBox="0 0 100 100" aria-hidden="true">{MONO}</svg>'
+    return _logo.mono_svg()
 
 # ---------------------------------------------------------------- Preisliste (Stand Stichweh 11/2025, Preise ohne CleanCard)
 # (Bezeichnung, Preis) – Preis None = Hinweiszeile ohne Preis
