@@ -225,3 +225,18 @@ footer .logo svg { width: 230px; height: auto; color: #fff; }
 .deal .now { font-weight: 800; font-stretch: 112%; font-size: 52px; line-height: 1; color: var(--red); margin: 0; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .deal .now span { font-size: 26px; }
 @media (max-width: 860px) { .deal-grid { grid-template-columns: 1fr; } .deal { grid-template-columns: 1fr auto; align-items: end; } .deal .day, .deal h3, .deal .was { grid-column: 1; } .deal .now { grid-column: 2; grid-row: 1 / span 3; font-size: 40px; } .deal .now span { font-size: 20px; } .deal h3 { font-size: 22px; } }
+
+/* Live-Status „Jetzt geöffnet / Geschlossen“ */
+.open-now { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; font-size: 15px; margin: 22px 0 0; }
+.open-now.is-live::before { content: ""; width: 10px; height: 10px; border-radius: 50%; background: #8a8a8a; box-shadow: 0 0 0 3px rgba(138,138,138,.2); flex: none; }
+.open-now.is-open::before { background: #1E9E4A; box-shadow: 0 0 0 3px rgba(30,158,74,.2); }
+.hours-mini .open-now { margin: 0; font-size: 13px; color: #fff; }
+.hours-mini .open-now::before { background: rgba(255,255,255,.55); box-shadow: none; }
+.hours-mini .open-now.is-open::before { background: #7CF0A4; }
+
+/* Anfahrt mit Bus und Bahn */
+.transit { display: grid; gap: 6px; margin: 0 0 26px; padding: 14px 16px; background: var(--grey); border-left: 4px solid var(--red); font-size: 15px; }
+.transit strong { font-size: 16px; }
+.lines { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.line { display: inline-block; min-width: 34px; text-align: center; padding: 2px 8px; font-weight: 800; font-size: 14px; color: #fff; background: var(--charcoal, #2A2A2A); }
+.line.tram { background: #3B6EB4; }
