@@ -137,7 +137,7 @@ def head(title, desc, file, robots="", home=False):
   <div class="bar-red"><div class="wrap">
     <a class="brand" href="{'#' if home else './'}" aria-label="Tayfun Textilpflege, Startseite">{logo()}</a>
     <div class="actions">
-      <div class="hours-mini">An der Kirche 10 · Wettbergen<br>Mo–Sa ab 8 Uhr</div>
+      <div class="hours-mini">An der Kirche 10 · Wettbergen<br><span class="open-now" data-open-now>Mo–Sa ab 8 Uhr</span></div>
       <a class="call" href="tel:+49511464252">0511 464252</a>
     </div>
   </div></div>
@@ -225,6 +225,7 @@ def index():
         <h1 id="hero-title">Ihre Textilreinigung in <span>Wettbergen</span></h1>
         <p class="lead">Reinigung, Wäscherei, Lederpflege und Änderungsschneiderei unter einem Dach. Gardinen und Teppiche holen wir auch bei Ihnen ab.</p>
         <div class="btns"><a class="btn primary" href="preisliste.html">Zur Preisliste</a><a class="btn outline" href="tel:+49511464252">0511 464252 anrufen</a></div>
+        <p class="open-now" data-open-now aria-live="polite">Mo–Sa ab 8 Uhr geöffnet</p>
         <dl class="hours">
           <dt>Mo, Di, Do, Fr</dt><dd>8–13 und 15–18 Uhr</dd>
           <dt>Mittwoch</dt><dd>8–13 Uhr</dd>
@@ -369,6 +370,11 @@ def index():
           <dt>Mittwoch</dt><dd>8–13 Uhr</dd>
           <dt>Samstag</dt><dd>8–13 Uhr</dd>
         </dl>
+        <div class="transit">
+          <strong>Mit Bus und Bahn</strong>
+          <span>Haltestelle „Wettbergen“, von dort ca. 7 Minuten zu Fuß</span>
+          <span class="lines"><span class="line tram" title="Stadtbahn">3</span><span class="line tram" title="Stadtbahn">7</span><span class="line" title="Bus">129</span><span class="line" title="Bus">130</span><span class="line" title="Bus">363</span></span>
+        </div>
         <a class="btn outline" href="https://www.google.com/maps/search/?api=1&amp;query=Tayfun+Textilpflege+An+der+Kirche+10+30457+Hannover" rel="noopener" target="_blank">Route in Google Maps</a>
       </div>
       <form id="anfrage" aria-labelledby="form-title" novalidate>
