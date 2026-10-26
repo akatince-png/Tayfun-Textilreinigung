@@ -110,6 +110,11 @@ def rows(items):
 def table(items):
     return f'<div class="table-wrap"><table><tbody>{rows(items)}</tbody></table></div>'
 
+WA_NUMMER = "49511464252"
+WA_ABHOLUNG = "https://wa.me/" + WA_NUMMER + "?text=Hallo%2C%20ich%20m%C3%B6chte%20eine%20Abholung%20anfragen%3A%20"
+WA_FRAGE = "https://wa.me/" + WA_NUMMER + "?text=Hallo%20Tayfun%20Textilpflege%2C%20ich%20habe%20eine%20Frage%3A%20"
+WA_ICON = '<svg class="wa-ico" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6a2.7 2.7 0 0 0 1.8-1.2 2.2 2.2 0 0 0 .2-1.2c-.1-.1-.2-.2-.4-.3Z"/></svg>'
+
 # ---------------------------------------------------------------- Rahmen
 NAV = [("Angebote", "#angebote"), ("Leistungen", "#leistungen"), ("Preisliste", "preisliste.html"), ("Hemden &amp; Anzüge", "hemden-anzuege.html"),
        ("Gardinen", "gardinenservice.html"), ("Teppiche", "teppichreinigung.html"), ("Abholservice", "#abholservice"),
@@ -365,6 +370,7 @@ def index():
         <dl>
           <dt>Adresse</dt><dd>An der Kirche 10<br>30457 Hannover-Wettbergen</dd>
           <dt>Telefon</dt><dd>{TEL}</dd>
+          <dt>WhatsApp</dt><dd><a href="{WA_FRAGE}" rel="noopener" target="_blank">0511 464252</a></dd>
           <dt>E-Mail</dt><dd><a href="mailto:info@tayfun-textilpflege.de">info@tayfun-textilpflege.de</a></dd>
           <dt>Mo, Di, Do, Fr</dt><dd>8–13 und 15–18 Uhr</dd>
           <dt>Mittwoch</dt><dd>8–13 Uhr</dd>
@@ -377,31 +383,13 @@ def index():
         </div>
         <a class="btn outline" href="https://www.google.com/maps/search/?api=1&amp;query=Tayfun+Textilpflege+An+der+Kirche+10+30457+Hannover" rel="noopener" target="_blank">Route in Google Maps</a>
       </div>
-      <form id="anfrage" aria-labelledby="form-title" novalidate>
-        <h3 id="form-title">Abholung für Gardinen oder Teppiche anfragen</h3>
-        <div class="row">
-          <label for="f-name">Name<input id="f-name" name="name" autocomplete="name" required></label>
-          <label for="f-tel">Telefon<input id="f-tel" name="telefon" type="tel" autocomplete="tel" required></label>
-        </div>
-        <label for="f-adresse">Adresse<input id="f-adresse" name="adresse" autocomplete="street-address"></label>
-        <fieldset>
-          <legend>Worum geht es?</legend>
-          <div class="checks">
-            <label><input type="checkbox" name="leistung" value="Gardinen abhängen und aufhängen"> Gardinen ab- und aufhängen</label>
-            <label><input type="checkbox" name="leistung" value="Gardinen nur abholen"> Gardinen nur abholen</label>
-            <label><input type="checkbox" name="leistung" value="Teppich aufrollen und auslegen"> Teppich auf- und ausrollen</label>
-            <label><input type="checkbox" name="leistung" value="Teppich nur abholen"> Teppich nur abholen</label>
-          </div>
-        </fieldset>
-        <div class="row">
-          <label for="f-tag">Wunschtag<input id="f-tag" name="wunschtag" type="date"></label>
-          <label for="f-zeit">Zeitfenster<select id="f-zeit" name="zeitfenster"><option>Vormittags</option><option>Nachmittags</option><option>Egal</option></select></label>
-        </div>
-        <label for="f-text">Nachricht (optional)<textarea id="f-text" name="nachricht" placeholder="z. B. 3 Fenster mit Gardinen, 1 Teppich ca. 2 × 3 m"></textarea></label>
-        <label class="consent" for="f-ok"><input id="f-ok" name="einwilligung" type="checkbox" required><span>Ich bin einverstanden, dass meine Angaben zur Bearbeitung der Anfrage gespeichert werden. Mehr in der <a href="datenschutz.html">Datenschutzerklärung</a>.</span></label>
-        <button class="btn primary" type="submit">Anfrage senden</button>
-        <div class="form-msg" id="form-msg" role="status" hidden></div>
-      </form>
+      <div id="anfrage" class="wa-box">
+        <h3>Abholung per WhatsApp anfragen</h3>
+        <p>Schreiben Sie uns kurz, was abgeholt werden soll, gern mit Foto und ungefährer Größe. Wir melden uns mit einem Termin.</p>
+        <a class="btn wa" href="{WA_ABHOLUNG}" rel="noopener" target="_blank">{WA_ICON}WhatsApp öffnen</a>
+        <figure class="wa-qr"><img src="assets/whatsapp-qr.svg" alt="QR-Code: WhatsApp-Nachricht an Tayfun Textilpflege" width="270" height="270"><figcaption>Am Computer? Mit dem Handy scannen.</figcaption></figure>
+        <p class="note">Lieber anrufen? <a href="tel:+49511464252">0511 464252</a>. Beim Tippen auf „WhatsApp öffnen“ wechseln Sie zu WhatsApp, mehr dazu in der <a href="datenschutz.html">Datenschutzerklärung</a>.</p>
+      </div>
     </div>
   </section>
 """
@@ -459,7 +447,7 @@ subpage("teppichreinigung.html", "Teppichreinigung Hannover mit Abholung · Tayf
         "Vom pflegeleichten Velours bis zum handgeknüpften Orientteppich. Wir rollen Ihren Teppich zu Hause auf und legen ihn nach der Reinigung wieder aus.",
         f"""<h2>So läuft es ab</h2>
 <ul>
-<li>Termin am Telefon oder über das Anfrageformular vereinbaren</li>
+<li>Termin am Telefon oder per WhatsApp vereinbaren</li>
 <li>Wir rollen den Teppich bei Ihnen auf und nehmen ihn mit</li>
 <li>Gründliche Reinigung passend zum Material</li>
 <li>Wir bringen ihn zurück und legen ihn wieder aus</li>
@@ -511,8 +499,8 @@ subpage("datenschutz.html", "Datenschutz · Tayfun Textilpflege", "Datenschutzer
 <p>Diese Website wird bei ALL-INKL.COM – Neue Medien Münnich, Inhaber René Münnich, Hauptstraße 68, 02742 Friedersdorf, Deutschland, betrieben. Beim Aufruf der Website verarbeitet der Anbieter technisch notwendige Daten (z. B. IP-Adresse, Datum und Uhrzeit, aufgerufene Seite, Browser) in Server-Protokollen, um die Website auszuliefern und die Sicherheit zu gewährleisten (Art. 6 Abs. 1 lit. f DSGVO). Die Daten werden in Deutschland verarbeitet. Mit dem Anbieter besteht ein Vertrag zur Auftragsverarbeitung. <span class="placeholder">[Auftragsverarbeitungsvertrag im ALL-INKL-Kundenbereich abschließen]</span></p>
 <h2>Schriften</h2>
 <p>Die verwendete Schrift ist lokal eingebunden. Beim Aufruf der Seite wird keine Verbindung zu Servern von Google oder anderen Schriftanbietern aufgebaut.</p>
-<h2>Anfrageformular</h2>
-<p>Wenn Sie uns über das Formular eine Anfrage für die Abholung von Gardinen oder Teppichen senden, verarbeiten wir Ihre Angaben (Name, Telefon, Adresse, Nachricht), um die Anfrage zu bearbeiten (Art. 6 Abs. 1 lit. b DSGVO). Die Daten werden gelöscht, sobald sie nicht mehr benötigt werden und keine gesetzlichen Aufbewahrungspflichten bestehen. <span class="placeholder">[Dienst für den Formularversand ergänzen, sobald eingerichtet]</span></p>
+<h2>WhatsApp</h2>
+<p>Auf dieser Website verlinken wir auf WhatsApp. Der Knopf „WhatsApp öffnen“ und der QR-Code sind einfache Links; beim Aufruf unserer Seite werden keine Daten an WhatsApp übertragen. Erst wenn Sie den Link öffnen, wechseln Sie zu WhatsApp, einem Dienst der WhatsApp Ireland Limited, Merrion Road, Dublin 4, D04 X2K5, Irland. Wenn Sie uns dort schreiben, verarbeiten wir Ihre Nachricht und Ihre Telefonnummer, um Ihre Anfrage zu beantworten (Art. 6 Abs. 1 lit. b DSGVO). WhatsApp verarbeitet dabei Daten auch selbst, unter Umständen auch in den USA; es gilt die Datenschutzerklärung von WhatsApp. Wenn Sie das nicht möchten, erreichen Sie uns telefonisch oder im Laden.</p>
 <h2>Google Maps</h2>
 <p>Der Link „Route in Google Maps“ führt zu Google. Erst wenn Sie ihn anklicken, werden Daten an Google übertragen.</p>
 <h2>Ihre Rechte</h2>
