@@ -1,0 +1,28 @@
+/* Variante „rund“ – nur Formen und Schatten, Inhalt und Farben wie die eckige Fassung */
+:root { --r: 18px; --schatten: 0 6px 24px rgba(0,0,0,.08); }
+.btn, .call, .toc a { border-radius: 999px; }
+.btn.primary { box-shadow: 0 6px 16px rgba(215,38,46,.3); }
+.hero-photo img, .photo, .page-photo, .callouts img { border-radius: var(--r); }
+.hero-photo .stamp { border-radius: 14px; }
+.hours { border-left: 0; background: var(--grey); padding: 14px 18px; border-radius: 14px; }
+.open-now.is-live { background: var(--grey); padding: 6px 14px 6px 12px; border-radius: 999px; }
+.hours-mini .open-now.is-live { background: rgba(255,255,255,.16); padding: 3px 10px; }
+.strip { border-radius: var(--r); overflow: hidden; box-shadow: var(--schatten); }
+.strip h3 { background: transparent; color: var(--red); padding: 16px 18px 0; font-size: 19px; }
+.strip p { padding: 8px 18px 18px; }
+.tile { border-radius: var(--r); }
+.tile small { border-radius: 999px; padding-inline: 10px; }
+.deal { border-top: 0; border-radius: var(--r); box-shadow: 0 10px 30px rgba(0,0,0,.25); }
+.deal .day { border-radius: 999px; }
+.box, .transit { border-left: 0; border-radius: 14px; }
+.line { border-radius: 999px; padding-inline: 10px; }
+.offer { border-radius: 14px; }
+.pricelist .group { border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; box-shadow: var(--schatten); }
+.pricelist .group table { margin: 0 14px 10px; width: calc(100% - 28px); }
+.pricelist .group h2 { margin-top: 0; }
+.pricelist h3 { margin-inline: 14px; }
+details { border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; margin-bottom: 10px; background: #fff; }
+form { border-top: 1px solid var(--line); border-radius: var(--r); box-shadow: var(--schatten); }
+input, select, textarea { border-radius: 12px; }
+.form-msg { border-left: 0; border-radius: 12px; }
+.totop { border-radius: 50%; }
