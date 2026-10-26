@@ -143,7 +143,7 @@ def head(title, desc, file, robots="", home=False):
     <a class="brand" href="{'#' if home else './'}" aria-label="Tayfun Textilpflege, Startseite">{logo()}</a>
     <div class="actions">
       <div class="hours-mini">An der Kirche 10 · Wettbergen<br><span class="open-now" data-open-now>Mo–Sa ab 8 Uhr</span></div>
-      <a class="call" href="tel:+49511464252">0511 464252</a>
+      <a class="call" href="{'#anfrage' if home else './#anfrage'}" aria-label="WhatsApp 0511 464252, zum QR-Code">{WA_ICON}<span>0511 464252</span></a>
     </div>
   </div></div>
   <nav class="subnav" aria-label="Bereiche"><div class="wrap">{nav}</div></nav>
@@ -229,7 +229,7 @@ def index():
         <p class="kicker">Hannover-Wettbergen · An der Kirche 10</p>
         <h1 id="hero-title">Ihre Textilreinigung in <span>Wettbergen</span></h1>
         <p class="lead">Reinigung, Wäscherei, Lederpflege und Änderungsschneiderei unter einem Dach. Gardinen und Teppiche holen wir auch bei Ihnen ab.</p>
-        <div class="btns"><a class="btn primary" href="preisliste.html">Zur Preisliste</a><a class="btn outline" href="tel:+49511464252">0511 464252 anrufen</a></div>
+        <div class="btns"><a class="btn primary" href="preisliste.html">Zur Preisliste</a><a class="btn wa" href="#anfrage">{WA_ICON}WhatsApp 0511 464252</a></div>
         <p class="open-now" data-open-now aria-live="polite">Mo–Sa ab 8 Uhr geöffnet</p>
         <dl class="hours">
           <dt>Mo, Di, Do, Fr</dt><dd>8–13 und 15–18 Uhr</dd>
