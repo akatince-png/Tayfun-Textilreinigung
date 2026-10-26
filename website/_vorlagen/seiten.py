@@ -133,7 +133,6 @@ def head(title, desc, file, robots="", home=False):
 <link rel="stylesheet" href="rund.css">
 {JSONLD if home else ""}</head>
 <body>
-<div class="preview">Vorschau – Preise und Rechtstexte sind noch Entwürfe und werden vor dem Livegang geprüft.</div>
 <header class="top">
   <div class="bar-red"><div class="wrap">
     <a class="brand" href="{'#' if home else './'}" aria-label="Tayfun Textilpflege, Startseite">{logo()}</a>

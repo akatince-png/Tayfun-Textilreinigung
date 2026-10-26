@@ -51,7 +51,7 @@ Nachgebaut nach dem Ladenschild An der Kirche 10: rotes Feld, Kreis mit zwei ver
 - [ ] Website bei ALL-INKL hochladen (Inhalt von `website/` ohne `_vorlagen`, inkl. `.htaccess`), SSL „Let's Encrypt“ einschalten, AV-Vertrag abschließen. Anleitung im Übergabepaket.
 - [ ] Buslinien und Fußweg bei „Mit Bus und Bahn“ prüfen (Stand Okt. 2026: Haltestelle „Wettbergen“, Stadtbahn 3 und 7, Bus 129, 130, 363)
 - [ ] Anfrageformular anbinden: Empfänger-Adresse als `data-endpoint` am `<form id="anfrage">` eintragen
-- [ ] Gelben Vorschau-Hinweis oben auf allen Seiten entfernen
+- [x] Gelben Vorschau-Hinweis oben auf allen Seiten entfernt (26.10.2026)
 - [ ] Website im Google-Unternehmensprofil eintragen und bei der Google Search Console anmelden
 
 ## Branches
