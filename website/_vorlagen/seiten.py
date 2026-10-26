@@ -130,6 +130,7 @@ def head(title, desc, file, robots="", home=False):
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <link rel="preload" href="fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="rund.css">
 {JSONLD if home else ""}</head>
 <body>
 <div class="preview">Vorschau – Preise und Rechtstexte sind noch Entwürfe und werden vor dem Livegang geprüft.</div>

@@ -12,7 +12,7 @@ Markenauftritt und Website für Tayfun Textilpflege, An der Kirche 10, 30457 Han
 | `marke/schriften/` | Schriften des verworfenen Entwurfs (Archiv). Die Website nutzt Archivo aus `website/fonts/`. |
 | `marke/_werkzeug/` | `logo_dateien.py` schreibt die SVGs, `logo.js` erzeugt daraus PNG und PDF. |
 | `marke/archiv/` | Der verworfene Entwurf „feine Textilpflege“ (Siegel in Nachtblau). Nur zur Ablage. |
-| `website/` | Die Website als statische Dateien, ohne Baukasten. Läuft auf jedem Webspace. |
+| `website/` | Die Website als statische Dateien, ohne Baukasten. Läuft auf jedem Webspace. Runde Formen kommen aus `rund.css`; ohne diese Datei ist die Seite eckig. |
 
 ## Logo
 
