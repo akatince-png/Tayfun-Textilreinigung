@@ -227,9 +227,29 @@ def slides_html():
     dots = "".join(f'<button type="button" aria-label="Bild {i + 1}"{cur if i == 0 else ""}></button>' for i in range(len(HERO_SLIDES)))
     return "".join(out) + f'<div class="dots">{dots}</div>'
 
+def preis(gruppe, name):
+    """Preis aus einer bestimmten Gruppe der Preisliste (für Namen, die mehrfach vorkommen)."""
+    for key, _, items in PREISE:
+        if key == gruppe:
+            for n, pr in items:
+                if n == name and pr:
+                    return pr
+    raise KeyError((gruppe, name))
+
+def callouts(img, alt, w, h, punkte, klasse=""):
+    """Foto mit Preis-Markierungen wie im Katalog. punkte: (x%, y%, Kurzname, Preis, links?)"""
+    pins = "".join(f'<span class="pin{" links" if l else ""}" style="--x:{x}%;--y:{y}%"><i>{k + 1}</i><b>{n} {pr} €</b></span>'
+                   for k, (x, y, n, pr, l) in enumerate(punkte))
+    leg = "".join(f'<li><span><strong>{n}</strong> {pr} €</span></li>' for _, _, n, pr, _ in punkte)
+    return (f'<figure class="callouts {klasse}"><img src="assets/fotos/{img}" alt="{alt}" loading="lazy" width="{w}" height="{h}">{pins}</figure>'
+            f'<ol class="legend">{leg}</ol>')
+
 def index():
     strips = "".join(f'<div class="strip"><h3>{t}</h3><p>{d}</p></div>' for t, d in LEISTUNGEN)
     SLIDES = slides_html()
+    CALL_TISCH = callouts("tischwaesche-fruehstueck.jpg", "Gedeckter Frühstückstisch mit geblümter Tischdecke und gestreifter Serviette", 1067, 1600, [
+        (88, 62, "Tischdecke", preis("waesche", "Tischdecke"), True),
+        (34, 80, "Serviette", preis("waesche", "Serviette/Taschentuch"), False)], "hoch")
     tisch = min(float(pr.replace(",", ".")) for g in PREISE for n, pr in g[2] if n == "Tischdecke" and pr)
     tiles = [("hemden-anzuege.html", "reinigung-hemden.jpg", 1600, 1066, "Hemden &amp; Blusen", f"Hemd ab {P['Hemd, hängend']} €"),
              ("hemden-anzuege.html", "anzug-smoking.jpg", 1280, 1600, "Anzüge &amp; Sakkos", f"Jacke {P['Jacke']} €"),
@@ -337,6 +357,18 @@ def index():
         <li><span><strong>Bettbezug, Bettlaken</strong> {P['Bettbezug']} €</span></li>
         <li><span><strong>Daunenbettdecke</strong> {P['Daunenbettdecke']} €</span></li>
       </ol>
+    </div>
+  </section>
+
+  <section id="tischwaesche" class="alt" aria-labelledby="tw-title">
+    <div class="wrap split">
+      <div>
+        <p class="kicker">Tischwäsche</p>
+        <h2 id="tw-title">Für den gedeckten Tisch</h2>
+        <p class="intro">Ob Sonntagsfrühstück, Familienfeier oder Festtafel: Tischdecken und Servietten waschen und mangeln wir, damit sie glatt und frisch auf den Tisch kommen. Auch Flecken von Kaffee, Rotwein oder Kerzenwachs gehen wir an.</p>
+        <p class="note" style="margin-top:14px">Weitere Preise im <a href="preisliste.html#waesche">Wäschedienst</a>.</p>
+      </div>
+      {CALL_TISCH}
     </div>
   </section>
 
@@ -448,6 +480,11 @@ Bringen Sie uns Ihre alten Bügel und Folien gern wieder mit, wenn Sie ohnehin v
 </figure>
 <p>Regelmäßig viele Hemden? Sprechen Sie uns im Laden an.</p>
 <h2>Anzüge, Sakkos und Abendgarderobe</h2>
+{callouts("anzug-smoking.jpg", "Smoking mit Weste, Frackhemd und Fliege auf einer Schneiderbüste", 1280, 1600, [
+    (62, 44, "Smokingjacke", P["Frack oder Smokingjacke"], False),
+    (47, 30, "Frackhemd", P["Frackhemd, Abendbluse"], False),
+    (45, 55, "Frackweste", P["Frackweste"], True),
+    (47, 82, "Hose", P["Hose"], False)], "anzug")}
 {table([(n, P[n]) for n in ["Jacke", "Hose", "Weste", "Krawatte", "Frack oder Smokingjacke", "Frackweste"]])}
 <h2>Angebote</h2>
 {table([(n, P[n]) for n in ["Dienstags: Hose", "Dienstags: Oberhemd, ab 10 Hemden, je Hemd", "Freitags: Anzug-Reinigung"]])}
@@ -458,7 +495,12 @@ subpage("gardinenservice.html", "Gardinen reinigen lassen in Hannover · Ab- und
         "Gardinenservice in Hannover: Wir hängen Ihre Gardinen und Vorhänge ab, reinigen sie und hängen sie wieder auf. Mit Abholung und Lieferung.",
         "Gardinenservice", "Gardinen ab, sauber, wieder dran",
         "Keine Leiter, kein Schleppen: Wir hängen Ihre Gardinen und Vorhänge ab, reinigen sie und hängen sie wieder auf.",
-        f"""<h2>Unser Service</h2>
+        f"""{callouts("vorhang-beige.jpg", "Wohnzimmer mit beigen Vorhängen, gestreiftem Teppich und Sofa mit Plaid", 1600, 1600, [
+    (36, 42, "Vorhänge, pro kg", P["Vorhänge, pro kg"], False),
+    (28, 90, "Teppich, pro m²", P["Maschinell hergestellte Teppiche, Flokati, pro m²"], False),
+    (84, 80, "Wolldecke", P["Wolldecke"], True),
+    (93, 74, "Polster, Sitz oder Lehne", P["Polster (Sitz oder Lehne)"], True)])}
+<h2>Unser Service</h2>
 <ul>
 <li>Abhängen bei Ihnen zu Hause oder im Büro</li>
 <li>Waschen bzw. Reinigen passend zum Material</li>
