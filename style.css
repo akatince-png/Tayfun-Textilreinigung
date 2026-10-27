@@ -96,8 +96,8 @@ section[id], main [id] { scroll-margin-top: 130px; }
 @media (max-width: 560px) { .strips { grid-template-columns: 1fr; } }
 
 /* Kacheln mit Foto */
-.tiles { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; margin-top: 28px; }
-@media (max-width: 1000px) { .tiles { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-top: 28px; }
+@media (max-width: 1000px) { .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 560px) { .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; } }
 .tile { position: relative; display: block; overflow: hidden; text-decoration: none; color: #fff; aspect-ratio: 3 / 4; background: var(--charcoal); }
 .tile img { width: 100%; height: 100%; object-fit: cover; transition: transform .4s ease; }
@@ -255,3 +255,6 @@ footer .logo svg { width: 230px; height: auto; color: #fff; }
 .call { display: inline-flex; align-items: center; gap: 8px; }
 .call .wa-ico { width: 20px; height: 20px; }
 .btns .btn.wa { justify-self: auto; }
+/* Bildausschnitte, damit Teppiche im Bild bleiben */
+.page-photo[src*="teppich-orient"] { object-position: 50% 82%; }
+.photo[src*="wohnzimmer-vorhang-teppich"] { object-position: 50% 78%; }
