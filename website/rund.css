@@ -33,3 +33,4 @@ input, select, textarea { border-radius: 12px; }
 .slide figcaption a { border-radius: 12px; }
 .nachhaltig { border-left: 0; border-radius: var(--r); }
 .nachhaltig img { border-radius: 12px; }
+.review-qr img { border-radius: 12px; }

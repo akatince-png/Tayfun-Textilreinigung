@@ -110,6 +110,8 @@ def rows(items):
 def table(items):
     return f'<div class="table-wrap"><table><tbody>{rows(items)}</tbody></table></div>'
 
+# Bewertungslink: sobald vorhanden durch den Link aus dem Google-Unternehmensprofil ersetzen („Rezensionen anfordern“, z. B. https://g.page/r/…/review)
+GOOGLE_BEWERTUNG = "https://www.google.com/maps/search/?api=1&amp;query=Tayfun+Textilpflege+An+der+Kirche+10+30457+Hannover"
 WA_NUMMER = "49511464252"
 WA_ABHOLUNG = "https://wa.me/" + WA_NUMMER + "?text=Hallo%2C%20ich%20m%C3%B6chte%20eine%20Abholung%20anfragen%3A%20"
 WA_FRAGE = "https://wa.me/" + WA_NUMMER + "?text=Hallo%20Tayfun%20Textilpflege%2C%20ich%20habe%20eine%20Frage%3A%20"
@@ -167,7 +169,7 @@ FOOT = f"""</main>
     <div class="logo">{logo()}<p style="margin-top:14px">Textilreinigung, Wäscherei und Änderungsschneiderei in Hannover-Wettbergen. Familienbetrieb seit 2001.</p></div>
     <div><h4>Kontakt</h4><p>Tayfun Textilpflege<br>An der Kirche 10<br>30457 Hannover<br>{TEL}</p></div>
     <div><h4>Öffnungszeiten</h4><p>Mo, Di, Do, Fr 8–13 und 15–18 Uhr<br>Mi 8–13 Uhr<br>Sa 8–13 Uhr</p></div>
-    <div class="legal"><span>© Tayfun Textilpflege</span><a href="preisliste.html">Preisliste</a><a href="leistungen.html">Leistungen A–Z</a><a href="impressum.html">Impressum</a><a href="datenschutz.html">Datenschutz</a></div>
+    <div class="legal"><span>© Tayfun Textilpflege</span><a href="preisliste.html">Preisliste</a><a href="leistungen.html">Leistungen A–Z</a><a href="impressum.html">Impressum</a><a href="datenschutz.html">Datenschutz</a><a href="{GOOGLE_BEWERTUNG}" rel="noopener" target="_blank">Bei Google bewerten</a></div>
   </div>
 </footer>
 <a class="totop" href="#" aria-label="Nach oben">↑</a>
@@ -433,6 +435,18 @@ def index():
     </div>
   </section>
 
+  <section id="bewertung" class="review" aria-labelledby="r-title">
+    <div class="wrap">
+      <div>
+        <p class="kicker">Ihre Meinung zählt</p>
+        <h2 id="r-title">Zufrieden mit uns? Wir freuen uns über Ihre Bewertung</h2>
+        <p>Sie waren mit unserer Arbeit zufrieden? Dann lassen Sie uns gern eine Bewertung bei Google da. Ein paar Worte genügen. Sie helfen anderen in Wettbergen und Umgebung, uns zu finden, und uns, noch besser zu werden. Vielen Dank!</p>
+        <a class="btn primary" href="{GOOGLE_BEWERTUNG}" rel="noopener" target="_blank"><span class="stars" aria-hidden="true">★★★★★</span> Jetzt bei Google bewerten</a>
+      </div>
+      <figure class="review-qr"><img src="assets/bewertung-qr.svg" alt="QR-Code zur Google-Bewertung von Tayfun Textilpflege" width="230" height="230"><figcaption>Mit dem Handy scannen</figcaption></figure>
+    </div>
+  </section>
+
   <section id="kontakt" aria-labelledby="k-title">
     <div class="wrap split">
       <div class="contact">
@@ -548,7 +562,7 @@ subpage("teppichreinigung.html", "Teppichreinigung Hannover mit Abholung · Tayf
 <h2>Preise</h2>
 {table(PREISE[6][2])}
 <div class="btns" style="margin-top:20px"><a class="btn primary" href="./#anfrage">Termin anfragen</a></div>""",
-        img=("assets/fotos/teppich-orient.jpg", "Orientteppich in Rot- und Orangetönen in einem hellen Wohnzimmer"))
+        img=("assets/fotos/teppich-kinder.jpg", "Zwei Kinder spielen mit Kuscheltieren auf einem hellen, flauschigen Teppich"))
 
 az = "".join(f"<li><strong>{t}</strong> – {d.split(' <a')[0]}</li>" for t, d in LEISTUNGEN)
 subpage("leistungen.html", "Alle Leistungen · Textilreinigung Hannover-Wettbergen · Tayfun",
