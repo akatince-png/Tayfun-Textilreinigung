@@ -198,7 +198,7 @@ LEISTUNGEN = [
  ("Sofortdienst", "Wenn es eilig ist: Fragen Sie im Laden nach unserem Sofortdienst."),
  ("Appretur", "Neuform und Glanz für Kleidung, damit sie wieder in Form fällt."),
  ("Imprägnierung", "Schutz gegen Regen und Schmutz für Jacken, Mäntel und Outdoor-Kleidung."),
- ("Hemdendienst", 'Gewaschen und gebügelt, auf dem Bügel oder gelegt. Drahtbügel nehmen wir gern zurück. <a href="hemden-anzuege.html">Mehr</a>'),
+ ("Hemdendienst", 'Gewaschen und gebügelt, auf dem Bügel oder gelegt. Alte Bügel und Folien nehmen wir gern zurück. <a href="hemden-anzuege.html">Mehr</a>'),
  ("Großteilwäschedienst", "Bettdecken, Kissen, Wolldecken, Tagesdecken und Schlafsäcke."),
  ("Tischwäschedienst", "Tafeltücher, Tischdecken und Servietten – gewaschen und gemangelt."),
  ("Heimtextilienreinigung", 'Gardinen, Vorhänge, Polster und Auflagen. <a href="gardinenservice.html">Gardinenservice</a>'),
@@ -441,14 +441,18 @@ subpage("hemden-anzuege.html", "Hemdendienst & Anzugreinigung Hannover-Wettberge
         f"""<h2>Hemdendienst</h2>
 {table([(n, P[n]) for n in ["Hemd, hängend", "Hemd, gelegt", "Hemd, handgebügelt", "Frackhemd, Abendbluse", "Bluse"]])}
 <p>Ihre Hemden bekommen Sie auf dem Bügel zurück, knitterfrei und bereit für den Schrank. Lieber gelegt? Sagen Sie es uns einfach bei der Abgabe.</p>
-<p class="box"><strong>Drahtbügel? Bringen Sie sie gern wieder mit.</strong> Wir nehmen Ihre Drahtbügel zurück und verwenden sie wieder. Das schont die Umwelt und Ihren Kleiderschrank.</p>
+<figure class="nachhaltig">
+<img src="assets/fotos/reinigung-hemden.jpg" alt="Hemden in Schutzfolie auf Drahtbügeln am Kleiderförderband" loading="lazy" width="1600" height="1066">
+<figcaption><strong>Möchten Sie uns bei der Nachhaltigkeit unterstützen?</strong>
+Bringen Sie uns Ihre alten Bügel und Folien gern wieder mit, wenn Sie ohnehin vorbeikommen. Was noch gut ist, bekommt bei uns ein zweites Leben. Ein kleiner Beitrag, der sich lohnt.</figcaption>
+</figure>
 <p>Regelmäßig viele Hemden? Sprechen Sie uns im Laden an.</p>
 <h2>Anzüge, Sakkos und Abendgarderobe</h2>
 {table([(n, P[n]) for n in ["Jacke", "Hose", "Weste", "Krawatte", "Frack oder Smokingjacke", "Frackweste"]])}
 <h2>Angebote</h2>
 {table([(n, P[n]) for n in ["Dienstags: Hose", "Dienstags: Oberhemd, ab 10 Hemden, je Hemd", "Freitags: Anzug-Reinigung"]])}
 <p class="note">Alle Preise in Euro inkl. MwSt. Weitere Preise in der <a href="preisliste.html">Preisliste</a>.</p>""",
-        img=("assets/fotos/reinigung-hemden.jpg", "Frisch gereinigte Hemden in Schutzhüllen am Kleiderförderband einer Reinigung"))
+        img=("assets/fotos/hemd-manschette.jpg", "Mann knöpft die Manschette eines frisch gebügelten weißen Hemdes zu"))
 
 subpage("gardinenservice.html", "Gardinen reinigen lassen in Hannover · Ab- und Aufhängen · Tayfun",
         "Gardinenservice in Hannover: Wir hängen Ihre Gardinen und Vorhänge ab, reinigen sie und hängen sie wieder auf. Mit Abholung und Lieferung.",

@@ -31,3 +31,5 @@ input, select, textarea { border-radius: 12px; }
 .wa-qr img { border-radius: 12px; }
 .slides { border-radius: var(--r); }
 .slide figcaption a { border-radius: 12px; }
+.nachhaltig { border-left: 0; border-radius: var(--r); }
+.nachhaltig img { border-radius: 12px; }

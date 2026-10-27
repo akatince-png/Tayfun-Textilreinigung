@@ -273,3 +273,10 @@ footer .logo svg { width: 230px; height: auto; color: #fff; }
 @media (prefers-reduced-motion: reduce) { .slide { transition: none; } }
 .hero-photo .stamp { z-index: 3; }
 .photo[src*="vorhang-beige"] { aspect-ratio: 1 / 1; object-position: 50% 60%; }
+
+/* Hinweis Nachhaltigkeit: Bügel und Folien */
+.nachhaltig { margin: 22px 0; display: grid; grid-template-columns: 200px 1fr; gap: 18px; align-items: center; background: #EEF5EF; border-left: 4px solid #1F8F4E; padding: 14px; }
+.nachhaltig img { width: 100%; height: auto; aspect-ratio: 1 / 1; object-fit: cover; object-position: 40% 50%; }
+.nachhaltig figcaption { font-size: 15px; color: var(--ink); }
+.nachhaltig strong { display: block; font-size: 17px; margin-bottom: 4px; color: #17733E; }
+@media (max-width: 560px) { .nachhaltig { grid-template-columns: 1fr; } .nachhaltig img { aspect-ratio: 16 / 9; } }
