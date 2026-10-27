@@ -307,7 +307,7 @@ def index():
 
   <section class="b2b-band" aria-label="Geschäftskunden">
     <div class="wrap">
-      <p><strong>Geschäftskunden</strong> Messe &amp; Events · Gastronomie &amp; Catering · Hotels · Gesundheit &amp; Pflege · Büros</p>
+      <p><strong>Geschäftskunden</strong> Messe &amp; Events · Gastronomie &amp; Catering · Hotels · Gesundheit &amp; Pflege · Büros · mit Abholung und Express-Service</p>
       <a class="btn white" href="geschaeftskunden.html">Angebot für Unternehmen</a>
     </div>
   </section>
@@ -574,12 +574,12 @@ subpage("teppichreinigung.html", "Teppichreinigung Hannover mit Abholung · Tayf
         img=("assets/fotos/teppich-kinder.jpg", "Zwei Kinder spielen mit Kuscheltieren auf einem hellen, flauschigen Teppich"))
 
 subpage("geschaeftskunden.html", "Textilreinigung für Geschäftskunden in Hannover · Messe, Gastronomie, Hotels · Tayfun",
-        "Textilreinigung für Unternehmen in Hannover: Messekleidung, Hostessen-Outfits, Uniformen, Tischwäsche für Gastronomie und Catering, Hotelwäsche, Kasacks und Kittel für Pflegedienste, Praxen, Apotheken und Therapie. Faire Mengenpreise.",
+        "Textilreinigung für Unternehmen in Hannover: Messekleidung, Hostessen-Outfits, Uniformen, Tischwäsche für Gastronomie und Catering, Hotelwäsche, Kasacks und Kittel für Pflegedienste, Praxen, Apotheken und Therapie. Abholung und Lieferung, Express- und 24-Stunden-Service, Termin vor Ort.",
         "Geschäftskunden", "Textilpflege für Ihr Unternehmen",
         "Ob Messeauftritt, Restaurant, Catering, Pflegedienst oder Praxis: Wir reinigen Ihre Arbeits- und Repräsentationskleidung sowie Tisch- und Hauswäsche zuverlässig, termingerecht und zu fairen Konditionen.",
         f"""<h2>Für wen wir arbeiten</h2>
 <div class="b2b-grid">
-<div class="b2b-card"><h3>Messe &amp; Events</h3><p>Hostessen-Outfits, Uniformen, Anzüge und Blusen für das Standpersonal, Tischdecken und Stoffe für den Messestand. Vor und nach der Messe, auch kurzfristig nach Absprache.</p></div>
+<div class="b2b-card"><h3>Messe &amp; Events</h3><p>Hostessen-Outfits, Uniformen, Anzüge und Blusen für das Standpersonal, Tischdecken und Stoffe für den Messestand. Vor, während und nach der Messe, auf Wunsch im 24-Stunden-Service.</p></div>
 <div class="b2b-card"><h3>Gastronomie &amp; Catering</h3><p>Tischdecken, Tafeltücher und Servietten, Kochjacken, Schürzen und Servicekleidung, frisch gewaschen und gemangelt für den nächsten Einsatz.</p></div>
 <div class="b2b-card"><h3>Hotels &amp; Ferienwohnungen</h3><p>Bettwäsche, Decken, Kissen und Gardinen für Gästezimmer, dazu Tisch- und Frühstückswäsche.</p></div>
 <div class="b2b-card"><h3>Gesundheit &amp; Pflege</h3><p>Kasacks, Kittel, Arzthosen und Berufskleidung für Pflegedienste, Arzt- und Zahnarztpraxen, Apotheken sowie Physiotherapie, Ergotherapie und andere therapeutische Einrichtungen.</p></div>
@@ -588,17 +588,18 @@ subpage("geschaeftskunden.html", "Textilreinigung für Geschäftskunden in Hanno
 </div>
 <h2>Was Sie von uns erwarten können</h2>
 <ul class="checklist">
-<li>Ein fester Ansprechpartner, persönlich im Laden oder per WhatsApp</li>
+<li><strong>Abholung und Lieferung</strong> bei Ihnen im Betrieb, nach Absprache auch mit festen Tagen</li>
+<li><strong>Express- und 24-Stunden-Service</strong> nach Absprache, zum Beispiel während Messen und Veranstaltungen</li>
+<li><strong>Persönlicher Besuch vor Ort:</strong> Unser Ansprechpartner im Außendienst kommt gern zu Ihnen und bespricht alles direkt in Ihrem Betrieb</li>
+<li>Ein fester Ansprechpartner, auch per WhatsApp oder Telefon</li>
 <li>Faire Mengenpreise bei regelmäßigen Aufträgen</li>
-<li>Feste Abgabe- und Abholtage nach Absprache</li>
-<li>Termingerecht, auch vor Messen und Veranstaltungen</li>
 <li>Abrechnung per Rechnung</li>
 </ul>
 <h2>Beispielpreise</h2>
 {table([("Kittel/Kasack, hängend", preis("waesche", "Kittel, hängend")), ("Arbeitshose/-latzhose/-jacke", preis("waesche", "Arbeitshose/-latzhose/-jacke")), ("Tischdecke", preis("waesche", "Tischdecke")), ("Serviette", preis("waesche", "Serviette/Taschentuch")), ("Hemd, hängend", P["Hemd, hängend"]), ("Sakko/Jacke", P["Jacke"]), ("Bluse", P["Bluse"])])}
 <p class="note">Einzelpreise laut <a href="preisliste.html">Preisliste</a>. Für größere Mengen und regelmäßige Aufträge erstellen wir Ihnen gern ein individuelles Angebot.</p>
 <h2>Angebot anfragen</h2>
-<p>Schreiben Sie uns kurz, was Sie reinigen lassen möchten, wie viele Teile es ungefähr sind und bis wann Sie sie brauchen. Wir melden uns mit einem Angebot.</p>
+<p>Schreiben Sie uns kurz, was Sie reinigen lassen möchten, wie viele Teile es ungefähr sind und bis wann Sie sie brauchen. Wir melden uns mit einem Angebot. Gern vereinbaren wir auch einen <strong>Termin bei Ihnen vor Ort</strong>.</p>
 <div class="btns" style="margin-top:16px"><a class="btn wa" href="{WA_B2B}" rel="noopener" target="_blank">{WA_ICON}Per WhatsApp anfragen</a><a class="btn outline" href="tel:+49511464252">0511 464252 anrufen</a></div>""",
         img=("assets/fotos/reinigung-hemden.jpg", "Frisch gereinigte Hemden in Schutzhüllen am Kleiderförderband einer Reinigung"))
 
