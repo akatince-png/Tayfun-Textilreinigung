@@ -308,3 +308,8 @@ textarea { font: inherit; color: inherit; background: var(--surface); border: 1p
 .ws-vermerke li.w { font-weight: 700; color: #B3141C; }
 #druck img { page-break-after: always; break-after: page; }
 @media (max-width: 700px) { .rail button { font-size: 10px; padding-inline: 0; min-width: 0; } }
+
+.anfragen li.ja { color: var(--ok); font-weight: 400; }
+.anfragen li.nein { color: var(--muted); font-weight: 400; }
+.anfragen li.w { font-weight: 400; color: inherit; }
+.anfrage-dlg textarea { min-height: 150px; }

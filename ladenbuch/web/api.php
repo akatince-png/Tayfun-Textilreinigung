@@ -94,7 +94,7 @@ $geraet = $sitzung['geraet'];
 $rolle = $sitzung['rolle'] ?? 'laden';
 $werkstatt = $rolle === 'werkstatt';
 // Die Werkstatt darf nur Sammler sehen und bearbeiten – keine Kunden, keine Kasse, keine Leitung
-if ($werkstatt && !in_array($a, ['abmelden', 'sync', 'push', 'foto'], true)) fehler('Nicht für den Werkstatt-Zugang.', 403);
+if ($werkstatt && !in_array($a, ['abmelden', 'sync', 'push', 'foto', 'kontakt'], true)) fehler('Nicht für den Werkstatt-Zugang.', 403);
 $leitung = $sitzung['leitung_bis'] !== null && $sitzung['leitung_bis'] > jetzt();
 
 switch ($a) {
@@ -190,6 +190,23 @@ switch ($a) {
         header('Content-Length: ' . filesize($datei));
         readfile($datei);
         exit;
+
+    // Telefonnummer zu genau einem Auftrag, z. B. für eine Rückfrage der Werkstatt per WhatsApp; jeder Abruf wird vermerkt
+    case 'kontakt':
+        $nr = (string) ($_GET['nr'] ?? '');
+        if (!preg_match('/^[A-Z]{1,2}-\d{1,7}$/', $nr)) fehler('Ungültiger Auftrag.');
+        $s = $db->prepare("SELECT daten FROM lb_daten WHERE typ = 'auftrag' AND id = ?");
+        $s->execute([$nr]);
+        $auftrag = json_decode((string) ($s->fetchColumn() ?: ''), true);
+        if (!is_array($auftrag)) fehler('Auftrag nicht gefunden.', 404);
+        $s = $db->prepare("SELECT daten FROM lb_daten WHERE typ = 'kunde' AND id = ?");
+        $s->execute([(string) ($auftrag['cust'] ?? '')]);
+        $kunde = json_decode((string) ($s->fetchColumn() ?: ''), true);
+        $tel = is_array($kunde) ? trim((string) ($kunde['tel'] ?? '')) : '';
+        if ($tel === '' || $tel === '–') fehler('Für diesen Auftrag ist keine Telefonnummer hinterlegt.', 404);
+        $db->prepare('INSERT INTO lb_verlauf (zeit, geraet, typ, id, daten) VALUES (?, ?, ?, ?, ?)')
+            ->execute([jetzt(), $geraet, 'kontakt', $nr, json_encode(['rolle' => $rolle], JSON_UNESCAPED_UNICODE)]);
+        antwort(['tel' => $tel, 'vorname' => explode(' ', trim((string) ($kunde['name'] ?? '')))[0]]);
 
     case 'pin':
         if (!$post) fehler('Nur POST.', 405);

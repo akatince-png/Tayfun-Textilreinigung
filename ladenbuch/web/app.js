@@ -1,6 +1,6 @@
 (function () {
   // ---------------------------------------------------------------- Stammdaten
-  const VERSION = "1.4.0";
+  const VERSION = "1.5.0";
   let STORES = { W: "Wettbergen" };
   const CATS = ["Garderobe", "Hemden", "Haushalt", "Gardinen", "Leder"];
   const ITEMS = [
@@ -703,6 +703,7 @@
     const merken = () => { const g = (id) => dlg.querySelector("#" + id);
       if (g("m-art")) Object.assign(zustand, { art: g("m-art").value, fleckart: g("m-fleck") ? g("m-fleck").value : zustand.fleckart, behandlung: g("m-beh").value, kunde: g("m-kunde").checked, notiz: g("m-notiz").value, zeit: g("m-zeit").value, von: g("m-von").value, vier: g("m-4a").checked, zeuge: g("m-zeuge") ? g("m-zeuge").value : zustand.zeuge }); };
     dlg.addEventListener("click", (e) => {
+      e.stopPropagation();
       const svg = e.target.closest("svg.umriss");
       if (svg) { merken(); const r = svg.getBoundingClientRect(); zustand.neu = { ansicht: svg.dataset.umriss, seite: svg.dataset.seite, x: Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)), y: Math.min(1, Math.max(0, (e.clientY - r.top) / r.height)) }; zeichnen(); return; }
       const b = e.target.closest("button"); if (!b) return; const ds = b.dataset;
@@ -760,7 +761,7 @@
   const WUENSCHE = ["Kunde wünscht Wäsche / Nassreinigung trotz Pflegeetikett", "Behandlung ohne Gewähr – Kunde ist informiert", "Ohne Pflegeetikett – Kunde ist informiert",
     "Fleck nur schonend versuchen", "Knöpfe / Applikationen vorher sichern", "Express – bevorzugt bearbeiten"];
   const FLECKEN = ["unbekannt", "Rotwein / Saft", "Kaffee / Tee", "Fett / Öl", "Blut", "Make-up", "Kugelschreiber / Tinte", "Gras / Erde", "Schweiß / Deo", "Rost", "Wachs", "Kaugummi"];
-  const rot = (it) => maengelVon(it).length > 0 || (it.wuensche || []).length > 0 || !!(it.hinweis || "").trim();
+  const rot = (it) => maengelVon(it).length > 0 || (it.wuensche || []).length > 0 || !!(it.hinweis || "").trim() || (it.anfragen || []).length > 0;
   const geprueft = (it) => !!it.schau || maengelVon(it).length > 0;
   function vermerke(it) {
     const out = [];
@@ -777,7 +778,7 @@
     const offen = its.filter((it) => !geprueft(it)).length;
     return `<div class="teile-zustand"><div class="tz-kopf"><b>Warenschau · Sammler ${zahl(o.nr)} · ${its.length} ${its.length === 1 ? "Teil" : "Teile"}</b>${offen ? `<span class="pay-warn">${offen} noch nicht geprüft</span>` : `<span class="ok-text">alle geprüft</span>`}</div>
       ${its.map((it) => `<div class="tz"><span class="ampel ${rot(it) ? "rot" : geprueft(it) ? "gruen" : "grau"}" aria-label="${rot(it) ? "Vermerk beachten" : geprueft(it) ? "geprüft, einwandfrei" : "noch nicht geprüft"}"></span>
-        <span><b>${teilPos(o, it)}/${its.length} ${esc(ITEM[it.id].name)}</b> ${stPill(it.st)}${optText(it) ? `<br><span class="mini">${esc(optText(it))}</span>` : ""}${rot(it) ? `<br><span class="mini">${[...(it.wuensche || []).map((w) => w.text), ...maengelVon(it).map((m) => m.art)].map(esc).join(" · ")}</span>` : ""}</span>
+        <span><b>${teilPos(o, it)}/${its.length} ${esc(ITEM[it.id].name)}</b> ${stPill(it.st)}${optText(it) ? `<br><span class="mini">${esc(optText(it))}</span>` : ""}${rot(it) ? `<br><span class="mini">${[...(it.wuensche || []).map((w) => w.text), ...maengelVon(it).map((m) => m.art)].map(esc).join(" · ")}</span>` : ""}${anfragenListe(it, true)}</span>
         <span class="chips">${geprueft(it) ? "" : `<button class="btn small ghost" data-schauok="${it.tnr}" type="button">Einwandfrei</button>`}<button class="btn small ${rot(it) ? "warnung" : "ghost"}" data-maengel="${it.tnr}" type="button">Prüfen</button></span></div>`).join("")}
       <span class="mini">Grün: nach Pflegeetikett und Fachwissen. Rot: Vermerk beachten (Mangel, Kundenwunsch oder Hinweis).</span></div>`;
   }
@@ -795,6 +796,7 @@
       if (optText(it)) zeilen.push([`   ${optText(it)}`, `22px ${MONO}`]);
       (it.wuensche || []).forEach((w) => zeilen.push([`   ! ${w.text}`, `22px ${MONO}`]));
       if ((it.hinweis || "").trim()) zeilen.push([`   ! ${it.hinweis}`, `22px ${MONO}`]);
+      anfragenVon(it).forEach((a) => zeilen.push([`   ? ${a.kurz} – ${a.antwort ? (a.antwort.ja ? "Kunde hat zugestimmt" : "Kunde hat abgelehnt") : "wartet auf Antwort"}`, `22px ${MONO}`]));
       maengelVon(it).forEach((m) => zeilen.push([`   - ${m.art}${m.fleckart ? " (" + m.fleckart + ")" : ""}, ${UMRISS[m.ansicht].name} ${m.seite}${m.notiz ? ": " + m.notiz : ""}${m.behandlung ? " → " + m.behandlung : ""}${m.kunde ? " [Kunde bestätigt]" : ""}`, `22px ${MONO}`]));
     });
     const [, mg] = leinwand(1, 1); const fertig = zeilen.flatMap(([t, f]) => umbruch(mg, t, f, IW).map((z) => [z, f]));
@@ -865,10 +867,81 @@
       ${its.map((it) => `<div class="panel ws-teil ${rot(it) ? "rot" : "gruen"}${f.pos === teilPos(o, it) ? " gewaehlt" : ""}">
         <div class="ws-teil-kopf"><span class="ampel ${rot(it) ? "rot" : "gruen"}"></span><b>${teilLabel(o, it)} · ${esc(ITEM[it.id].name)}</b>${stPill(it.st)}</div>
         ${optText(it) ? `<div class="ws-opt">${esc(optText(it))}</div>` : ""}
-        ${rot(it) ? `<ul class="ws-vermerke">${vermerke(it)}</ul>` : `<p class="ok-text">Nach Pflegeetikett und eigener Fachkenntnis behandeln.</p>`}
+        ${rot(it) ? `${vermerke(it) ? `<ul class="ws-vermerke">${vermerke(it)}</ul>` : ""}${anfragenListe(it, true)}` : `<p class="ok-text">Nach Pflegeetikett und eigener Fachkenntnis behandeln.</p>`}
         ${maengelVon(it).some((m) => (m.fotos || []).length) ? `<div class="fotos klein">${maengelVon(it).flatMap((m) => m.fotos || []).map((id) => `<img class="foto" data-foto="${esc(id)}" alt="Foto">`).join("")}</div>` : ""}
         <div class="chips">${["reinigung", "finish", "extern", "fertig"].map((s) => `<button class="chip" data-wsst="${it.tnr}" data-st="${s}" aria-pressed="${it.st === s}" type="button">${ST[s]}</button>`).join("")}
-          <button class="btn ghost small" data-maengel="${it.tnr}" data-zeit="bearbeitung" type="button">Feststellung / Foto</button></div></div>`).join("")}`;
+          <button class="btn ghost small" data-maengel="${it.tnr}" data-zeit="bearbeitung" type="button">Feststellung / Foto</button>
+          <button class="btn small wa-btn" data-anfrage="${it.tnr}" type="button">Kunde fragen (WhatsApp)</button></div></div>`).join("")}`;
+  }
+
+  // ---------------------------------------------------------------- Rückfragen an den Kunden per WhatsApp (auch direkt aus der Werkstatt)
+  // Jede Anfrage wird am Teil festgehalten; die Antwort des Kunden trägt man mit „zugestimmt“ / „abgelehnt“ ein.
+  const anfragenVon = (it) => it.anfragen || [];
+  const offeneAnfragen = (it) => anfragenVon(it).filter((a) => !a.antwort);
+  const VORLAGEN = [
+    ["rueckfrage", "Rückfrage zur Behandlung", (v, t, f, m) => `${v}, hier ist die Werkstatt von Tayfun Textilpflege. Bei Ihrem Auftrag ${t} haben wir festgestellt: ${f || "…"}. Dürfen wir ${m || "…"} durchführen? Bitte antworten Sie kurz mit Ja oder Nein. Vielen Dank!`],
+    ["nass", "Nassreinigung nötig", (v, t, f) => `${v}, hier ist die Werkstatt von Tayfun Textilpflege. Wir haben Ihr Teil aus Auftrag ${t} gereinigt${f ? " und festgestellt: " + f : ""}. Für ein gutes Ergebnis wäre eine Nassreinigung nötig. Dürfen wir diese durchführen? Bitte antworten Sie kurz mit Ja oder Nein. Vielen Dank!`],
+    ["fleck", "Fleck nicht ganz entfernbar", (v, t, f) => `${v}, hier ist die Werkstatt von Tayfun Textilpflege. Bei Ihrem Auftrag ${t} lässt sich ${f || "ein Fleck"} ohne Risiko für das Material leider nicht vollständig entfernen. Sollen wir es mit einer stärkeren Behandlung auf eigenes Risiko versuchen, oder so belassen? Vielen Dank für Ihre kurze Antwort!`],
+    ["reparatur", "Reparatur nötig", (v, t, f, m) => `${v}, hier ist die Werkstatt von Tayfun Textilpflege. Bei Ihrem Auftrag ${t} ist uns aufgefallen: ${f || "…"}. Wir könnten ${m || "das"} für Sie reparieren lassen. Möchten Sie das? Bitte antworten Sie kurz mit Ja oder Nein.`],
+    ["frei", "Freie Nachricht", (v, t) => `${v}, hier ist die Werkstatt von Tayfun Textilpflege zu Ihrem Auftrag ${t}: `],
+  ];
+  function anfrageDialog(tnr) {
+    const f = allItems().find(({ it }) => it.tnr === tnr); if (!f) return;
+    const dlg = document.createElement("dialog"); dlg.className = "maengel-dlg anfrage-dlg"; document.body.append(dlg);
+    const letzter = maengelVon(f.it).slice(-1)[0];
+    const z = { vorlage: "rueckfrage", fest: letzter ? `${letzter.art}${letzter.notiz ? " (" + letzter.notiz + ")" : ""}` : "", mass: "", kontakt: null, fehler: "" };
+    const text = () => { const { o, it } = allItems().find(({ it }) => it.tnr === tnr); const v = z.kontakt && z.kontakt.vorname ? `Guten Tag ${z.kontakt.vorname}` : "Guten Tag";
+      return VORLAGEN.find((x) => x[0] === z.vorlage)[2](v, `${zahl(o.nr)} (${ITEM[it.id].name}, Teil ${teilPos(o, it)}/${o.items.length})`, z.fest.trim(), z.mass.trim()); };
+    const zeichnen = () => {
+      const { it, o } = allItems().find(({ it }) => it.tnr === tnr);
+      const nr = z.kontakt ? handyNr(z.kontakt.tel) : "";
+      dlg.innerHTML = `<div class="md-links"><h2>Kunde fragen · ${teilLabel(o, it)} · ${esc(ITEM[it.id].name)}</h2>
+          <label class="field" for="af-vorlage">Vorlage<select id="af-vorlage">${VORLAGEN.map(([k, n]) => `<option value="${k}"${k === z.vorlage ? " selected" : ""}>${n}</option>`).join("")}</select></label>
+          ${z.vorlage !== "frei" ? `<label class="field" for="af-fest">Was wurde festgestellt?<input id="af-fest" value="${esc(z.fest)}" placeholder="z. B. Wasserflecken am Saum" autocomplete="off"></label>` : ""}
+          ${["rueckfrage", "reparatur"].includes(z.vorlage) ? `<label class="field" for="af-mass">Was möchten wir tun?<input id="af-mass" value="${esc(z.mass)}" placeholder="z. B. eine Nassreinigung" autocomplete="off"></label>` : ""}
+          <label class="field" for="af-text">Nachricht (kann noch geändert werden)<textarea id="af-text" rows="7">${esc(z.textEigen ?? text())}</textarea></label>
+          ${z.fehler ? `<p class="pay-warn">${esc(z.fehler)}</p>` : !z.kontakt ? `<p class="mini">Telefonnummer wird geladen …</p>` : ""}
+          <div class="chips">${nr ? `<a class="btn wa-btn" id="af-senden" href="https://wa.me/${nr}?text=${encodeURIComponent(z.textEigen ?? text())}" target="_blank" rel="noopener">Per WhatsApp senden</a>` : ""}
+            <button class="btn ghost" data-afzu type="button">Schließen</button></div>
+          <p class="mini">Die Antwort kommt im WhatsApp-Chat des Geschäfts an. Danach hier oder im Laden „zugestimmt“ oder „abgelehnt“ eintragen.</p></div>
+        <div class="md-rechts"><b>Anfragen zu diesem Teil</b>${anfragenListe(it, true) || `<p class="mini">Noch keine.</p>`}</div>`;
+    };
+    dlg.addEventListener("input", (e) => {
+      if (e.target.id === "af-text") { z.textEigen = e.target.value; const a = dlg.querySelector("#af-senden"); if (a && z.kontakt) a.href = `https://wa.me/${handyNr(z.kontakt.tel)}?text=${encodeURIComponent(z.textEigen)}`; }
+      else if (e.target.id === "af-fest" || e.target.id === "af-mass") { z[e.target.id === "af-fest" ? "fest" : "mass"] = e.target.value; z.textEigen = undefined; const ta = dlg.querySelector("#af-text"); ta.value = text(); const a = dlg.querySelector("#af-senden"); if (a) a.href = `https://wa.me/${handyNr(z.kontakt.tel)}?text=${encodeURIComponent(text())}`; }
+    });
+    dlg.addEventListener("change", (e) => { if (e.target.id === "af-vorlage") { z.vorlage = e.target.value; z.textEigen = undefined; zeichnen(); } });
+    dlg.addEventListener("click", (e) => {
+      e.stopPropagation();
+      if (e.target.closest("#af-senden")) {
+        // Senden geschieht in WhatsApp; hier wird die Anfrage festgehalten
+        const { it, o } = allItems().find(({ it }) => it.tnr === tnr);
+        (it.anfragen ||= []).push({ id: Date.now().toString(36), am: jetztText(), von: wer(), text: z.textEigen ?? text(), kurz: VORLAGEN.find((x) => x[0] === z.vorlage)[1] + (z.mass ? ": " + z.mass : z.fest ? ": " + z.fest : "") });
+        change(o); setTimeout(zeichnen, 300); return;
+      }
+      const b = e.target.closest("button"); if (!b) return;
+      if ("afzu" in b.dataset) dlg.close();
+      else antwortKlick(b, tnr, zeichnen);
+    });
+    dlg.addEventListener("close", () => { dlg.remove(); render(); });
+    zeichnen(); dlg.showModal();
+    api("kontakt", null, `&nr=${encodeURIComponent(f.o.nr)}`).then((r) => { z.kontakt = r; zeichnen(); })
+      .catch((err) => { z.fehler = err.status === 0 ? "Keine Verbindung – die Telefonnummer wird online geholt." : err.message; zeichnen(); });
+  }
+  // Liste der Anfragen mit Antwort-Knöpfen (in Werkstatt-Karte, Dialogen und Auftrag)
+  function anfragenListe(it, knoepfe) {
+    const a = anfragenVon(it); if (!a.length) return "";
+    return `<ul class="ws-vermerke anfragen">${a.map((x) => `<li class="${x.antwort ? (x.antwort.ja ? "ja" : "nein") : "w"}"><b>Anfrage per WhatsApp</b> (${esc(x.am)}, ${esc(x.von)}): ${esc(x.kurz)}
+      ${x.antwort ? `<br><b>${x.antwort.ja ? "Kunde hat zugestimmt" : "Kunde hat abgelehnt"}</b> · ${esc(x.antwort.am)}, eingetragen von ${esc(x.antwort.von)}${x.antwort.notiz ? " · " + esc(x.antwort.notiz) : ""}`
+        : `<br><span class="pill p-alt">wartet auf Antwort</span>${knoepfe ? ` <button class="btn small" data-afja="${x.id}" data-teilnr="${it.tnr}" type="button">Kunde hat zugestimmt</button> <button class="btn ghost small" data-afnein="${x.id}" data-teilnr="${it.tnr}" type="button">Kunde hat abgelehnt</button>` : ""}`}</li>`).join("")}</ul>`;
+  }
+  function antwortKlick(b, tnr, danach) {
+    const ds = b.dataset; const id = ds.afja || ds.afnein; if (!id) return false;
+    const f = allItems().find(({ it }) => it.tnr === (ds.teilnr || tnr)); const x = anfragenVon(f.it).find((y) => y.id === id);
+    const notiz = (window.prompt(ds.afja ? "Zustimmung – kurzer Vermerk (freiwillig), z. B. „per WhatsApp: Ja, gerne“" : "Ablehnung – kurzer Vermerk (freiwillig)", "") || "").trim();
+    x.antwort = { ja: !!ds.afja, am: jetztText(), von: wer(), notiz }; change(f.o); toast(ds.afja ? "Zustimmung eingetragen" : "Ablehnung eingetragen");
+    if (danach) danach(); else render();
+    return true;
   }
 
   // ---------------------------------------------------------------- Kundensuche, verzeiht Tippfehler und Sonderzeichen
@@ -1193,6 +1266,8 @@
     else if ("tauf" in ds) { const tk = tickets().find((x) => x.id === ui.openTicket); tk.status = "pruefung"; tk.ergebnis = null; tLog(tk, "Wieder geöffnet"); change(tk); }
     else if ("tclose2" in ds) { ui.openTicket = null; }
     else if (ds.maengel) { maengelDialog(ds.maengel, ds.zeit); return; }
+    else if (ds.anfrage) { anfrageDialog(ds.anfrage); return; }
+    else if (ds.afja || ds.afnein) { antwortKlick(b); return; }
     else if ("maneu" in ds) { maNeu(); }
     else if (ds.maaktiv) { const m = mitarbeiter().find((x) => x.id === ds.maaktiv); m.aktiv = m.aktiv === false; change(m); }
     else if (ds.tfilter2) { ui.tfilter2 = ds.tfilter2; }
