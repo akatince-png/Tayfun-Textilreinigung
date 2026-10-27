@@ -1,6 +1,6 @@
 (function () {
   // ---------------------------------------------------------------- Stammdaten
-  const VERSION = "1.2.0";
+  const VERSION = "1.3.0";
   let STORES = { W: "Wettbergen" };
   const CATS = ["Garderobe", "Hemden", "Haushalt", "Gardinen", "Leder"];
   const ITEMS = [
@@ -150,10 +150,10 @@
   addEventListener("offline", () => { syncZustand = "offline"; renderSync(); });
 
   // Nummernblöcke: der Server reserviert sie, damit auch offline jede Nummer nur einmal vergeben wird
-  const BLOCK = { auftrag: [30, 10], teil: [150, 60], kunde: [30, 10], ticket: [10, 3] };
+  const BLOCK = { auftrag: [30, 10], kunde: [30, 10], ticket: [10, 3] };
   const rest = (key) => (meta.nummern[key] || []).reduce((s, [von, bis]) => s + bis - von + 1, 0);
   async function nummernAuffuellen() {
-    const keys = ["kunde", "ticket", ...Object.keys(STORES).flatMap((g) => ["auftrag:" + g, "teil:" + g])];
+    const keys = ["kunde", "ticket", ...Object.keys(STORES).map((g) => "auftrag:" + g)];
     for (const key of keys) {
       const [art, g] = key.split(":"); const [gross, min] = BLOCK[art];
       if (rest(key) >= min) continue;
@@ -201,7 +201,7 @@
   const stPill = (s) => `<span class="st st-${s}">${ST[s]}</span>`;
   function makeItems(o, d) {
     const out = [];
-    o.lines.forEach((l) => { const n = ITEM[l.id].unit === "Stk" ? l.qty : 1; for (let i = 0; i < n; i++) out.push({ tnr: o.store + naechsteNummer("teil:" + o.store), id: l.id, st: "angenommen", platz: "", log: [{ am: d || o.date, st: "angenommen" }] }); });
+    o.lines.forEach((l) => { const n = ITEM[l.id].unit === "Stk" ? l.qty : 1; for (let i = 0; i < n; i++) out.push({ tnr: `${o.nr}-${out.length + 1}`, id: l.id, st: "angenommen", platz: "", log: [{ am: d || o.date, st: "angenommen" }] }); });
     return out;
   }
   const allItems = () => db.orders.flatMap((o) => (o.items || []).map((it) => ({ it, o })));
@@ -243,7 +243,7 @@
 
   // Code 39 Strichcode für die Auftragsnummer (Scanner können ihn ohne Zusatzsoftware lesen)
   function tags(o) {
-    const its = o.items || []; const out = its.slice(0, 12).map((it, i) => `<span class="tag">${it.tnr} · ${o.nr} ${i + 1}/${its.length}</span>`);
+    const its = o.items || []; const out = its.slice(0, 12).map((it) => `<span class="tag">${rot(it) ? "● " : ""}${teilLabel(o, it)} · ${esc(ITEM[it.id].name)}</span>`);
     return `<div class="tags" aria-label="Etiketten">${out.join("")}${its.length > 12 ? `<span class="tag">…</span>` : ""}</div>`;
   }
   // Abholcode = Auftragsnummer + 4 Prüfzeichen; nur wer den Schein (Papier oder Handy) hat, kennt die Prüfzeichen
@@ -330,17 +330,10 @@
       ${o.status === "storniert" ? "" : payBox(o)}
       ${digitalBox(o)}
       ${kdBox}
-      <div class="chips">${next}<button class="btn ghost" data-print type="button">Abholschein drucken</button><button class="btn ghost" data-close type="button">Schließen</button></div>${warn}${storno}</div>
+      <div class="chips">${next}<button class="btn ghost" data-close type="button">Schließen</button></div>${druckBox(o)}${warn}${storno}</div>
       <div class="receipt-wrap"><img class="schein-img" data-schein="${o.nr}" alt="Abholschein ${o.nr}, Abholcode ${abholcode(o)}"><span class="hint">Etiketten für die Teile</span>${tags(o)}</div></div>`;
   }
 
-  // ---------------------------------------------------------------- Drucken (AirPrint-Bondrucker, 80 mm)
-  function drucken(o) {
-    const box = document.getElementById("druck");
-    box.innerHTML = `<img alt="">`;
-    box.firstChild.src = SCHEIN.zeichnen(belegDaten(o), null, { druck: true }).toDataURL("image/png");
-    box.firstChild.decode().catch(() => {}).then(() => window.print());
-  }
   // ---------------------------------------------------------------- Leitungsbereich: Geräte, Passwort, PIN, Sicherung
   function leitungFehler(err) {
     if (err.status === 403) { ui.mgmt = false; render(); toast("Leitungsbereich abgelaufen – bitte PIN neu eingeben"); }
@@ -651,29 +644,42 @@
       <path class="form" d="${u.form}"/>${u.linien ? `<path class="linie" d="${u.linien}"/>` : ""}${seite === "vorne" && u.detail ? `<path class="linie" d="${u.detail}"/>` : ""}${marken}${neuM}</svg>`;
   }
 
+  // Warenschau eines Teils: Optionen, Kundenwünsche, Hinweis, „einwandfrei“
+  function schauHtml(it) {
+    const opts = OPTIONEN[it.id] || [];
+    return `<div class="kd md-schau"><b>Warenschau</b>
+      ${opts.map(([k, n, werte]) => `<div class="chips"><span class="mini">${n}:</span>${werte.map((w) => `<button class="chip" data-mopt="${k}" data-wert="${esc(w)}" aria-pressed="${(it.opt || {})[k] === w}" type="button">${esc(w)}</button>`).join("")}</div>`).join("")}
+      <div class="wunsch">${WUENSCHE.map((w, i) => `<label class="check"><input type="checkbox" data-mwunsch="${i}"${(it.wuensche || []).some((x) => x.text === w) ? " checked" : ""}> ${esc(w)}</label>`).join("")}</div>
+      <label class="field" for="m-hinweis">Hinweis für die Reinigung<input id="m-hinweis" value="${esc(it.hinweis || "")}" placeholder="z. B. nur dämpfen, nicht bügeln" autocomplete="off"></label>
+      ${it.schau ? `<span class="ok-text">Warenschau: ${esc(it.schau.von)}, ${esc(it.schau.am)} · Kunde bestätigt</span>` : `<div><button class="btn small" data-mok type="button">${maengelVon(it).length ? "Warenschau abgeschlossen" : "Einwandfrei"} – Kunde bestätigt</button></div>`}
+      <span class="mini">Was hier eingetragen wird, ist mit dem Kunden besprochen und gilt als von ihm bestätigt.</span></div>`;
+  }
   // Dialog für ein Teil: Umriss links, Mängelliste und Formular rechts
-  function maengelDialog(tnr) {
+  function maengelDialog(tnr, startZeit) {
     const f = allItems().find(({ it }) => it.tnr === tnr); if (!f) return;
     const dlg = document.createElement("dialog"); dlg.className = "maengel-dlg"; document.body.append(dlg);
-    const zustand = { ansicht: (ANSICHTEN[f.it.id] || ["decke"])[0], seite: "vorne", neu: null, fotos: [], zeit: "annahme" };
+    const zustand = { ansicht: (ANSICHTEN[f.it.id] || ["decke"])[0], seite: "vorne", neu: null, fotos: [], zeit: startZeit || "annahme" };
     const zeichnen = () => {
       const { it, o } = allItems().find(({ it }) => it.tnr === tnr);
       const ans = ANSICHTEN[it.id] || ["decke"];
-      const liste = (it.maengel || []).map((m, i) => `<li class="${m.gestrichen ? "weg" : ""}"><b>${i + 1}. ${esc(m.art)}</b> · ${UMRISS[m.ansicht].name}, ${m.seite === "vorne" ? "vorne" : "hinten"}${m.notiz ? ` – ${esc(m.notiz)}` : ""}
+      const liste = (it.maengel || []).map((m, i) => `<li class="${m.gestrichen ? "weg" : ""}"><b>${i + 1}. ${esc(m.art)}${m.fleckart ? ` (${esc(m.fleckart)})` : ""}</b> · ${UMRISS[m.ansicht].name}, ${m.seite === "vorne" ? "vorne" : "hinten"}${m.notiz ? ` – ${esc(m.notiz)}` : ""}${m.behandlung ? `<br>Behandlung: ${esc(m.behandlung)}` : ""}${m.kunde ? ` <span class="ok-text">Kunde bestätigt</span>` : ""}
         <br><span class="mini">${esc(m.amText)} · ${esc(M_ZEIT[m.zeit] || "")} · erfasst von ${esc(m.vonName || m.geraet || "?")}${m.zeugeName ? ` · Vier-Augen mit ${esc(m.zeugeName)}` : ""}${m.gestrichen ? ` · gestrichen von ${esc(m.gestrichen.von)} (${esc(m.gestrichen.am)})` : ""}</span>
         ${(m.fotos || []).length ? `<span class="fotos klein">${m.fotos.map((id) => `<img class="foto" data-foto="${esc(id)}" alt="Foto zu Mangel ${i + 1}">`).join("")}</span>` : ""}
         ${m.gestrichen ? "" : `<button class="btn ghost small" data-mweg="${m.id}" type="button">Als Irrtum streichen</button>`}</li>`).join("");
       const n = zustand.neu;
-      dlg.innerHTML = `<div class="md-links"><h2>${it.tnr} · ${esc(ITEM[it.id].name)}</h2>
+      dlg.innerHTML = `<div class="md-links"><h2><span class="ampel ${rot(it) ? "rot" : geprueft(it) ? "gruen" : "grau"}"></span> ${teilLabel(o, it)} · ${esc(ITEM[it.id].name)}</h2>
           <p class="mini">Auftrag ${o.nr} · ${esc(cust(o.cust).name)}</p>
           <div class="chips">${ans.length > 1 ? ans.map((k) => `<button class="chip" data-mans="${k}" aria-pressed="${k === zustand.ansicht}" type="button">${UMRISS[k].name}</button>`).join("") : ""}
             <button class="chip" data-mseite="vorne" aria-pressed="${zustand.seite === "vorne"}" type="button">Vorderseite</button><button class="chip" data-mseite="hinten" aria-pressed="${zustand.seite === "hinten"}" type="button">Rückseite</button></div>
           ${umrissSvg(zustand.ansicht, zustand.seite, it, n && n.ansicht === zustand.ansicht && n.seite === zustand.seite ? n : null)}
           <p class="mini">Stelle des Mangels antippen.</p></div>
-        <div class="md-rechts">${liste ? `<ol class="mliste">${liste}</ol>` : `<p class="mini">Noch keine Mängel erfasst.</p>`}
+        <div class="md-rechts">${schauHtml(it)}${liste ? `<ol class="mliste">${liste}</ol>` : `<p class="mini">Noch keine Mängel erfasst. Mangel? Stelle links antippen.</p>`}
           ${n ? `<div class="kd md-form"><b>Neuer Mangel (Stelle markiert)</b>
             <label class="field" for="m-art">Art<select id="m-art">${M_ARTEN.map((a) => `<option${a === zustand.art ? " selected" : ""}>${a}</option>`).join("")}</select></label>
+            ${(zustand.art || M_ARTEN[0]) === "Fleck" ? `<label class="field" for="m-fleck">Art des Flecks<select id="m-fleck">${FLECKEN.map((x) => `<option${x === zustand.fleckart ? " selected" : ""}>${x}</option>`).join("")}</select></label>` : ""}
             <label class="field" for="m-notiz">Beschreibung<input id="m-notiz" value="${esc(zustand.notiz || "")}" placeholder="z. B. ca. 1 cm, Knie links" autocomplete="off"></label>
+            <label class="field" for="m-beh">Hinweis zur Behandlung (für die Reinigung)<input id="m-beh" value="${esc(zustand.behandlung || "")}" placeholder="z. B. nur vorsichtig, nicht reiben" autocomplete="off"></label>
+            <label class="check"><input type="checkbox" id="m-kunde"${zustand.kunde ?? zustand.zeit === "annahme" ? " checked" : ""}> Kunde ist informiert und hat es bestätigt</label>
             <label class="field" for="m-zeit">Wann erfasst?<select id="m-zeit">${Object.entries(M_ZEIT).map(([k, v]) => `<option value="${k}"${k === zustand.zeit ? " selected" : ""}>${v}</option>`).join("")}</select></label>
             <label class="field" for="m-von">Erfasst von<select id="m-von">${maOptionen(zustand.von ?? bediener)}</select></label>
             <label class="check"><input type="checkbox" id="m-4a"${zustand.vier ? " checked" : ""}> Vier-Augen-Prinzip: zweite Person war dabei</label>
@@ -687,7 +693,7 @@
     };
     // Formularwerte beim Neuzeichnen behalten
     const merken = () => { const g = (id) => dlg.querySelector("#" + id);
-      if (g("m-art")) Object.assign(zustand, { art: g("m-art").value, notiz: g("m-notiz").value, zeit: g("m-zeit").value, von: g("m-von").value, vier: g("m-4a").checked, zeuge: g("m-zeuge") ? g("m-zeuge").value : zustand.zeuge }); };
+      if (g("m-art")) Object.assign(zustand, { art: g("m-art").value, fleckart: g("m-fleck") ? g("m-fleck").value : zustand.fleckart, behandlung: g("m-beh").value, kunde: g("m-kunde").checked, notiz: g("m-notiz").value, zeit: g("m-zeit").value, von: g("m-von").value, vier: g("m-4a").checked, zeuge: g("m-zeuge") ? g("m-zeuge").value : zustand.zeuge }); };
     dlg.addEventListener("click", (e) => {
       const svg = e.target.closest("svg.umriss");
       if (svg) { merken(); const r = svg.getBoundingClientRect(); zustand.neu = { ansicht: svg.dataset.umriss, seite: svg.dataset.seite, x: Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)), y: Math.min(1, Math.max(0, (e.clientY - r.top) / r.height)) }; zeichnen(); return; }
@@ -696,6 +702,8 @@
       else if (ds.mseite) { merken(); zustand.seite = ds.mseite; zeichnen(); }
       else if ("mabbr" in ds) { zustand.neu = null; zustand.fotos = []; zustand.notiz = ""; zeichnen(); }
       else if ("mzu" in ds) dlg.close();
+      else if (ds.mopt) { merken(); const { it, o } = allItems().find(({ it }) => it.tnr === tnr); it.opt = it.opt || {}; it.opt[ds.mopt] = it.opt[ds.mopt] === ds.wert ? "" : ds.wert; change(o); zeichnen(); }
+      else if ("mok" in ds) { merken(); const { it, o } = allItems().find(({ it }) => it.tnr === tnr); schauOk(it, o); zeichnen(); }
       else if (ds.mweg) {
         const { it, o } = allItems().find(({ it }) => it.tnr === tnr); const m = it.maengel.find((x) => x.id === ds.mweg);
         m.gestrichen = { am: jetztText(), von: wer() }; change(o); zeichnen();
@@ -708,28 +716,151 @@
         const n = zustand.neu;
         (it.maengel ||= []).push({ id: Date.now().toString(36), art: zustand.art || M_ARTEN[0], notiz: (zustand.notiz || "").trim(), ansicht: n.ansicht, seite: n.seite,
           x: Math.round(n.x * 1000) / 1000, y: Math.round(n.y * 1000) / 1000, fotos: zustand.fotos.slice(), zeit: zustand.zeit,
+          fleckart: (zustand.art || M_ARTEN[0]) === "Fleck" ? zustand.fleckart || FLECKEN[0] : "", behandlung: (zustand.behandlung || "").trim(), kunde: !!zustand.kunde,
           am: new Date().toISOString(), amText: jetztText(), von: zustand.von || "", vonName: maName(zustand.von) || "", geraet: meta.geraet || "",
           zeuge: zustand.vier ? zustand.zeuge : "", zeugeName: zustand.vier ? maName(zustand.zeuge) : "" });
         change(o); toast("Mangel gespeichert");
-        Object.assign(zustand, { neu: null, fotos: [], notiz: "", vier: false, zeuge: "" }); zeichnen();
+        Object.assign(zustand, { neu: null, fotos: [], notiz: "", behandlung: "", fleckart: "", kunde: undefined, vier: false, zeuge: "" }); zeichnen();
       }
     });
     dlg.addEventListener("change", (e) => {
       if (e.target.id === "m-foto" && e.target.files[0]) {
         merken();
         fotoSpeichern(e.target.files[0]).then((id) => { if (id) { zustand.fotos.push(id); zeichnen(); } });
-      } else if (["m-4a", "m-zeit", "m-von"].includes(e.target.id)) { merken(); zeichnen(); }
+      } else if (["m-4a", "m-zeit", "m-von", "m-art"].includes(e.target.id)) { merken(); if (e.target.id === "m-zeit") zustand.kunde = undefined; zeichnen(); }
+      else if (e.target.dataset.mwunsch !== undefined || e.target.id === "m-hinweis") {
+        merken(); const { it, o } = allItems().find(({ it }) => it.tnr === tnr);
+        if (e.target.id === "m-hinweis") it.hinweis = e.target.value.trim();
+        else { const w = WUENSCHE[+e.target.dataset.mwunsch]; it.wuensche = (it.wuensche || []).filter((x) => x.text !== w); if (e.target.checked) it.wuensche.push({ text: w, am: jetztText(), von: wer(), kunde: true }); }
+        change(o); zeichnen();
+      }
     });
     dlg.addEventListener("close", () => { dlg.remove(); render(); });
     zeichnen(); dlg.showModal();
   }
 
-  // Teileliste im Auftrag, immer sichtbar: Nummer, Station, Mängel
+  // ---------------------------------------------------------------- Sammler: eine Nummer pro Abgabe, Teile als „3/8“
+  // Die Sammelnummer ist die Auftragsnummer ohne Geschäftskürzel (W-1001 → 1001). Teile intern: W-1001-3.
+  const zahl = (nr) => nr.split("-")[1] || nr;
+  const teilPos = (o, it) => (o.items || []).indexOf(it) + 1;
+  const teilLabel = (o, it) => `${zahl(o.nr)} · ${teilPos(o, it)}/${(o.items || []).length}`;
+  // Vorgaben je Artikel, die der Reiniger sehen muss
+  const OPTIONEN = { hose: [["buegelfalte", "Bügelfalte", ["mit", "ohne"]]], anzug: [["buegelfalte", "Bügelfalte", ["mit", "ohne"]]],
+    hemd: [["staerke", "Stärke", ["ohne", "leicht", "kräftig"]]], "hemd-g": [["staerke", "Stärke", ["ohne", "leicht", "kräftig"]]], bluse: [["staerke", "Stärke", ["ohne", "leicht"]]],
+    rock: [["falten", "Falten", ["wie vorhanden", "neu legen"]]], gardine: [["fertig", "Rückgabe", ["gelegt", "auf Rolle / hängend"]]], vorhang: [["fertig", "Rückgabe", ["gelegt", "auf Rolle / hängend"]]] };
+  // Kundenwünsche und Freigaben – jede davon macht das Teil „rot“ (Vermerk beachten)
+  const WUENSCHE = ["Kunde wünscht Wäsche / Nassreinigung trotz Pflegeetikett", "Behandlung ohne Gewähr – Kunde ist informiert", "Ohne Pflegeetikett – Kunde ist informiert",
+    "Fleck nur schonend versuchen", "Knöpfe / Applikationen vorher sichern", "Express – bevorzugt bearbeiten"];
+  const FLECKEN = ["unbekannt", "Rotwein / Saft", "Kaffee / Tee", "Fett / Öl", "Blut", "Make-up", "Kugelschreiber / Tinte", "Gras / Erde", "Schweiß / Deo", "Rost", "Wachs", "Kaugummi"];
+  const rot = (it) => maengelVon(it).length > 0 || (it.wuensche || []).length > 0 || !!(it.hinweis || "").trim();
+  const geprueft = (it) => !!it.schau || maengelVon(it).length > 0;
+  function vermerke(it) {
+    const out = [];
+    (it.wuensche || []).forEach((w) => out.push(`<li class="w">${esc(w.text)}</li>`));
+    if ((it.hinweis || "").trim()) out.push(`<li class="w">Hinweis: ${esc(it.hinweis)}</li>`);
+    maengelVon(it).forEach((m) => out.push(`<li>${esc(m.art)}${m.fleckart ? ` (${esc(m.fleckart)})` : ""} · ${esc(UMRISS[m.ansicht].name)} ${m.seite === "vorne" ? "vorne" : "hinten"}${m.notiz ? ` – ${esc(m.notiz)}` : ""}${m.behandlung ? `<br><b>Behandlung:</b> ${esc(m.behandlung)}` : ""}${m.kunde ? ` <span class="ok-text">Kunde bestätigt</span>` : ""}</li>`));
+    return out.join("");
+  }
+  const optText = (it) => (OPTIONEN[it.id] || []).filter(([k]) => it.opt && it.opt[k]).map(([k, n]) => `${n}: ${it.opt[k]}`).join(" · ");
+
+  // Teileliste im Auftrag: Warenschau mit grünem Haken / rotem Punkt
   function teileZustand(o) {
     const its = o.items || []; if (!its.length) return "";
-    return `<div class="teile-zustand"><b>Teile und Zustand</b>${its.map((it) => { const n = maengelVon(it).length;
-      return `<div class="tz"><button class="btn ghost small" data-teil="${it.tnr}" type="button">${it.tnr}</button><span>${esc(ITEM[it.id].name)} ${stPill(it.st)}</span>
-        <button class="btn small ${n ? "warnung" : "ghost"}" data-maengel="${it.tnr}" type="button">${n ? `${n} ${n === 1 ? "Mangel" : "Mängel"}` : "Mängel erfassen"}</button></div>`; }).join("")}</div>`;
+    const offen = its.filter((it) => !geprueft(it)).length;
+    return `<div class="teile-zustand"><div class="tz-kopf"><b>Warenschau · Sammler ${zahl(o.nr)} · ${its.length} ${its.length === 1 ? "Teil" : "Teile"}</b>${offen ? `<span class="pay-warn">${offen} noch nicht geprüft</span>` : `<span class="ok-text">alle geprüft</span>`}</div>
+      ${its.map((it) => `<div class="tz"><span class="ampel ${rot(it) ? "rot" : geprueft(it) ? "gruen" : "grau"}" aria-label="${rot(it) ? "Vermerk beachten" : geprueft(it) ? "geprüft, einwandfrei" : "noch nicht geprüft"}"></span>
+        <span><b>${teilPos(o, it)}/${its.length} ${esc(ITEM[it.id].name)}</b> ${stPill(it.st)}${optText(it) ? `<br><span class="mini">${esc(optText(it))}</span>` : ""}${rot(it) ? `<br><span class="mini">${[...(it.wuensche || []).map((w) => w.text), ...maengelVon(it).map((m) => m.art)].map(esc).join(" · ")}</span>` : ""}</span>
+        <span class="chips">${geprueft(it) ? "" : `<button class="btn small ghost" data-schauok="${it.tnr}" type="button">Einwandfrei</button>`}<button class="btn small ${rot(it) ? "warnung" : "ghost"}" data-maengel="${it.tnr}" type="button">Prüfen</button></span></div>`).join("")}
+      <span class="mini">Grün: nach Pflegeetikett und Fachwissen. Rot: Vermerk beachten (Mangel, Kundenwunsch oder Hinweis).</span></div>`;
+  }
+  function schauOk(it, o) { it.schau = { am: jetztText(), von: bedienerName() || meta.geraet || "", kunde: true }; change(o); }
+
+  // ---------------------------------------------------------------- Drucken: Abholschein, Sammler (für die Tüte), Etiketten (für die Teile)
+  const MONO = 'ui-monospace, Menlo, "Courier New", monospace', SANS = 'Archivo, "Arial Black", "Helvetica Neue", Arial, sans-serif';
+  function leinwand(w, h) { const cv = document.createElement("canvas"); cv.width = w; cv.height = h; const g = cv.getContext("2d"); g.fillStyle = "#fff"; g.fillRect(0, 0, w, h); return [cv, g]; }
+  function umbruch(g, s, f, max) { g.font = f; const out = []; let z = ""; String(s).split(" ").forEach((w) => { const t2 = z ? z + " " + w : w; if (g.measureText(t2).width > max && z) { out.push(z); z = "   " + w; } else z = t2; }); if (z) out.push(z); return out; }
+  function sammlerBild(o) {
+    const W = 576, X = 24, IW = W - 48; const its = o.items || [];
+    const zeilen = []; // [text, font, extra]
+    its.forEach((it) => {
+      zeilen.push([`${rot(it) ? "●" : "✓"} ${teilPos(o, it)}/${its.length}  ${ITEM[it.id].name}`, `700 26px ${SANS}`]);
+      if (optText(it)) zeilen.push([`   ${optText(it)}`, `22px ${MONO}`]);
+      (it.wuensche || []).forEach((w) => zeilen.push([`   ! ${w.text}`, `22px ${MONO}`]));
+      if ((it.hinweis || "").trim()) zeilen.push([`   ! ${it.hinweis}`, `22px ${MONO}`]);
+      maengelVon(it).forEach((m) => zeilen.push([`   - ${m.art}${m.fleckart ? " (" + m.fleckart + ")" : ""}, ${UMRISS[m.ansicht].name} ${m.seite}${m.notiz ? ": " + m.notiz : ""}${m.behandlung ? " → " + m.behandlung : ""}${m.kunde ? " [Kunde bestätigt]" : ""}`, `22px ${MONO}`]));
+    });
+    const [, mg] = leinwand(1, 1); const fertig = zeilen.flatMap(([t, f]) => umbruch(mg, t, f, IW).map((z) => [z, f]));
+    const H = 580 + fertig.length * 32;
+    const [cv, g] = leinwand(W, H); let y = 70;
+    const mitte = (t, f) => { g.font = f; g.fillStyle = "#111"; g.textAlign = "center"; g.fillText(t, W / 2, y); g.textAlign = "left"; };
+    mitte("S A M M L E R", `700 28px ${MONO}`); y += 120; mitte(zahl(o.nr), `800 120px ${SANS}`); y += 50;
+    mitte(`${its.length} ${its.length === 1 ? "Teil" : "Teile"} · ${its.filter(rot).length} mit Vermerk`, `700 28px ${SANS}`); y += 40;
+    mitte(`${o.nr} · ${cust(o.cust).name}`, `24px ${MONO}`); y += 34; mitte(`abholbereit ab ${fmtDate(o.due)}`, `700 24px ${MONO}`); y += 26;
+    g.fillRect(X, y, IW, 3); y += 42;
+    fertig.forEach(([z, f]) => { g.font = f; g.fillStyle = "#111"; g.fillText(z, X, y); y += 32; });
+    y += 4; g.fillRect(X, y, IW, 3); y += 20;
+    SCHEIN.strichcode(g, zahl(o.nr), W / 2, y, IW * 0.7, 70); y += 100;
+    mitte("Nicht mit in die Reinigung geben", `22px ${MONO}`);
+    return cv;
+  }
+  function etikettBild(o, it) {
+    const W = 576, H = 230; const [cv, g] = leinwand(W, H);
+    g.fillStyle = "#111"; g.font = `800 92px ${SANS}`; g.fillText(zahl(o.nr), 24, 100);
+    const zw = g.measureText(zahl(o.nr)).width;
+    g.font = `700 34px ${SANS}`; g.fillText(`${teilPos(o, it)}/${(o.items || []).length}`, 40 + zw, 96);
+    g.font = `26px ${MONO}`; g.fillText(ITEM[it.id].name.slice(0, 32), 24, 146);
+    if (optText(it)) { g.font = `20px ${MONO}`; g.fillText(optText(it).slice(0, 44), 24, 176); }
+    if (rot(it)) { g.beginPath(); g.arc(W - 60, 64, 38, 0, Math.PI * 2); g.fill(); g.fillStyle = "#fff"; g.font = `800 44px ${SANS}`; g.textAlign = "center"; g.fillText("!", W - 60, 80); g.textAlign = "left"; g.fillStyle = "#111"; }
+    SCHEIN.strichcode(g, `${zahl(o.nr)}-${teilPos(o, it)}`, W - 150, 150, 230, 56);
+    return cv;
+  }
+  function drucken(o, was) {
+    const bilder = [];
+    if (was === "schein" || was === "alles") bilder.push(SCHEIN.zeichnen(belegDaten(o), null, { druck: true }));
+    if (was === "sammler" || was === "alles") bilder.push(sammlerBild(o));
+    if (was === "etiketten" || was === "alles") (o.items || []).forEach((it) => bilder.push(etikettBild(o, it)));
+    const box = document.getElementById("druck");
+    box.innerHTML = bilder.map(() => `<img alt="">`).join("");
+    bilder.forEach((cv, i) => (box.children[i].src = cv.toDataURL("image/png")));
+    Promise.all([...box.children].map((im) => im.decode().catch(() => {}))).then(() => window.print());
+  }
+  function druckBox(o) {
+    return `<div class="chips druck-knoepfe"><span class="mini">Drucken:</span>
+      <button class="btn ghost small" data-print="alles" type="button">Alles</button>
+      <button class="btn ghost small" data-print="schein" type="button">Abholschein</button>
+      <button class="btn ghost small" data-print="sammler" type="button">Sammler</button>
+      <button class="btn ghost small" data-print="etiketten" type="button">Etiketten (${(o.items || []).length})</button></div>`;
+  }
+
+  // ---------------------------------------------------------------- Werkstatt: Sammelnummer eingeben, Teile mit grün/rot sehen
+  function findeSammler(eingabe) {
+    const v = (eingabe || "").trim().toUpperCase().replace(/\s+/g, "");
+    const m = v.match(/^(?:TAYFUN)?([A-Z]{1,2})?-?(\d{3,7})(?:-(\d{1,3}))?(?:-[A-Z0-9]{4})?$/); if (!m) return null;
+    const kand = db.orders.filter((o) => zahl(o.nr) === m[2] && (!m[1] || o.store === m[1]));
+    const o = kand.find((x) => x.store === ui.store) || kand[0];
+    return o ? { o, pos: m[3] ? +m[3] : null } : null;
+  }
+  function werkstattAnsicht() {
+    const f = ui.wsNr ? findeSammler(ui.wsNr) : null; const o = f && f.o;
+    const its = o ? o.items || [] : [];
+    const kopf = `<div class="pickbox"><b>Sammler aufrufen</b><label class="field" for="ws-nr">Nummer vom Etikett oder Sammler eintippen oder scannen, dann Enter<input id="ws-nr" inputmode="numeric" value="${esc(ui.wsNr || "")}" placeholder="z. B. 1001" autocomplete="off" enterkeyhint="go"></label></div>`;
+    if (!ui.wsNr) {
+      const offen = db.orders.filter(inStore).filter((x) => ["arbeit", "kundendienst"].includes(x.status)).sort((a, b) => a.due.localeCompare(b.due));
+      return kopf + `<div class="panel"><h2>In Arbeit (${offen.length})</h2>${offen.length ? `<div class="list">${offen.slice(0, 40).map((x) => `<button class="row" data-ws="${zahl(x.nr)}" type="button"><span class="t">Sammler ${zahl(x.nr)} · ${(x.items || []).length} Teile${(x.items || []).some(rot) ? ` <span class="pill p-alt">${x.items.filter(rot).length} mit Vermerk</span>` : ""}</span><span class="s num">abholbereit ab ${fmtDate(x.due)}</span><span class="r">${pill(x)}</span></button>`).join("")}</div>` : `<p class="empty">Nichts in Arbeit.</p>`}</div>`;
+    }
+    if (!o) return kopf + `<p class="empty">Kein Sammler mit der Nummer ${esc(ui.wsNr)} gefunden.</p>`;
+    const zaehl = o.zaehlung;
+    return kopf + `<div class="panel ws-kopf"><div><span class="mini">Sammler</span><b class="ws-nr">${zahl(o.nr)}</b></div>
+        <div><b class="ws-anz">${its.length} ${its.length === 1 ? "Teil" : "Teile"}</b><span class="mini">${its.filter(rot).length} mit Vermerk · abholbereit ab <b>${fmtDate(o.due)}</b></span>
+        ${zaehl ? `<span class="ok-text">Anzahl geprüft: ${esc(zaehl.von)}, ${esc(zaehl.am)}</span>` : `<button class="btn small" data-wszaehl type="button">${its.length} Teile nachgezählt – stimmt</button>`}</div>
+        <div class="chips"><button class="btn ghost small" data-wsalle="reinigung" type="button">Alle in Reinigung</button><button class="btn ghost small" data-wsalle="finish" type="button">Alle ins Finish</button><button class="btn small" data-wsalle="fertig" type="button">Alle fertig</button></div></div>
+      ${its.map((it) => `<div class="panel ws-teil ${rot(it) ? "rot" : "gruen"}${f.pos === teilPos(o, it) ? " gewaehlt" : ""}">
+        <div class="ws-teil-kopf"><span class="ampel ${rot(it) ? "rot" : "gruen"}"></span><b>${teilLabel(o, it)} · ${esc(ITEM[it.id].name)}</b>${stPill(it.st)}</div>
+        ${optText(it) ? `<div class="ws-opt">${esc(optText(it))}</div>` : ""}
+        ${rot(it) ? `<ul class="ws-vermerke">${vermerke(it)}</ul>` : `<p class="ok-text">Nach Pflegeetikett und eigener Fachkenntnis behandeln.</p>`}
+        ${maengelVon(it).some((m) => (m.fotos || []).length) ? `<div class="fotos klein">${maengelVon(it).flatMap((m) => m.fotos || []).map((id) => `<img class="foto" data-foto="${esc(id)}" alt="Foto">`).join("")}</div>` : ""}
+        <div class="chips">${["reinigung", "finish", "extern", "fertig"].map((s) => `<button class="chip" data-wsst="${it.tnr}" data-st="${s}" aria-pressed="${it.st === s}" type="button">${ST[s]}</button>`).join("")}
+          <button class="btn ghost small" data-maengel="${it.tnr}" data-zeit="bearbeitung" type="button">Feststellung / Foto</button></div></div>`).join("")}`;
   }
 
   // ---------------------------------------------------------------- Kundensuche, verzeiht Tippfehler und Sonderzeichen
@@ -759,6 +890,7 @@
 
   // ---------------------------------------------------------------- Ansichten
   const VIEWS = {
+    werkstatt: () => werkstattAnsicht(),
     kundendienst: () => kundendienstAnsicht(),
     heute() {
       const t = iso(today0()); const os = db.orders.filter(inStore);
@@ -876,7 +1008,7 @@
       return `<div class="scanbox">
           <b>Teile scannen</b>
           <div class="chips">${STATIONEN.filter(([k]) => !["storniert", "angenommen"].includes(k)).map(([k, n]) => `<button class="chip" data-ziel="${k}" aria-pressed="${k === ziel}" type="button">${n}</button>`).join("")}</div>
-          <div class="scanrow"><label class="field" for="scan">Etikett scannen oder Teilenummer eintippen, dann Enter<input id="scan" placeholder="z. B. W104523" autocomplete="off" autocapitalize="characters"></label>
+          <div class="scanrow"><label class="field" for="scan">Etikett scannen oder Teilenummer eintippen, dann Enter<input id="scan" placeholder="z. B. 1001-3" autocomplete="off" autocapitalize="characters"></label>
           ${ziel === "fertig" ? `<label class="field" for="scan-platz">Platz im Regal<input id="scan-platz" value="${esc(ui.scanPlatz || "Stange 1")}" autocomplete="off"></label>` : `<span></span>`}</div>
           <span class="mini">Gescannte Teile wandern nach „${ST[ziel]}“. Sind alle Teile eines Auftrags fertig, wird der Auftrag automatisch abholbereit.</span>
           ${(ui.scans || []).length ? `<div class="scanlog">${ui.scans.slice(0, 6).map((s) => `<span class="${s.ok ? "ok" : "err"}">${s.ok ? "✓" : "✗"} ${esc(s.text)}</span>`).join("")}</div>` : ""}
@@ -973,7 +1105,7 @@
           <p class="hint" style="margin-top:10px">Auftragswert laut App. Der tatsächliche Umsatz kommt aus der Kasse.</p></div>`;
     },
   };
-  const TITLES = { kundendienst: "Kundendienst", heute: "Heute", annahme: "Neue Annahme", auftraege: "Aufträge", teile: "Teile-Kartei", kunden: "Kunden", kasse: "Kasse", management: "Geschäftsleitung", auswertung: "Auswertung" };
+  const TITLES = { werkstatt: "Werkstatt", kundendienst: "Kundendienst", heute: "Heute", annahme: "Neue Annahme", auftraege: "Aufträge", teile: "Teile-Kartei", kunden: "Kunden", kasse: "Kasse", management: "Geschäftsleitung", auswertung: "Auswertung" };
 
   function render() {
     document.querySelectorAll("[data-nav]").forEach((b) => b.closest(".rail") && b.setAttribute("aria-current", b.dataset.nav === ui.view ? "page" : "false"));
@@ -1009,12 +1141,11 @@
       const k = { id, name: d.custQ.trim(), tel: (document.getElementById("new-tel") || {}).value?.trim() || "–", store: ui.store, seit: iso(today0()) };
       db.customers.push(k); d.cust = id; change(k); toast("Kunde angelegt"); }
     else if ("save" in ds) {
-      const teile = d.lines.reduce((s, l) => s + (ITEM[l.id].unit === "Stk" ? l.qty : 1), 0);
-      if (rest("auftrag:" + ui.store) < 1 || rest("teil:" + ui.store) < teile) { toast("Keine freien Nummern auf diesem Gerät – bitte kurz mit dem Internet verbinden."); sync(); return; }
+      if (rest("auftrag:" + ui.store) < 1) { toast("Keine freien Nummern auf diesem Gerät – bitte kurz mit dem Internet verbinden."); sync(); return; }
       const nr = ui.store + "-" + naechsteNummer("auftrag:" + ui.store);
       const neu = { nr, cust: d.cust, store: ui.store, date: d.date, due: d.due, status: "arbeit", lines: d.lines.map((l) => ({ ...l })), picked: null, geraet: meta.geraet || "" };
       neu.items = makeItems(neu, d.date); neu.code = genCode(); db.orders.push(neu);
-      ui.draft = newDraft(); change(neu); toast(`Auftrag ${nr} gespeichert – Abholschein bereit`);
+      ui.draft = newDraft(); change(neu); toast(`Sammler ${zahl(nr)} gespeichert – jetzt Warenschau je Teil`);
       ui.view = "auftraege"; ui.filter = "offen"; ui.openOrder = nr; scrollTo({ top: 0 });
     }
     else if (ds.order) { ui.openOrder = ds.order; if (ui.view !== "auftraege" && ui.view !== "heute") { ui.view = "auftraege"; ui.filter = "alle"; ui.aq = ""; } scrollTo({ top: 0, behavior: "smooth" }); }
@@ -1048,7 +1179,7 @@
     else if ("tfertig" in ds) { ticketAbschluss(tickets().find((x) => x.id === ui.openTicket)); }
     else if ("tauf" in ds) { const tk = tickets().find((x) => x.id === ui.openTicket); tk.status = "pruefung"; tk.ergebnis = null; tLog(tk, "Wieder geöffnet"); change(tk); }
     else if ("tclose2" in ds) { ui.openTicket = null; }
-    else if (ds.maengel) { maengelDialog(ds.maengel); return; }
+    else if (ds.maengel) { maengelDialog(ds.maengel, ds.zeit); return; }
     else if ("maneu" in ds) { maNeu(); }
     else if (ds.maaktiv) { const m = mitarbeiter().find((x) => x.id === ds.maaktiv); m.aktiv = m.aktiv === false; change(m); }
     else if (ds.tfilter2) { ui.tfilter2 = ds.tfilter2; }
@@ -1062,7 +1193,12 @@
     }
     else if ("zeigen" in ds) { zeigen(db.orders.find((x) => x.nr === ui.openOrder)); return; }
     else if ("teilen" in ds) { teilen(db.orders.find((x) => x.nr === ui.openOrder)); return; }
-    else if ("print" in ds) { drucken(db.orders.find((x) => x.nr === ui.openOrder)); return; }
+    else if ("print" in ds) { drucken(db.orders.find((x) => x.nr === ui.openOrder), ds.print || "schein"); return; }
+    else if (ds.schauok) { const f = allItems().find(({ it }) => it.tnr === ds.schauok); schauOk(f.it, f.o); toast(`${teilLabel(f.o, f.it)} einwandfrei`); }
+    else if (ds.ws) { ui.wsNr = ds.ws; scrollTo({ top: 0 }); }
+    else if ("wszaehl" in ds) { const o = findeSammler(ui.wsNr).o; o.zaehlung = { am: jetztText(), von: wer(), anzahl: (o.items || []).length }; change(o); toast("Anzahl bestätigt"); }
+    else if (ds.wsalle) { const o = findeSammler(ui.wsNr).o; (o.items || []).forEach((it) => it.st !== ds.wsalle && setItem(it, ds.wsalle, ds.wsalle === "fertig" ? it.platz || "Stange 1" : undefined)); const m = syncOrder(o); change(o); toast(`Alle Teile: ${ST[ds.wsalle]}${m}`); }
+    else if (ds.wsst) { const f = allItems().find(({ it }) => it.tnr === ds.wsst); if (f.it.st !== ds.st) setItem(f.it, ds.st, ds.st === "fertig" ? f.it.platz || "Stange 1" : undefined); const m = syncOrder(f.o); change(f.o); toast(`${teilLabel(f.o, f.it)}: ${ST[ds.st]}${m}`); }
     else if (ds.custopen) { ui.openCust = ds.custopen; scrollTo({ top: 0, behavior: "smooth" }); }
     else if ("closecust" in ds) { ui.openCust = null; }
     else if (b.id === "sync") { sync(); return; }
@@ -1072,6 +1208,8 @@
   // Scanner wirken wie eine Tastatur: Nummer + Enter
   document.addEventListener("keydown", (e) => {
     if (e.key === "Enter" && e.target.id === "pin") { e.preventDefault(); document.querySelector("[data-unlock]").click(); }
+    if (e.key === "Enter" && e.target.id === "ws-nr") { e.preventDefault(); ui.wsNr = e.target.value.trim(); render(); const f = ui.wsNr && findeSammler(ui.wsNr); if (!f) return;
+      const el = f.pos && document.querySelector(".ws-teil.gewaehlt"); if (el) el.scrollIntoView({ block: "center" }); return; }
     if (e.key === "Enter" && e.target.id === "pick") {
       e.preventDefault();
       const v = e.target.value.trim(); let wert = v;
@@ -1087,11 +1225,12 @@
     if (e.key !== "Enter" || e.target.id !== "scan") return;
     e.preventDefault();
     const nr = e.target.value.trim().toUpperCase().replace(/\s/g, ""); const ziel = ui.scanZiel || "reinigung";
-    const f = allItems().find(({ it }) => it.tnr === nr);
+    const fs = findeSammler(nr);
+    const f = fs && fs.pos ? (fs.o.items || [])[fs.pos - 1] && { o: fs.o, it: fs.o.items[fs.pos - 1] } : allItems().find(({ it }) => it.tnr === nr);
     ui.scans = ui.scans || [];
-    if (!f) ui.scans.unshift({ ok: false, text: `${nr || "(leer)"}: Teil nicht gefunden` });
+    if (!f) ui.scans.unshift({ ok: false, text: fs && !fs.pos ? `${nr}: Das ist die Sammelnummer – bitte das Etikett mit Position scannen (z. B. ${zahl(fs.o.nr)}-1)` : `${nr || "(leer)"}: Teil nicht gefunden` });
     else { setItem(f.it, ziel, ziel === "fertig" ? (ui.scanPlatz || "Stange 1") : undefined); const m = syncOrder(f.o); change(f.o);
-      ui.scans.unshift({ ok: true, text: `${f.it.tnr} ${ITEM[f.it.id].name} → ${ST[ziel]}${ziel === "fertig" ? " (" + (ui.scanPlatz || "Stange 1") + ")" : ""}${m}` }); }
+      ui.scans.unshift({ ok: true, text: `${teilLabel(f.o, f.it)} ${ITEM[f.it.id].name} → ${ST[ziel]}${ziel === "fertig" ? " (" + (ui.scanPlatz || "Stange 1") + ")" : ""}${m}` }); }
     render(); const s = document.getElementById("scan"); if (s) { s.value = ""; s.focus(); }
   });
   // Kundenfeld antippen: Kundenliste klappt automatisch auf

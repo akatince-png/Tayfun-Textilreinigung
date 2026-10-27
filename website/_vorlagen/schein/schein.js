@@ -95,17 +95,22 @@ const SCHEIN = (() => {
     mitte("Dies ist kein Kassenbeleg.", `21px ${MONO}`, "#555"); y += 26;
 
     // Strichcode (Code 39) mit dem Abholcode
-    const bars = []; let bx = 0;
-    for (const ch of "*" + code(d) + "*") { [...C39[ch]].forEach((k, i) => { const w = k === "w" ? 3 : 1; if (i % 2 === 0) bars.push([bx, w]); bx += w; }); bx += 1; }
-    const s = Math.min(3, IW / bx), bw = bx * s, x0 = W / 2 + R - bw / 2;
-    g.fillStyle = "#151515"; bars.forEach(([x, w]) => g.fillRect(x0 + x * s, y, w * s, 80));
+    strichcode(g, code(d), W / 2 + R, y, IW, 80);
     y += 80 + 30; mitte(code(d), `22px ${MONO}`);
     if (H === 4000) return { height: y + 60 };
     return cv;
   }
 
+  // Code-39-Strichcode, mittig um cx, höchstens maxB breit
+  function strichcode(g, text, cx, y, maxB, h) {
+    const bars = []; let bx = 0;
+    for (const ch of "*" + text.toUpperCase() + "*") { [...(C39[ch] || C39["-"])].forEach((k, i) => { const w = k === "w" ? 3 : 1; if (i % 2 === 0) bars.push([bx, w]); bx += w; }); bx += 1; }
+    const s = Math.min(3, maxB / bx), x0 = cx - bx * s / 2;
+    g.fillStyle = "#151515"; bars.forEach(([x, w]) => g.fillRect(x0 + x * s, y, w * s, h));
+  }
+
   // Als PNG-Datei; Name ohne Sonderzeichen
   const datei = (cv, d) => new Promise((ok) => cv.toBlob((b) => ok(new File([b], `Abholschein-${d.n}.png`, { type: "image/png" })), "image/png"));
 
-  return { BASIS, packen, auspacken, link, code, zeichnen, datei, qr };
+  return { BASIS, packen, auspacken, link, code, zeichnen, datei, qr, strichcode };
 })();

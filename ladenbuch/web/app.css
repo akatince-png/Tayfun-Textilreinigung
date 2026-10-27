@@ -282,3 +282,29 @@ textarea { font: inherit; color: inherit; background: var(--surface); border: 1p
 .md-form { display: grid; gap: 10px; }
 .fotos.klein { display: flex; gap: 6px; flex-wrap: wrap; }
 .fotos.klein .foto { width: 72px; height: 72px; }
+
+.ampel { display: inline-block; width: 16px; height: 16px; border-radius: 50%; flex: none; vertical-align: -2px; }
+.ampel.rot { background: #D7262E; }
+.ampel.gruen { background: #1E8A4A; -webkit-mask: none; position: relative; }
+.ampel.gruen::after { content: ""; position: absolute; left: 5px; top: 2px; width: 4px; height: 8px; border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg); }
+.ampel.grau { background: var(--line); }
+.ok-text { color: var(--ok); font-weight: 600; font-size: 14px; }
+.tz-kopf { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; justify-content: space-between; }
+.tz { grid-template-columns: auto minmax(0, 1fr) auto; }
+.md-schau { display: grid; gap: 8px; }
+.wunsch { display: grid; gap: 6px; }
+.druck-knoepfe { align-items: center; }
+.ws-kopf { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 16px 24px; align-items: center; }
+@media (max-width: 760px) { .ws-kopf { grid-template-columns: 1fr; } }
+.ws-kopf > div { display: grid; gap: 4px; }
+.ws-nr { font-size: 56px; font-weight: 800; font-stretch: 112%; line-height: 1; }
+.ws-anz { font-size: 26px; }
+.ws-teil { display: grid; gap: 10px; border-left: 8px solid var(--ok); }
+.ws-teil.rot { border-left-color: #D7262E; }
+.ws-teil.gewaehlt { outline: 3px solid var(--info); }
+.ws-teil-kopf { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; font-size: 18px; }
+.ws-opt { font-weight: 600; }
+.ws-vermerke { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
+.ws-vermerke li.w { font-weight: 700; color: #B3141C; }
+#druck img { page-break-after: always; break-after: page; }
+@media (max-width: 700px) { .rail button { font-size: 10px; padding-inline: 0; min-width: 0; } }
