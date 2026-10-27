@@ -290,7 +290,7 @@ def index():
         <h1 id="hero-title">Ihre Textilreinigung in <span>Wettbergen</span></h1>
         <p class="lead">Reinigung, Wäscherei, Lederpflege und Änderungsschneiderei unter einem Dach. Gardinen und Teppiche holen wir auch bei Ihnen ab.</p>
         <div class="btns"><a class="btn primary" href="preisliste.html">Zur Preisliste</a><a class="btn wa" href="#anfrage">{WA_ICON}WhatsApp 0511 464252</a></div>
-        <a class="b2b-link" href="geschaeftskunden.html"><strong>Für Unternehmen:</strong> Messe, Gastronomie, Hotels, Praxen <span aria-hidden="true">→</span></a>
+        <a class="b2b-link" href="geschaeftskunden.html"><strong>Für Unternehmen:</strong> Messe, Gastronomie, Hotels, Gesundheit &amp; Pflege <span aria-hidden="true">→</span></a>
         <p class="open-now" data-open-now aria-live="polite">Mo–Sa ab 8 Uhr geöffnet</p>
         <dl class="hours">
           <dt>Mo, Di, Do, Fr</dt><dd>8–13 und 15–18 Uhr</dd>
@@ -307,7 +307,7 @@ def index():
 
   <section class="b2b-band" aria-label="Geschäftskunden">
     <div class="wrap">
-      <p><strong>Geschäftskunden</strong> Messe &amp; Events · Gastronomie &amp; Catering · Hotels · Praxen &amp; Pflege · Büros</p>
+      <p><strong>Geschäftskunden</strong> Messe &amp; Events · Gastronomie &amp; Catering · Hotels · Gesundheit &amp; Pflege · Büros</p>
       <a class="btn white" href="geschaeftskunden.html">Angebot für Unternehmen</a>
     </div>
   </section>
@@ -574,15 +574,15 @@ subpage("teppichreinigung.html", "Teppichreinigung Hannover mit Abholung · Tayf
         img=("assets/fotos/teppich-kinder.jpg", "Zwei Kinder spielen mit Kuscheltieren auf einem hellen, flauschigen Teppich"))
 
 subpage("geschaeftskunden.html", "Textilreinigung für Geschäftskunden in Hannover · Messe, Gastronomie, Hotels · Tayfun",
-        "Textilreinigung für Unternehmen in Hannover: Messekleidung, Hostessen-Outfits, Uniformen, Tischwäsche für Gastronomie und Catering, Hotelwäsche, Berufskleidung für Praxen. Faire Mengenpreise.",
+        "Textilreinigung für Unternehmen in Hannover: Messekleidung, Hostessen-Outfits, Uniformen, Tischwäsche für Gastronomie und Catering, Hotelwäsche, Kasacks und Kittel für Pflegedienste, Praxen, Apotheken und Therapie. Faire Mengenpreise.",
         "Geschäftskunden", "Textilpflege für Ihr Unternehmen",
-        "Ob Messeauftritt, Restaurant, Catering oder Praxis: Wir reinigen Ihre Arbeits- und Repräsentationskleidung sowie Tisch- und Hauswäsche zuverlässig, termingerecht und zu fairen Konditionen.",
+        "Ob Messeauftritt, Restaurant, Catering, Pflegedienst oder Praxis: Wir reinigen Ihre Arbeits- und Repräsentationskleidung sowie Tisch- und Hauswäsche zuverlässig, termingerecht und zu fairen Konditionen.",
         f"""<h2>Für wen wir arbeiten</h2>
 <div class="b2b-grid">
 <div class="b2b-card"><h3>Messe &amp; Events</h3><p>Hostessen-Outfits, Uniformen, Anzüge und Blusen für das Standpersonal, Tischdecken und Stoffe für den Messestand. Vor und nach der Messe, auch kurzfristig nach Absprache.</p></div>
 <div class="b2b-card"><h3>Gastronomie &amp; Catering</h3><p>Tischdecken, Tafeltücher und Servietten, Kochjacken, Schürzen und Servicekleidung, frisch gewaschen und gemangelt für den nächsten Einsatz.</p></div>
 <div class="b2b-card"><h3>Hotels &amp; Ferienwohnungen</h3><p>Bettwäsche, Decken, Kissen und Gardinen für Gästezimmer, dazu Tisch- und Frühstückswäsche.</p></div>
-<div class="b2b-card"><h3>Praxen &amp; Pflege</h3><p>Kittel, Arzthosen und Berufskleidung für Arzt-, Zahnarzt- und Physiotherapiepraxen, Pflegedienste und Kosmetikstudios.</p></div>
+<div class="b2b-card"><h3>Gesundheit &amp; Pflege</h3><p>Kasacks, Kittel, Arzthosen und Berufskleidung für Pflegedienste, Arzt- und Zahnarztpraxen, Apotheken sowie Physiotherapie, Ergotherapie und andere therapeutische Einrichtungen.</p></div>
 <div class="b2b-card"><h3>Büros &amp; Kanzleien</h3><p>Hemden- und Anzugservice für Ihr Team, Gardinen und Teppiche für Büro und Empfang.</p></div>
 <div class="b2b-card"><h3>Vereine &amp; Veranstalter</h3><p>Trikots, Kostüme, Fahnen und Tischwäsche für Feste und Veranstaltungen.</p></div>
 </div>
@@ -595,7 +595,7 @@ subpage("geschaeftskunden.html", "Textilreinigung für Geschäftskunden in Hanno
 <li>Abrechnung per Rechnung</li>
 </ul>
 <h2>Beispielpreise</h2>
-{table([("Kittel, hängend", preis("waesche", "Kittel, hängend")), ("Arbeitshose/-latzhose/-jacke", preis("waesche", "Arbeitshose/-latzhose/-jacke")), ("Tischdecke", preis("waesche", "Tischdecke")), ("Serviette", preis("waesche", "Serviette/Taschentuch")), ("Hemd, hängend", P["Hemd, hängend"]), ("Sakko/Jacke", P["Jacke"]), ("Bluse", P["Bluse"])])}
+{table([("Kittel/Kasack, hängend", preis("waesche", "Kittel, hängend")), ("Arbeitshose/-latzhose/-jacke", preis("waesche", "Arbeitshose/-latzhose/-jacke")), ("Tischdecke", preis("waesche", "Tischdecke")), ("Serviette", preis("waesche", "Serviette/Taschentuch")), ("Hemd, hängend", P["Hemd, hängend"]), ("Sakko/Jacke", P["Jacke"]), ("Bluse", P["Bluse"])])}
 <p class="note">Einzelpreise laut <a href="preisliste.html">Preisliste</a>. Für größere Mengen und regelmäßige Aufträge erstellen wir Ihnen gern ein individuelles Angebot.</p>
 <h2>Angebot anfragen</h2>
 <p>Schreiben Sie uns kurz, was Sie reinigen lassen möchten, wie viele Teile es ungefähr sind und bis wann Sie sie brauchen. Wir melden uns mit einem Angebot.</p>
