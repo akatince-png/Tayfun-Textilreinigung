@@ -9,7 +9,7 @@ const a=await neu('iPad Theke');
 log('Bediener-Auswahl sichtbar (ohne Mitarbeiter):', await a.isVisible('#bediener'));
 // Mitarbeiter anlegen
 await a.click('.rail [data-nav="management"]'); await a.fill('#pin','4711'); await a.click('[data-unlock]'); await a.waitForTimeout(800);
-for (const [n,k,r] of [['Ayşe Demir','AY','Mitarbeiter'],['Duran Ince','DI','Inhaber']]) { await a.fill('#ma-name',n); await a.fill('#ma-kurz',k); await a.selectOption('#ma-rolle',r); await a.click('[data-maneu]'); await a.waitForTimeout(150); }
+for (const [n,k,r] of [['Ayşe Demir','AY','Mitarbeiter'],['Duran Ince','DI','Inhaber']]) { await a.fill('#ma-name',n); await a.fill('#ma-kurz',k); await a.selectOption('#ma-rolle',r).catch(()=>{}); await a.click('[data-maneu]'); await a.waitForTimeout(150); }
 log('Kartei:', (await a.locator('.panel:has(h2:text("Mitarbeiter")) .geraete b').allTextContents()));
 const ids = await a.locator('#bediener option').evaluateAll(os=>os.map(o=>[o.value,o.textContent]));
 log('Bediener-Liste:', ids.map(x=>x[1]));

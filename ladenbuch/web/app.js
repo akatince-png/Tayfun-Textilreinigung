@@ -1,6 +1,6 @@
 (function () {
   // ---------------------------------------------------------------- Stammdaten
-  const VERSION = "1.3.0";
+  const VERSION = "1.4.0";
   let STORES = { W: "Wettbergen" };
   const CATS = ["Garderobe", "Hemden", "Haushalt", "Gardinen", "Leder"];
   const ITEMS = [
@@ -130,7 +130,7 @@
         }
         meta.rev = r.rev; mehr = r.mehr;
         if (JSON.stringify(r.geschaefte) !== JSON.stringify(meta.geschaefte)) { meta.geschaefte = r.geschaefte; STORES = r.geschaefte; neu = true; }
-        meta.geraet = r.geraet;
+        meta.geraet = r.geraet; meta.rolle = r.rolle || "laden";
       }
       await save();
       await nummernAuffuellen();
@@ -153,6 +153,7 @@
   const BLOCK = { auftrag: [30, 10], kunde: [30, 10], ticket: [10, 3] };
   const rest = (key) => (meta.nummern[key] || []).reduce((s, [von, bis]) => s + bis - von + 1, 0);
   async function nummernAuffuellen() {
+    if (meta.rolle === "werkstatt") return; // Werkstatt legt nichts Neues an
     const keys = ["kunde", "ticket", ...Object.keys(STORES).map((g) => "auftrag:" + g)];
     for (const key of keys) {
       const [art, g] = key.split(":"); const [gross, min] = BLOCK[art];
@@ -181,7 +182,7 @@
     try {
       const r = await api("login", { geraet: document.getElementById("l-geraet").value, passwort: document.getElementById("l-pass").value });
       // Anderes Konto oder neues Gerät: lokale Daten nur übernehmen, wenn nichts mehr aussteht
-      token = r.token; LS.set("lb-token", token); document.getElementById("l-pass").value = "";
+      token = r.token; LS.set("lb-token", token); document.getElementById("l-pass").value = ""; meta.rolle = r.rolle || "laden"; ui.view = meta.rolle === "werkstatt" ? "werkstatt" : "heute";
       info.textContent = "Daten werden geladen …";
       await sync(); await starten();
     } catch (err) { info.textContent = err.status === 0 ? "Keine Internetverbindung. Für die erste Anmeldung wird Internet gebraucht." : err.message; }
@@ -192,7 +193,7 @@
 
   const inStore = (o) => ui.store === "ALL" || o.store === ui.store;
   const LAUF = { id: "LAUF", name: "Laufkunde (ohne Namen)", tel: "–" };
-  const UNBEKANNT = { id: "?", name: "(Kunde wird geladen)", tel: "–" };
+  const UNBEKANNT = { id: "?", get name() { return meta.rolle === "werkstatt" ? "–" : "(Kunde wird geladen)"; }, tel: "–" };
   const cust = (id) => (id === "LAUF" ? LAUF : db.customers.find((c) => c.id === id) || UNBEKANNT);
   const geschaeft = (g) => STORES[g] || g;
   // Teile-Kartei: jedes Kleidungsstück bekommt eine eigene Nummer (Geschäftskürzel + laufende Zahl), unabhängig davon, ob der Kunde bekannt ist
@@ -344,9 +345,14 @@
   }
   function einstellungen() {
     const g = ui.geraete;
-    const liste = !g ? `<p class="mini">Geräte werden geladen …</p>` : g.geraete.map((x) => `<div><span><b>${esc(x.geraet)}</b>${x.id === g.dieses ? " (dieses Gerät)" : ""}<br><span class="mini">zuletzt ${esc(new Date(x.zuletzt.replace(" ", "T") + "Z").toLocaleString("de-DE"))}</span></span>${x.id === g.dieses ? "" : `<button class="btn ghost small" data-geraetweg="${x.id}" type="button">Abmelden</button>`}</div>`).join("");
+    const liste = !g ? `<p class="mini">Geräte werden geladen …</p>` : g.geraete.map((x) => `<div><span><b>${esc(x.geraet)}</b>${x.id === g.dieses ? " (dieses Gerät)" : ""}<br><span class="mini">${x.rolle === "werkstatt" ? "Werkstatt" : "Laden"} · zuletzt ${esc(new Date(x.zuletzt.replace(" ", "T") + "Z").toLocaleString("de-DE"))}</span></span>${x.id === g.dieses ? "" : `<button class="btn ghost small" data-geraetweg="${x.id}" type="button">Abmelden</button>`}</div>`).join("");
     return `<div class="grid2">
       ${mitarbeiterPanel()}
+      <div class="panel einst"><h2>Werkstatt-Zugang</h2><p class="mini">Für das Tablet des Textilreinigers: sieht nur die Werkstatt mit den Sammlern, keine Kunden, Preise oder Kasse.
+        ${g ? (g.werkstatt ? "<b>Eingerichtet.</b>" : "<b>Noch nicht eingerichtet.</b>") : ""}</p>
+        <div class="row2"><label class="field" for="wp1">Werkstatt-Passwort<input id="wp1" type="password" autocomplete="new-password"></label><label class="field" for="wp2">Wiederholen<input id="wp2" type="password" autocomplete="new-password"></label></div>
+        <div class="chips"><button class="btn ghost" data-wpneu type="button">${g && g.werkstatt ? "Passwort ändern" : "Werkstatt-Zugang einrichten"}</button>${g && g.werkstatt ? `<button class="btn ghost" data-wpaus type="button">Werkstatt-Zugang abschalten</button>` : ""}</div>
+        <p class="mini">Mindestens 8 Zeichen, anders als das Laden-Passwort. Auf dem Werkstatt-Tablet mit diesem Passwort anmelden.</p></div>
       <div class="panel einst"><h2>Angemeldete Geräte</h2><div class="geraete">${liste}</div>
         <p class="mini">Ist ein Gerät verloren gegangen, hier abmelden. Es kommt dann ohne Passwort nicht mehr an die Daten.</p></div>
       <div class="panel einst"><h2>Sicherung</h2><p class="mini">Alle Kunden und Aufträge als Datei. Am besten einmal im Monat speichern, zusätzlich zur Sicherung bei ALL-INKL.</p>
@@ -591,7 +597,7 @@
     el.innerHTML = maOptionen(bediener, "Wer arbeitet gerade?");
   }
   function mitarbeiterPanel() {
-    const rollen = ["Inhaber", "Mitarbeiter", "Aushilfe", "Fahrer / Außendienst", "Schneiderei"];
+    const rollen = ["Inhaber", "Laden / Kasse", "Textilreinigung / Detachur", "Bügeln / Finish", "Aushilfe", "Fahrer / Außendienst", "Schneiderei"];
     const zeile = (m) => `<div><span><b>${esc(m.name)}</b>${m.kuerzel ? ` (${esc(m.kuerzel)})` : ""}<br><span class="mini">${esc(m.rolle || "")}${m.tel ? " · " + esc(m.tel) : ""}${m.aktiv === false ? " · ausgeschieden" : ""}</span></span>
       <button class="btn ghost small" data-maaktiv="${m.id}" type="button">${m.aktiv === false ? "Wieder aktiv" : "Ausgeschieden"}</button></div>`;
     return `<div class="panel einst"><h2>Mitarbeiter</h2>
@@ -647,6 +653,8 @@
   // Warenschau eines Teils: Optionen, Kundenwünsche, Hinweis, „einwandfrei“
   function schauHtml(it) {
     const opts = OPTIONEN[it.id] || [];
+    if (werkstattZugang()) return `<div class="kd md-schau"><b>Vorgaben aus der Annahme</b>${optText(it) ? `<span>${esc(optText(it))}</span>` : ""}
+      ${(it.wuensche || []).length || (it.hinweis || "").trim() ? `<ul class="ws-vermerke">${(it.wuensche || []).map((w) => `<li class="w">${esc(w.text)}</li>`).join("")}${(it.hinweis || "").trim() ? `<li class="w">Hinweis: ${esc(it.hinweis)}</li>` : ""}</ul>` : `<span class="ok-text">Keine Kundenwünsche – nach Pflegeetikett und Fachkenntnis.</span>`}</div>`;
     return `<div class="kd md-schau"><b>Warenschau</b>
       ${opts.map(([k, n, werte]) => `<div class="chips"><span class="mini">${n}:</span>${werte.map((w) => `<button class="chip" data-mopt="${k}" data-wert="${esc(w)}" aria-pressed="${(it.opt || {})[k] === w}" type="button">${esc(w)}</button>`).join("")}</div>`).join("")}
       <div class="wunsch">${WUENSCHE.map((w, i) => `<label class="check"><input type="checkbox" data-mwunsch="${i}"${(it.wuensche || []).some((x) => x.text === w) ? " checked" : ""}> ${esc(w)}</label>`).join("")}</div>
@@ -658,14 +666,14 @@
   function maengelDialog(tnr, startZeit) {
     const f = allItems().find(({ it }) => it.tnr === tnr); if (!f) return;
     const dlg = document.createElement("dialog"); dlg.className = "maengel-dlg"; document.body.append(dlg);
-    const zustand = { ansicht: (ANSICHTEN[f.it.id] || ["decke"])[0], seite: "vorne", neu: null, fotos: [], zeit: startZeit || "annahme" };
+    const zustand = { ansicht: (ANSICHTEN[f.it.id] || ["decke"])[0], seite: "vorne", neu: null, fotos: [], zeit: werkstattZugang() ? "bearbeitung" : startZeit || "annahme" };
     const zeichnen = () => {
       const { it, o } = allItems().find(({ it }) => it.tnr === tnr);
       const ans = ANSICHTEN[it.id] || ["decke"];
       const liste = (it.maengel || []).map((m, i) => `<li class="${m.gestrichen ? "weg" : ""}"><b>${i + 1}. ${esc(m.art)}${m.fleckart ? ` (${esc(m.fleckart)})` : ""}</b> · ${UMRISS[m.ansicht].name}, ${m.seite === "vorne" ? "vorne" : "hinten"}${m.notiz ? ` – ${esc(m.notiz)}` : ""}${m.behandlung ? `<br>Behandlung: ${esc(m.behandlung)}` : ""}${m.kunde ? ` <span class="ok-text">Kunde bestätigt</span>` : ""}
         <br><span class="mini">${esc(m.amText)} · ${esc(M_ZEIT[m.zeit] || "")} · erfasst von ${esc(m.vonName || m.geraet || "?")}${m.zeugeName ? ` · Vier-Augen mit ${esc(m.zeugeName)}` : ""}${m.gestrichen ? ` · gestrichen von ${esc(m.gestrichen.von)} (${esc(m.gestrichen.am)})` : ""}</span>
         ${(m.fotos || []).length ? `<span class="fotos klein">${m.fotos.map((id) => `<img class="foto" data-foto="${esc(id)}" alt="Foto zu Mangel ${i + 1}">`).join("")}</span>` : ""}
-        ${m.gestrichen ? "" : `<button class="btn ghost small" data-mweg="${m.id}" type="button">Als Irrtum streichen</button>`}</li>`).join("");
+        ${m.gestrichen || (werkstattZugang() && m.zeit !== "bearbeitung") ? "" : `<button class="btn ghost small" data-mweg="${m.id}" type="button">Als Irrtum streichen</button>`}</li>`).join("");
       const n = zustand.neu;
       dlg.innerHTML = `<div class="md-links"><h2><span class="ampel ${rot(it) ? "rot" : geprueft(it) ? "gruen" : "grau"}"></span> ${teilLabel(o, it)} · ${esc(ITEM[it.id].name)}</h2>
           <p class="mini">Auftrag ${o.nr} · ${esc(cust(o.cust).name)}</p>
@@ -680,7 +688,7 @@
             <label class="field" for="m-notiz">Beschreibung<input id="m-notiz" value="${esc(zustand.notiz || "")}" placeholder="z. B. ca. 1 cm, Knie links" autocomplete="off"></label>
             <label class="field" for="m-beh">Hinweis zur Behandlung (für die Reinigung)<input id="m-beh" value="${esc(zustand.behandlung || "")}" placeholder="z. B. nur vorsichtig, nicht reiben" autocomplete="off"></label>
             <label class="check"><input type="checkbox" id="m-kunde"${zustand.kunde ?? zustand.zeit === "annahme" ? " checked" : ""}> Kunde ist informiert und hat es bestätigt</label>
-            <label class="field" for="m-zeit">Wann erfasst?<select id="m-zeit">${Object.entries(M_ZEIT).map(([k, v]) => `<option value="${k}"${k === zustand.zeit ? " selected" : ""}>${v}</option>`).join("")}</select></label>
+            <label class="field" for="m-zeit">Wann erfasst?<select id="m-zeit">${Object.entries(M_ZEIT).filter(([k]) => !werkstattZugang() || k === "bearbeitung").map(([k, v]) => `<option value="${k}"${k === zustand.zeit ? " selected" : ""}>${v}</option>`).join("")}</select></label>
             <label class="field" for="m-von">Erfasst von<select id="m-von">${maOptionen(zustand.von ?? bediener)}</select></label>
             <label class="check"><input type="checkbox" id="m-4a"${zustand.vier ? " checked" : ""}> Vier-Augen-Prinzip: zweite Person war dabei</label>
             ${zustand.vier ? `<label class="field" for="m-zeuge">Zweite Person<select id="m-zeuge">${maOptionen(zustand.zeuge, "– bitte wählen –", zustand.von ?? bediener)}</select></label>` : ""}
@@ -1107,8 +1115,11 @@
   };
   const TITLES = { werkstatt: "Werkstatt", kundendienst: "Kundendienst", heute: "Heute", annahme: "Neue Annahme", auftraege: "Aufträge", teile: "Teile-Kartei", kunden: "Kunden", kasse: "Kasse", management: "Geschäftsleitung", auswertung: "Auswertung" };
 
+  // Werkstatt-Zugang: nur der Bereich Werkstatt
+  const werkstattZugang = () => meta.rolle === "werkstatt";
   function render() {
-    document.querySelectorAll("[data-nav]").forEach((b) => b.closest(".rail") && b.setAttribute("aria-current", b.dataset.nav === ui.view ? "page" : "false"));
+    if (werkstattZugang()) ui.view = "werkstatt";
+    document.querySelectorAll("[data-nav]").forEach((b) => { if (!b.closest(".rail")) return; b.setAttribute("aria-current", b.dataset.nav === ui.view ? "page" : "false"); b.hidden = werkstattZugang() && b.dataset.nav !== "werkstatt"; });
     const gs = Object.keys(STORES); if (!gs.includes(ui.store) && ui.store !== "ALL") ui.store = gs[0];
     const st = document.getElementById("stores"); st.hidden = gs.length < 2;
     st.innerHTML = gs.map((g) => `<button data-store="${g}" type="button" aria-pressed="${g === ui.store}">${esc(STORES[g])}</button>`).join("") + (ui.view === "annahme" ? "" : `<button data-store="ALL" type="button" aria-pressed="${ui.store === "ALL"}">Alle</button>`);
@@ -1163,6 +1174,8 @@
     else if ("pwneu" in ds) { const a = document.getElementById("pw1").value, b2 = document.getElementById("pw2").value; if (a !== b2) { toast("Die beiden Passwörter sind verschieden"); return; } api("passwort", { neu: a }).then(() => { toast("Passwort geändert. Andere Geräte müssen sich neu anmelden."); render(); ladeGeraete(); }).catch((err) => leitungFehler(err)); return; }
     else if ("pinneu" in ds) { const a = document.getElementById("pn1").value, b2 = document.getElementById("pn2").value; if (a !== b2) { toast("Die beiden PINs sind verschieden"); return; } api("pin_aendern", { neu: a }).then(() => { toast("PIN geändert"); render(); }).catch((err) => leitungFehler(err)); return; }
     else if ("sicherung" in ds) { sicherung(); return; }
+    else if ("wpneu" in ds) { const a = document.getElementById("wp1").value, b2 = document.getElementById("wp2").value; if (a !== b2) { toast("Die beiden Passwörter sind verschieden"); return; } api("werkstatt_passwort", { neu: a }).then(() => { toast("Werkstatt-Zugang gespeichert"); ladeGeraete(); }).catch((err) => leitungFehler(err)); return; }
+    else if ("wpaus" in ds) { api("werkstatt_passwort", { neu: "" }).then(() => { toast("Werkstatt-Zugang abgeschaltet"); ladeGeraete(); }).catch((err) => leitungFehler(err)); return; }
     else if ("abmelden" in ds) { if (ausstehend.size) { toast("Erst abgleichen: es warten noch Änderungen"); sync(); return; } abmelden(true); IDB.leeren().then(() => location.reload()); return; }
     else if (ds.treklam) { ui.view = "kundendienst"; ui.tNeu = ds.treklam; ui.tSuche = undefined; ui.openTicket = null; scrollTo({ top: 0 }); }
     else if ("tneu" in ds) { ui.tSuche = ""; ui.tNeu = null; ui.openTicket = null; setTimeout(() => document.getElementById("t-suche")?.focus(), 0); }

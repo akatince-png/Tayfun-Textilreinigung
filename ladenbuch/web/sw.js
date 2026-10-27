@@ -1,5 +1,5 @@
 // Ladenbuch offline: die App-Dateien liegen im Gerätespeicher, Daten laufen immer über api.php
-const VERSION = "ladenbuch-1.3.0";
+const VERSION = "ladenbuch-1.4.0";
 const DATEIEN = ["./", "index.html", "app.css", "app.js", "schein.js", "qrcode.min.js", "logo.png", "manifest.webmanifest",
   "fonts/archivo-latin.woff2", "fonts/archivo-latin-ext.woff2", "icons/icon.svg", "icons/icon-180.png", "icons/icon-192.png", "icons/icon-512.png"];
 

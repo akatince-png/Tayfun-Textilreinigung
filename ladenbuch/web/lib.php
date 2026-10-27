@@ -2,8 +2,8 @@
 // Ladenbuch – gemeinsame Funktionen für api.php und das Installationsprogramm.
 declare(strict_types=1);
 
-const LB_SCHEMA = 1;
-const LB_VERSION = '1.3.0';
+const LB_SCHEMA = 2;
+const LB_VERSION = '1.4.0';
 
 // Zugangsdaten liegen außerhalb des Web-Ordners der Domain
 function lb_geheim_ordner(): string { return dirname(__DIR__) . '/ladenbuch-geheim'; }
@@ -39,6 +39,8 @@ function lb_schema(PDO $db): void {
         token_hash CHAR(64) PRIMARY KEY, geraet VARCHAR(64) NOT NULL, erstellt DATETIME NOT NULL,
         zuletzt DATETIME NOT NULL, leitung_bis DATETIME NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
     $db->exec("CREATE TABLE IF NOT EXISTS lb_sperre (schluessel VARCHAR(100) PRIMARY KEY, versuche INT NOT NULL, bis DATETIME NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+    // Schema 2: Zugangsart je Gerät (laden oder werkstatt)
+    $db->exec("ALTER TABLE lb_sitzungen ADD COLUMN IF NOT EXISTS rolle VARCHAR(16) NOT NULL DEFAULT 'laden'");
     lb_setze($db, 'schema', (string) LB_SCHEMA);
 }
 
