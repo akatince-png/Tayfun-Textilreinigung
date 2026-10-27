@@ -114,11 +114,12 @@ def table(items):
 GOOGLE_BEWERTUNG = "https://g.page/r/CdzVc1rKl03iEAE/review"
 WA_NUMMER = "49511464252"
 WA_ABHOLUNG = "https://wa.me/" + WA_NUMMER + "?text=Hallo%2C%20ich%20m%C3%B6chte%20eine%20Abholung%20anfragen%3A%20"
+WA_B2B = "https://wa.me/" + WA_NUMMER + "?text=Hallo%20Tayfun%20Textilpflege%2C%20wir%20sind%20ein%20Unternehmen%20und%20m%C3%B6chten%20ein%20Angebot%20anfragen%3A%20"
 WA_FRAGE = "https://wa.me/" + WA_NUMMER + "?text=Hallo%20Tayfun%20Textilpflege%2C%20ich%20habe%20eine%20Frage%3A%20"
 WA_ICON = '<svg class="wa-ico" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6a2.7 2.7 0 0 0 1.8-1.2 2.2 2.2 0 0 0 .2-1.2c-.1-.1-.2-.2-.4-.3Z"/></svg>'
 
 # ---------------------------------------------------------------- Rahmen
-NAV = [("Angebote", "#angebote"), ("Leistungen", "#leistungen"), ("Preisliste", "preisliste.html"), ("Hemden &amp; Anzüge", "hemden-anzuege.html"),
+NAV = [("Geschäftskunden", "geschaeftskunden.html"), ("Angebote", "#angebote"), ("Leistungen", "#leistungen"), ("Preisliste", "preisliste.html"), ("Hemden &amp; Anzüge", "hemden-anzuege.html"),
        ("Gardinen", "gardinenservice.html"), ("Teppiche", "teppichreinigung.html"), ("Abholservice", "#abholservice"),
        ("Alle Leistungen", "leistungen.html"), ("Kontakt", "#kontakt")]
 
@@ -289,6 +290,7 @@ def index():
         <h1 id="hero-title">Ihre Textilreinigung in <span>Wettbergen</span></h1>
         <p class="lead">Reinigung, Wäscherei, Lederpflege und Änderungsschneiderei unter einem Dach. Gardinen und Teppiche holen wir auch bei Ihnen ab.</p>
         <div class="btns"><a class="btn primary" href="preisliste.html">Zur Preisliste</a><a class="btn wa" href="#anfrage">{WA_ICON}WhatsApp 0511 464252</a></div>
+        <a class="b2b-link" href="geschaeftskunden.html"><strong>Für Unternehmen:</strong> Messe, Gastronomie, Hotels, Praxen <span aria-hidden="true">→</span></a>
         <p class="open-now" data-open-now aria-live="polite">Mo–Sa ab 8 Uhr geöffnet</p>
         <dl class="hours">
           <dt>Mo, Di, Do, Fr</dt><dd>8–13 und 15–18 Uhr</dd>
@@ -300,6 +302,13 @@ def index():
         <div class="slides" data-slides aria-roledescription="Diashow" aria-label="Unsere Leistungen">{SLIDES}</div>
         <div class="stamp">Familienbetrieb<small>seit 2001</small></div>
       </div>
+    </div>
+  </section>
+
+  <section class="b2b-band" aria-label="Geschäftskunden">
+    <div class="wrap">
+      <p><strong>Geschäftskunden</strong> Messe &amp; Events · Gastronomie &amp; Catering · Hotels · Praxen &amp; Pflege · Büros</p>
+      <a class="btn white" href="geschaeftskunden.html">Angebot für Unternehmen</a>
     </div>
   </section>
 
@@ -564,6 +573,35 @@ subpage("teppichreinigung.html", "Teppichreinigung Hannover mit Abholung · Tayf
 <div class="btns" style="margin-top:20px"><a class="btn primary" href="./#anfrage">Termin anfragen</a></div>""",
         img=("assets/fotos/teppich-kinder.jpg", "Zwei Kinder spielen mit Kuscheltieren auf einem hellen, flauschigen Teppich"))
 
+subpage("geschaeftskunden.html", "Textilreinigung für Geschäftskunden in Hannover · Messe, Gastronomie, Hotels · Tayfun",
+        "Textilreinigung für Unternehmen in Hannover: Messekleidung, Hostessen-Outfits, Uniformen, Tischwäsche für Gastronomie und Catering, Hotelwäsche, Berufskleidung für Praxen. Faire Mengenpreise.",
+        "Geschäftskunden", "Textilpflege für Ihr Unternehmen",
+        "Ob Messeauftritt, Restaurant, Catering oder Praxis: Wir reinigen Ihre Arbeits- und Repräsentationskleidung sowie Tisch- und Hauswäsche zuverlässig, termingerecht und zu fairen Konditionen.",
+        f"""<h2>Für wen wir arbeiten</h2>
+<div class="b2b-grid">
+<div class="b2b-card"><h3>Messe &amp; Events</h3><p>Hostessen-Outfits, Uniformen, Anzüge und Blusen für das Standpersonal, Tischdecken und Stoffe für den Messestand. Vor und nach der Messe, auch kurzfristig nach Absprache.</p></div>
+<div class="b2b-card"><h3>Gastronomie &amp; Catering</h3><p>Tischdecken, Tafeltücher und Servietten, Kochjacken, Schürzen und Servicekleidung, frisch gewaschen und gemangelt für den nächsten Einsatz.</p></div>
+<div class="b2b-card"><h3>Hotels &amp; Ferienwohnungen</h3><p>Bettwäsche, Decken, Kissen und Gardinen für Gästezimmer, dazu Tisch- und Frühstückswäsche.</p></div>
+<div class="b2b-card"><h3>Praxen &amp; Pflege</h3><p>Kittel, Arzthosen und Berufskleidung für Arzt-, Zahnarzt- und Physiotherapiepraxen, Pflegedienste und Kosmetikstudios.</p></div>
+<div class="b2b-card"><h3>Büros &amp; Kanzleien</h3><p>Hemden- und Anzugservice für Ihr Team, Gardinen und Teppiche für Büro und Empfang.</p></div>
+<div class="b2b-card"><h3>Vereine &amp; Veranstalter</h3><p>Trikots, Kostüme, Fahnen und Tischwäsche für Feste und Veranstaltungen.</p></div>
+</div>
+<h2>Was Sie von uns erwarten können</h2>
+<ul class="checklist">
+<li>Ein fester Ansprechpartner, persönlich im Laden oder per WhatsApp</li>
+<li>Faire Mengenpreise bei regelmäßigen Aufträgen</li>
+<li>Feste Abgabe- und Abholtage nach Absprache</li>
+<li>Termingerecht, auch vor Messen und Veranstaltungen</li>
+<li>Abrechnung per Rechnung</li>
+</ul>
+<h2>Beispielpreise</h2>
+{table([("Kittel, hängend", preis("waesche", "Kittel, hängend")), ("Arbeitshose/-latzhose/-jacke", preis("waesche", "Arbeitshose/-latzhose/-jacke")), ("Tischdecke", preis("waesche", "Tischdecke")), ("Serviette", preis("waesche", "Serviette/Taschentuch")), ("Hemd, hängend", P["Hemd, hängend"]), ("Sakko/Jacke", P["Jacke"]), ("Bluse", P["Bluse"])])}
+<p class="note">Einzelpreise laut <a href="preisliste.html">Preisliste</a>. Für größere Mengen und regelmäßige Aufträge erstellen wir Ihnen gern ein individuelles Angebot.</p>
+<h2>Angebot anfragen</h2>
+<p>Schreiben Sie uns kurz, was Sie reinigen lassen möchten, wie viele Teile es ungefähr sind und bis wann Sie sie brauchen. Wir melden uns mit einem Angebot.</p>
+<div class="btns" style="margin-top:16px"><a class="btn wa" href="{WA_B2B}" rel="noopener" target="_blank">{WA_ICON}Per WhatsApp anfragen</a><a class="btn outline" href="tel:+49511464252">0511 464252 anrufen</a></div>""",
+        img=("assets/fotos/reinigung-hemden.jpg", "Frisch gereinigte Hemden in Schutzhüllen am Kleiderförderband einer Reinigung"))
+
 az = "".join(f"<li><strong>{t}</strong> – {d.split(' <a')[0]}</li>" for t, d in LEISTUNGEN)
 subpage("leistungen.html", "Alle Leistungen · Textilreinigung Hannover-Wettbergen · Tayfun",
         "Spezialreinigung, Nassreinigung, Sofortdienst, Appretur, Imprägnierung, Hemdendienst, Wäschedienst, Teppich-, Leder- und Heimtextilienreinigung sowie Änderungsschneiderei in Hannover-Wettbergen.",
@@ -614,7 +652,7 @@ subpage("datenschutz.html", "Datenschutz · Tayfun Textilpflege", "Datenschutzer
 <p>Sie haben das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit und Widerspruch sowie das Recht, sich bei einer Datenschutz-Aufsichtsbehörde zu beschweren (in Niedersachsen: Die Landesbeauftragte für den Datenschutz Niedersachsen).</p>
 """, robots='<meta name="robots" content="noindex">\n', cta=False)
 
-urls = ["", "preisliste.html", "leistungen.html", "hemden-anzuege.html", "gardinenservice.html", "teppichreinigung.html"]
+urls = ["", "geschaeftskunden.html", "preisliste.html", "leistungen.html", "hemden-anzuege.html", "gardinenservice.html", "teppichreinigung.html"]
 (OUT / "sitemap.xml").write_text('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
     + "".join(f"  <url><loc>{DOMAIN}/{u}</loc></url>\n" for u in urls) + "</urlset>\n", encoding="utf-8")
 (OUT / "robots.txt").write_text(f"User-agent: *\nAllow: /\nSitemap: {DOMAIN}/sitemap.xml\n", encoding="utf-8")
