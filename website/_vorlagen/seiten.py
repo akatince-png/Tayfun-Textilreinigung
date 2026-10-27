@@ -198,7 +198,7 @@ LEISTUNGEN = [
  ("Sofortdienst", "Wenn es eilig ist: Fragen Sie im Laden nach unserem Sofortdienst."),
  ("Appretur", "Neuform und Glanz für Kleidung, damit sie wieder in Form fällt."),
  ("Imprägnierung", "Schutz gegen Regen und Schmutz für Jacken, Mäntel und Outdoor-Kleidung."),
- ("Hemdendienst", 'Gewaschen und gebügelt, hängend oder gelegt. <a href="hemden-anzuege.html">Mehr</a>'),
+ ("Hemdendienst", 'Gewaschen und gebügelt, auf dem Bügel oder gelegt. Drahtbügel nehmen wir gern zurück. <a href="hemden-anzuege.html">Mehr</a>'),
  ("Großteilwäschedienst", "Bettdecken, Kissen, Wolldecken, Tagesdecken und Schlafsäcke."),
  ("Tischwäschedienst", "Tafeltücher, Tischdecken und Servietten – gewaschen und gemangelt."),
  ("Heimtextilienreinigung", 'Gardinen, Vorhänge, Polster und Auflagen. <a href="gardinenservice.html">Gardinenservice</a>'),
@@ -207,8 +207,29 @@ LEISTUNGEN = [
  ("Änderungsschneiderei", "Kürzen, Enger- und Weitermachen, Reißverschlüsse und Reparaturen."),
 ]
 
+HERO_SLIDES = [
+    ("hemd-manschette.jpg", "Mann knöpft die Manschette eines frisch gebügelten weißen Hemdes zu", "hemden-anzuege.html", "Hemdendienst", "Hemd ab {Hemd}"),
+    ("anzug-smoking.jpg", "Smoking mit Fliege auf einer Schneiderbüste", "hemden-anzuege.html", "Anzüge &amp; Smoking", "freitags Anzug {Anzug}"),
+    ("brautkleid-buegel.jpg", "Braut im Morgenmantel vor ihrem Brautkleid am Bügel", "preisliste.html#garderobe", "Brautmode &amp; Abendkleider", "schonende Spezialreinigung"),
+    ("teppich-kinder.jpg", "Zwei Kinder spielen auf einem hellen, flauschigen Teppich", "teppichreinigung.html", "Teppichreinigung", "mit Abholung"),
+    ("vorhang-beige.jpg", "Beige Vorhänge an einem hohen Fenster", "gardinenservice.html", "Gardinen &amp; Vorhänge", "ab- und aufhängen"),
+    ("kissen.jpg", "Frisch gewaschene weiße Kopfkissen", "#bettwaren", "Bettdecken &amp; Kissen", "Kissen ab {Kissen}"),
+]
+
+def slides_html():
+    werte = {"Hemd": P["Hemd, hängend"] + " €", "Anzug": P["Freitags: Anzug-Reinigung"] + " €", "Kissen": P["Kleines Kissen, kleines Daunenkissen, Kindersteppdecke"] + " €"}
+    out = []
+    for i, (img, alt, href, titel, zusatz) in enumerate(HERO_SLIDES):
+        lade = 'fetchpriority="high"' if i == 0 else 'loading="lazy"'
+        out.append(f'<figure class="slide{" is-active" if i == 0 else ""}"><img src="assets/fotos/{img}" alt="{alt}" {lade} decoding="async">'
+                   f'<figcaption><a href="{href}">{titel}<small>{zusatz.format(**werte)}</small></a></figcaption></figure>')
+    cur = ' aria-current="true"'
+    dots = "".join(f'<button type="button" aria-label="Bild {i + 1}"{cur if i == 0 else ""}></button>' for i in range(len(HERO_SLIDES)))
+    return "".join(out) + f'<div class="dots">{dots}</div>'
+
 def index():
     strips = "".join(f'<div class="strip"><h3>{t}</h3><p>{d}</p></div>' for t, d in LEISTUNGEN)
+    SLIDES = slides_html()
     tisch = min(float(pr.replace(",", ".")) for g in PREISE for n, pr in g[2] if n == "Tischdecke" and pr)
     tiles = [("hemden-anzuege.html", "reinigung-hemden.jpg", 1600, 1066, "Hemden &amp; Blusen", f"Hemd ab {P['Hemd, hängend']} €"),
              ("hemden-anzuege.html", "anzug-smoking.jpg", 1280, 1600, "Anzüge &amp; Sakkos", f"Jacke {P['Jacke']} €"),
@@ -241,7 +262,7 @@ def index():
         </dl>
       </div>
       <div class="hero-photo">
-        <img src="assets/fotos/hemd-manschette.jpg" alt="Mann knöpft die Manschette eines frisch gebügelten weißen Hemdes zu" width="1000" height="1500" fetchpriority="high">
+        <div class="slides" data-slides aria-roledescription="Diashow" aria-label="Unsere Leistungen">{SLIDES}</div>
         <div class="stamp">Familienbetrieb<small>seit 2001</small></div>
       </div>
     </div>
@@ -419,6 +440,8 @@ subpage("hemden-anzuege.html", "Hemdendienst & Anzugreinigung Hannover-Wettberge
         "Gewaschen, gebügelt und auf dem Bügel – bereit für den Schrank. Geben Sie Ihre Kleidung einfach bei uns im Laden ab.",
         f"""<h2>Hemdendienst</h2>
 {table([(n, P[n]) for n in ["Hemd, hängend", "Hemd, gelegt", "Hemd, handgebügelt", "Frackhemd, Abendbluse", "Bluse"]])}
+<p>Ihre Hemden bekommen Sie auf dem Bügel zurück, knitterfrei und bereit für den Schrank. Lieber gelegt? Sagen Sie es uns einfach bei der Abgabe.</p>
+<p class="box"><strong>Drahtbügel? Bringen Sie sie gern wieder mit.</strong> Wir nehmen Ihre Drahtbügel zurück und verwenden sie wieder. Das schont die Umwelt und Ihren Kleiderschrank.</p>
 <p>Regelmäßig viele Hemden? Sprechen Sie uns im Laden an.</p>
 <h2>Anzüge, Sakkos und Abendgarderobe</h2>
 {table([(n, P[n]) for n in ["Jacke", "Hose", "Weste", "Krawatte", "Frack oder Smokingjacke", "Frackweste"]])}
@@ -446,9 +469,13 @@ subpage("gardinenservice.html", "Gardinen reinigen lassen in Hannover · Ab- und
 
 subpage("teppichreinigung.html", "Teppichreinigung Hannover mit Abholung · Tayfun Textilpflege",
         "Teppichreinigung in Hannover: maschinell gefertigte Teppiche, Shaggy, Orient-, Berber- und Seidenteppiche. Wir rollen auf, holen ab und legen wieder aus.",
-        "Teppichreinigung", "Teppichreinigung mit Abholung",
-        "Vom pflegeleichten Velours bis zum handgeknüpften Orientteppich. Wir rollen Ihren Teppich zu Hause auf und legen ihn nach der Reinigung wieder aus.",
-        f"""<h2>So läuft es ab</h2>
+        "Teppichreinigung", "Ein sauberer Teppich für die schönsten Momente",
+        "Auf dem Teppich wird gespielt, gekuschelt und gepicknickt. Wir machen ihn wieder gründlich sauber, damit Sie die Zeit mit Ihren Liebsten unbeschwert genießen können. Mit Abholung und Auslegen.",
+        f"""<h2>Warum regelmäßig reinigen?</h2>
+<p>Im Teppich sammeln sich über das Jahr Staub, Krümel, Pollen und Flecken, die der Staubsauger nicht erreicht. Gerade wo Kinder spielen oder Haustiere liegen, lohnt sich eine gründliche Reinigung. Danach fühlt sich der Teppich wieder weich und frisch an, und die Farben leuchten.</p>
+<p>Unser Tipp: einmal im Jahr reinigen lassen, bei Kindern und Haustieren gern öfter.</p>
+<img class="page-photo" src="assets/fotos/teppich-familie.jpg" alt="Familie mit Kleinkind sitzt auf einem hellen Hochflorteppich vor dem Sofa" loading="lazy" width="1600" height="1067">
+<h2>So läuft es ab</h2>
 <ul>
 <li>Termin am Telefon oder per WhatsApp vereinbaren</li>
 <li>Wir rollen den Teppich bei Ihnen auf und nehmen ihn mit</li>
@@ -459,7 +486,7 @@ subpage("teppichreinigung.html", "Teppichreinigung Hannover mit Abholung · Tayf
 <h2>Preise</h2>
 {table(PREISE[6][2])}
 <div class="btns" style="margin-top:20px"><a class="btn primary" href="./#anfrage">Termin anfragen</a></div>""",
-        img=("assets/fotos/teppich-orient.jpg", "Orientteppich in Rot- und Orangetönen in einem hellen Wohnzimmer"))
+        img=("assets/fotos/teppich-kinder.jpg", "Zwei Kinder spielen mit Kuscheltieren auf einem hellen, flauschigen Teppich"))
 
 az = "".join(f"<li><strong>{t}</strong> – {d.split(' <a')[0]}</li>" for t, d in LEISTUNGEN)
 subpage("leistungen.html", "Alle Leistungen · Textilreinigung Hannover-Wettbergen · Tayfun",

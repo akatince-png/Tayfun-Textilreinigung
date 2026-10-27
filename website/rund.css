@@ -29,3 +29,5 @@ input, select, textarea { border-radius: 12px; }
 .wa-box { border-top: 1px solid var(--line); border-radius: var(--r); box-shadow: var(--schatten); }
 .btn.wa { box-shadow: 0 6px 16px rgba(31,143,78,.3); }
 .wa-qr img { border-radius: 12px; }
+.slides { border-radius: var(--r); }
+.slide figcaption a { border-radius: 12px; }
