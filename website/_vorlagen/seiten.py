@@ -199,7 +199,7 @@ def subpage(file, title, desc, kicker, h1, lead, body, robots="", img=None, cta=
         html += f'<img class="page-photo" src="{img[0]}" alt="{img[1]}" loading="lazy">\n'
     html += body
     if cta:
-        html += f'<h2>Fragen?</h2><p>Rufen Sie uns an unter {TEL} oder kommen Sie vorbei: An der Kirche 10, 30457 Hannover-Wettbergen.</p>'
+        html += f'<h2>Fragen?</h2><p>Nehmen Sie Kontakt mit uns auf, wie es Ihnen am liebsten ist: Schreiben Sie uns <a href="./#anfrage">per WhatsApp</a>, rufen Sie an unter {TEL} oder kommen Sie vorbei: An der Kirche 10, 30457 Hannover-Wettbergen.</p>'
     html += "\n</div></section>\n" + FOOT
     (OUT / file).write_text(html, encoding="utf-8")
     print("✓", file)
@@ -224,7 +224,7 @@ HERO_SLIDES = [
     ("hemd-manschette.jpg", "Mann knöpft die Manschette eines frisch gebügelten weißen Hemdes zu", "hemden-anzuege.html", "Hemdendienst", "Hemd ab {Hemd}"),
     ("anzug-smoking.jpg", "Smoking mit Fliege auf einer Schneiderbüste", "hemden-anzuege.html", "Anzüge &amp; Smoking", "freitags Anzug {Anzug}"),
     ("brautkleid-buegel.jpg", "Braut im Morgenmantel vor ihrem Brautkleid am Bügel", "preisliste.html#garderobe", "Brautmode &amp; Abendkleider", "schonende Spezialreinigung"),
-    ("teppich-kinder.jpg", "Zwei Kinder spielen auf einem hellen, flauschigen Teppich", "teppichreinigung.html", "Teppichreinigung", "mit Abholung"),
+    ("teppich-orient.jpg", "Orientteppich in Rot- und Orangetönen in einem hellen Wohnzimmer", "teppichreinigung.html", "Teppichreinigung", "mit Abholung"),
     ("vorhang-beige.jpg", "Beige Vorhänge an einem hohen Fenster", "gardinenservice.html", "Gardinen &amp; Vorhänge", "ab- und aufhängen"),
     ("kissen.jpg", "Frisch gewaschene weiße Kopfkissen", "#bettwaren", "Bettdecken &amp; Kissen", "Kissen ab {Kissen}"),
 ]
@@ -343,7 +343,7 @@ def index():
           <li>Teppiche aufrollen, abholen, reinigen und wieder auslegen</li>
           <li>Abholung und Lieferung in Hannover und Umgebung, zum Beispiel Wettbergen, Ricklingen, Mühlenberg, Ronnenberg, Hemmingen und Pattensen</li>
         </ul>
-        <p class="box">Die Kosten für Anfahrt, Ab- und Aufhängen oder Auf- und Ausrollen richten sich nach Aufwand. Wir nennen sie Ihnen vorher am Telefon.</p>
+        <p class="box">Die Kosten für Anfahrt, Ab- und Aufhängen oder Auf- und Ausrollen richten sich nach Aufwand. Wir nennen sie Ihnen vorher, telefonisch oder per WhatsApp.</p>
         <div class="btns" style="margin-top:22px"><a class="btn primary" href="#anfrage">Termin anfragen</a><a class="btn outline" href="tel:+49511464252">0511 464252</a></div>
       </div>
       <img class="photo" src="assets/fotos/vorhang-beige.jpg" alt="Wohnzimmer mit beigen Vorhängen am Fenster und gestreiftem Teppich" loading="lazy" width="1600" height="1600">
@@ -437,7 +437,7 @@ def index():
     <div class="wrap split">
       <div class="contact">
         <p class="kicker">Kontakt</p>
-        <h2 id="k-title">Besuchen Sie uns oder rufen Sie an</h2>
+        <h2 id="k-title">Schreiben Sie uns, rufen Sie an oder kommen Sie vorbei</h2>
         <dl>
           <dt>Adresse</dt><dd>An der Kirche 10<br>30457 Hannover-Wettbergen</dd>
           <dt>Telefon</dt><dd>{TEL}</dd>
@@ -522,7 +522,7 @@ subpage("gardinenservice.html", "Gardinen & Vorhänge waschen lassen in Hannover
 <li>Glätten und faltenfrei zurückbringen</li>
 <li>Wieder aufhängen</li>
 </ul>
-<p>Sie können Gardinen auch selbst bei uns im Laden abgeben. Die Kosten für Abholung, Ab- und Aufhängen richten sich nach Anzahl und Höhe der Fenster. Wir nennen sie Ihnen vorher.</p>
+<p>Sie können Gardinen auch selbst bei uns im Laden abgeben. Die Kosten für Abholung, Ab- und Aufhängen richten sich nach Anzahl und Höhe der Fenster. Wir nennen sie Ihnen vorher, telefonisch oder per WhatsApp.</p>
 <h2>Preise</h2>
 {table(PREISE[4][2])}
 <div class="btns" style="margin-top:20px"><a class="btn primary" href="./#anfrage">Termin anfragen</a></div>""",
@@ -544,17 +544,17 @@ subpage("teppichreinigung.html", "Teppichreinigung Hannover mit Abholung · Tayf
 <li>Gründliche Reinigung passend zum Material</li>
 <li>Wir bringen ihn zurück und legen ihn wieder aus</li>
 </ul>
-<p>Die Kosten für Abholung, Auf- und Ausrollen richten sich nach Größe und Aufwand. Wir nennen sie Ihnen vorher. Natürlich können Sie Ihren Teppich auch selbst im Laden abgeben.</p>
+<p>Die Kosten für Abholung, Auf- und Ausrollen richten sich nach Größe und Aufwand. Wir nennen sie Ihnen vorher, telefonisch oder per WhatsApp. Natürlich können Sie Ihren Teppich auch selbst im Laden abgeben.</p>
 <h2>Preise</h2>
 {table(PREISE[6][2])}
 <div class="btns" style="margin-top:20px"><a class="btn primary" href="./#anfrage">Termin anfragen</a></div>""",
-        img=("assets/fotos/teppich-kinder.jpg", "Zwei Kinder spielen mit Kuscheltieren auf einem hellen, flauschigen Teppich"))
+        img=("assets/fotos/teppich-orient.jpg", "Orientteppich in Rot- und Orangetönen in einem hellen Wohnzimmer"))
 
 az = "".join(f"<li><strong>{t}</strong> – {d.split(' <a')[0]}</li>" for t, d in LEISTUNGEN)
 subpage("leistungen.html", "Alle Leistungen · Textilreinigung Hannover-Wettbergen · Tayfun",
         "Spezialreinigung, Nassreinigung, Sofortdienst, Appretur, Imprägnierung, Hemdendienst, Wäschedienst, Teppich-, Leder- und Heimtextilienreinigung sowie Änderungsschneiderei in Hannover-Wettbergen.",
         "Leistungen", "Unsere Leistungen",
-        "Was Sie bei uns im Schaufenster lesen, bekommen Sie auch im Laden. Fehlt etwas? Rufen Sie uns an.",
+        "Was Sie bei uns im Schaufenster lesen, bekommen Sie auch im Laden. Fehlt etwas? Schreiben Sie uns per WhatsApp oder rufen Sie an.",
         f"""<ul>{az}</ul>
 <div class="az">
 <div><h2>Kleidung</h2><ul>
