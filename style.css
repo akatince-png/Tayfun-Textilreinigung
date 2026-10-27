@@ -288,3 +288,17 @@ footer .logo svg { width: 230px; height: auto; color: #fff; }
 .callouts.hoch { max-width: 460px; }
 .split .callouts { margin-top: 0; }
 .callouts.anzug { max-width: 560px; }
+
+/* Bitte um Google-Bewertung */
+.review { background: var(--charcoal); color: #fff; }
+.review .wrap { display: grid; grid-template-columns: 1fr auto; gap: 40px; align-items: center; }
+.review .kicker { color: #FF8A8F; }
+.review p { color: rgba(255,255,255,.85); max-width: 60ch; }
+.review .stars { color: #FBBC04; letter-spacing: 2px; margin-right: 6px; }
+.review-qr { margin: 0; display: grid; gap: 8px; justify-items: center; }
+.review-qr img { width: 170px; height: auto; background: #fff; padding: 6px; }
+.review-qr figcaption { font-size: 14px; color: rgba(255,255,255,.7); }
+@media (max-width: 760px) { .review .wrap { grid-template-columns: 1fr; } .review-qr { display: none; } .review .btn { display: block; text-align: center; } }
+/* Kinderbild auf dem Handy: Teppich sichtbar halten */
+.page-photo[src*="teppich-kinder"] { object-position: 50% 75%; }
+@media (max-width: 560px) { .page-photo[src*="teppich-kinder"] { aspect-ratio: 4 / 3; object-position: 50% 85%; } }
