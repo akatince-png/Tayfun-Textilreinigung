@@ -66,7 +66,7 @@ const SCHEIN = (() => {
     U:"wwnnnnnnw",V:"nwwnnnnnw",W:"wwwnnnnnn",X:"nwnnwnnnw",Y:"wwnnwnnnn",Z:"nwwnwnnnn","-":"nwnnnnwnw","*":"nwnnwnwnn" };
 
   // d = { v, n: Auftrag, c: Prüfzeichen, k: Vorname, a: angenommen, f: abholbereit ab, t: Teile,
-  //       p: [[Menge, Name, Cent, Hinweis]], s: Summe in Cent, b: Kassenbeleg-Nr. oder "", z: Zahlart }
+  //       p: [[Menge, Name, Cent, Hinweis]], s: Summe in Cent, b: Kassenbeleg-Nr. oder "", z: Zahlart, m: [Vorschäden] }
   function packen(d) {
     let s = ""; new TextEncoder().encode(JSON.stringify(d)).forEach((b) => (s += String.fromCharCode(b)));
     return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
@@ -136,6 +136,16 @@ const SCHEIN = (() => {
     y += 6; txt("SUMME", X, `800 34px ${SANS}`); txt(euro(d.s), X + IW, `800 34px ${SANS}`, "right"); y += 26;
     g.lineWidth = 3; g.strokeStyle = "#151515"; g.strokeRect(X, y, IW, 58);
     y += 39; mitte(d.b ? `BEZAHLT · ${d.z || ""} · Beleg ${d.b}`.replace(" ·  ·", " ·") : "ZAHLBAR BEI ABHOLUNG", `700 24px ${MONO}`); y += 19; strich();
+
+    // Vorschäden, die bei der Annahme mit dem Kunden festgehalten wurden
+    if (d.m && d.m.length) {
+      txt("Bei Annahme festgestellt:", X, `700 22px ${MONO}`); y += 32;
+      // Zeilen umbrechen statt abschneiden – der Kunde soll den ganzen Vermerk lesen können
+      const umbrechen = (s, f) => { g.font = f; const out = []; let z = ""; s.split(" ").forEach((w) => { const t2 = z ? z + " " + w : w; if (g.measureText(t2).width > IW && z) { out.push(z); z = "  " + w; } else z = t2; }); if (z) out.push(z); return out; };
+      d.m.slice(0, 12).forEach((z) => umbrechen("- " + z, `21px ${MONO}`).forEach((zeile) => { txt(kuerzen(zeile, `21px ${MONO}`, IW), X, `21px ${MONO}`); y += 30; }));
+      if (d.m.length > 12) { txt(`  … und ${d.m.length - 12} weitere`, X, `21px ${MONO}`); y += 30; }
+      y -= 30; strich();
+    }
 
     mitte("Mo, Di, Do, Fr  8–13 + 15–18 Uhr", `21px ${MONO}`); y += 30;
     mitte("Mi + Sa  8–13 Uhr", `21px ${MONO}`); y += 30;

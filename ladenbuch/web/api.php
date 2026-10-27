@@ -120,7 +120,7 @@ switch ($a) {
         $log = $db->prepare('INSERT INTO lb_verlauf (zeit, geraet, typ, id, daten) VALUES (?, ?, ?, ?, ?)');
         foreach ($liste as $x) {
             $typ = $x['typ'] ?? ''; $id = (string) ($x['id'] ?? '');
-            if (!in_array($typ, ['kunde', 'auftrag', 'ticket'], true) || !preg_match('/^[A-Z0-9-]{2,32}$/', $id) || !is_array($x['daten'] ?? null)) {
+            if (!in_array($typ, ['kunde', 'auftrag', 'ticket', 'mitarbeiter'], true) || !preg_match('/^[A-Z0-9-]{2,32}$/', $id) || !is_array($x['daten'] ?? null)) {
                 $db->rollBack(); fehler('Ungültiger Datensatz.');
             }
             $json = json_encode($x['daten'], JSON_UNESCAPED_UNICODE);
@@ -218,8 +218,8 @@ switch ($a) {
     // Komplette Sicherung als Datei
     case 'export':
         $s = $db->query('SELECT typ, id, daten, geaendert FROM lb_daten ORDER BY typ, id');
-        $alle = ['erstellt' => gmdate('c'), 'version' => LB_VERSION, 'kunden' => [], 'auftraege' => [], 'reklamationen' => []];
-        foreach ($s as $z) $alle[['kunde' => 'kunden', 'auftrag' => 'auftraege', 'ticket' => 'reklamationen'][$z['typ']] ?? 'sonstiges'][] = json_decode($z['daten'], true);
+        $alle = ['erstellt' => gmdate('c'), 'version' => LB_VERSION, 'kunden' => [], 'auftraege' => [], 'reklamationen' => [], 'mitarbeiter' => []];
+        foreach ($s as $z) $alle[['kunde' => 'kunden', 'auftrag' => 'auftraege', 'ticket' => 'reklamationen', 'mitarbeiter' => 'mitarbeiter'][$z['typ']] ?? 'sonstiges'][] = json_decode($z['daten'], true);
         header('Content-Disposition: attachment; filename="ladenbuch-sicherung-' . date('Y-m-d') . '.json"');
         antwort($alle);
 }

@@ -257,3 +257,28 @@ textarea { font: inherit; color: inherit; background: var(--surface); border: 1p
 .fotos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 .foto { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 8px; background: var(--line); }
 .foto-knopf { display: inline-flex; align-items: center; cursor: pointer; }
+
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.bediener-feld select { font-size: 14px; font-weight: 600; padding: 6px 10px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); max-width: 220px; }
+.teile-zustand { display: grid; gap: 6px; border: 1px solid var(--line); border-radius: 10px; padding: 12px; }
+.tz { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; align-items: center; }
+.btn.warnung { background: var(--warn-soft); color: var(--warn); border: 1px solid var(--warn); }
+.maengel-dlg { border: 0; border-radius: 16px; padding: 20px; width: min(980px, calc(100vw - 24px)); max-height: calc(100vh - 24px); overflow: auto; background: var(--surface); color: var(--ink); }
+.maengel-dlg::backdrop { background: rgba(0,0,0,.55); }
+.maengel-dlg[open] { display: grid; grid-template-columns: minmax(0, 420px) minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 760px) { .maengel-dlg[open] { grid-template-columns: 1fr; } }
+.maengel-dlg h2 { margin: 0; font-size: 20px; }
+.md-links, .md-rechts { display: grid; gap: 10px; min-width: 0; }
+.umriss { width: 100%; max-width: 420px; height: auto; background: #fff; border: 1px solid var(--line); border-radius: 12px; cursor: crosshair; touch-action: manipulation; }
+.umriss .form { fill: #fff; stroke: #111; stroke-width: 2.2; stroke-linejoin: round; }
+.umriss .linie { fill: none; stroke: #111; stroke-width: 1.4; stroke-linecap: round; }
+.umriss .marke circle { fill: #D7262E; stroke: #fff; stroke-width: 2; }
+.umriss .marke text { fill: #fff; font: 700 11px Archivo, Arial, sans-serif; text-anchor: middle; }
+.umriss .marke.neu circle { fill: #2F5FA8; }
+.umriss .marke.weg { opacity: .35; }
+.mliste { margin: 0; padding-left: 0; list-style: none; display: grid; gap: 10px; }
+.mliste li { border-bottom: 1px solid var(--line); padding-bottom: 8px; display: grid; gap: 4px; }
+.mliste li.weg > b { text-decoration: line-through; color: var(--muted); }
+.md-form { display: grid; gap: 10px; }
+.fotos.klein { display: flex; gap: 6px; flex-wrap: wrap; }
+.fotos.klein .foto { width: 72px; height: 72px; }

@@ -1,6 +1,6 @@
 (function () {
   // ---------------------------------------------------------------- Stammdaten
-  const VERSION = "1.1.0";
+  const VERSION = "1.2.0";
   let STORES = { W: "Wettbergen" };
   const CATS = ["Garderobe", "Hemden", "Haushalt", "Gardinen", "Leder"];
   const ITEMS = [
@@ -58,7 +58,7 @@
     return { tx, alle, meta, setzeMeta, leeren };
   })();
 
-  let db = { customers: [], orders: [], tickets: [] };
+  let db = { customers: [], orders: [], tickets: [], mitarbeiter: [] };
   let meta = { rev: 0, nummern: {} };
   const ausstehend = new Map(); // k -> Änderungszähler; noch nicht beim Server
   let aenderung = 0;
@@ -66,7 +66,7 @@
 
   async function laden() {
     const [daten, offenes, m] = await Promise.all([IDB.alle("daten"), IDB.alle("ausstehend"), IDB.meta("meta")]);
-    db = { customers: daten.filter((x) => x.typ === "kunde").map((x) => x.daten), orders: daten.filter((x) => x.typ === "auftrag").map((x) => x.daten), tickets: daten.filter((x) => x.typ === "ticket").map((x) => x.daten) };
+    db = { customers: daten.filter((x) => x.typ === "kunde").map((x) => x.daten), orders: daten.filter((x) => x.typ === "auftrag").map((x) => x.daten), tickets: daten.filter((x) => x.typ === "ticket").map((x) => x.daten), mitarbeiter: daten.filter((x) => x.typ === "mitarbeiter").map((x) => x.daten) };
     offenes.forEach((x) => { ausstehend.set(x.k, x.v); aenderung = Math.max(aenderung, x.v); });
     if (m) meta = m;
     if (meta.geschaefte) STORES = meta.geschaefte;
@@ -75,7 +75,7 @@
   // Jede Änderung: sofort auf dem Gerät speichern und zum Abgleich vormerken
   function change(...recs) {
     recs.filter(Boolean).forEach((x) => {
-      const typ = x.ticket ? "ticket" : x.nr ? "auftrag" : "kunde"; const id = x.ticket ? x.id : x.nr || x.id; const k = typ + ":" + id; const v = ++aenderung;
+      const typ = x.ticket ? "ticket" : x.mitarbeiter ? "mitarbeiter" : x.nr ? "auftrag" : "kunde"; const id = x.ticket || x.mitarbeiter ? x.id : x.nr || x.id; const k = typ + ":" + id; const v = ++aenderung;
       ausstehend.set(k, v);
       const daten = JSON.parse(JSON.stringify(x));
       IDB.tx(["daten", "ausstehend"], "readwrite", (t) => { t.objectStore("daten").put({ k, typ, id, daten }); t.objectStore("ausstehend").put({ k, typ, id, daten, v }); }).catch(() => toast("Speichern auf dem Gerät fehlgeschlagen"));
@@ -123,7 +123,7 @@
           neu = true;
           await IDB.tx(["daten"], "readwrite", (t) => rein.forEach((x) => t.objectStore("daten").put({ k: x.typ + ":" + x.id, typ: x.typ, id: x.id, daten: x.daten })));
           rein.forEach((x) => {
-            const liste = x.typ === "kunde" ? db.customers : x.typ === "ticket" ? tickets() : db.orders; const feld = x.typ === "auftrag" ? "nr" : "id";
+            const liste = x.typ === "kunde" ? db.customers : x.typ === "ticket" ? tickets() : x.typ === "mitarbeiter" ? mitarbeiter() : db.orders; const feld = x.typ === "auftrag" ? "nr" : "id";
             const i = liste.findIndex((y) => y[feld] === x.id);
             if (i >= 0) liste[i] = x.daten; else liste.push(x.daten);
           });
@@ -246,10 +246,6 @@
     const its = o.items || []; const out = its.slice(0, 12).map((it, i) => `<span class="tag">${it.tnr} · ${o.nr} ${i + 1}/${its.length}</span>`);
     return `<div class="tags" aria-label="Etiketten">${out.join("")}${its.length > 12 ? `<span class="tag">…</span>` : ""}</div>`;
   }
-  function itemsTable(o) {
-    if (!o.items || !o.items.length) return "";
-    return `<details><summary>Teile dieses Auftrags (${o.items.length})</summary><div class="scroll"><table class="tbl"><tbody>${o.items.map((it) => `<tr class="click" data-teil="${it.tnr}"><td class="l num">${it.tnr}</td><td class="l">${esc(ITEM[it.id].name)}</td><td>${stPill(it.st)}</td><td>${esc(it.platz || "")}</td></tr>`).join("")}</tbody></table></div></details>`;
-  }
   // Abholcode = Auftragsnummer + 4 Prüfzeichen; nur wer den Schein (Papier oder Handy) hat, kennt die Prüfzeichen
   function genCode() { return Array.from({ length: 4 }, () => "ACDEFHJKMNPRTUVWXY34679"[Math.floor(Math.random() * 23)]).join(""); }
   const abholcode = (o) => `${o.nr}-${o.code}`;
@@ -262,7 +258,8 @@
     const c = cust(o.cust); const wd = D(o.date).getDay();
     return { v: 1, n: o.nr, c: o.code, k: vorname(c), a: langDatum(o.date), f: langDatum(o.due), t: pieces(o),
       p: o.lines.map((l) => { const [p, why] = unitPrice(l.id, wd, o.lines); const u = ITEM[l.id].unit; return [u === "Stk" ? `${l.qty}x` : `${l.qty} ${u}`, ITEM[l.id].name, p * l.qty, why || ""]; }),
-      s: total(o), b: o.paid ? o.paid.beleg : "", z: o.paid ? o.paid.art : "" };
+      s: total(o), b: o.paid ? o.paid.beleg : "", z: o.paid ? o.paid.art : "",
+      m: (o.items || []).flatMap((it) => maengelVon(it).filter((m) => m.zeit === "annahme").map((m) => `${ITEM[it.id].name}: ${m.art}${m.notiz ? " (" + m.notiz + ")" : ""}`)) };
   }
   const LOGO = new Image(); LOGO.src = "logo.png";
   const scheinBild = (o) => SCHEIN.zeichnen(belegDaten(o), LOGO.complete && LOGO.naturalWidth ? LOGO : null);
@@ -329,10 +326,10 @@
       <dl><dt>Kunde</dt><dd>${esc(c.name)} · <span class="num">${c.tel}</span></dd><dt>Geschäft</dt><dd>${esc(geschaeft(o.store))}</dd>
       <dt>Angenommen</dt><dd>${fmtDate(o.date)}</dd><dt>Abholbar ab</dt><dd>${fmtDate(o.due)}</dd><dt>Status</dt><dd>${pill(o)}</dd></dl>
       <div class="lines">${lines}</div><div class="total"><span>Summe</span><span class="num">${euro(total(o))}</span></div>
+      ${teileZustand(o)}
       ${o.status === "storniert" ? "" : payBox(o)}
       ${digitalBox(o)}
       ${kdBox}
-      ${itemsTable(o)}
       <div class="chips">${next}<button class="btn ghost" data-print type="button">Abholschein drucken</button><button class="btn ghost" data-close type="button">Schließen</button></div>${warn}${storno}</div>
       <div class="receipt-wrap"><img class="schein-img" data-schein="${o.nr}" alt="Abholschein ${o.nr}, Abholcode ${abholcode(o)}"><span class="hint">Etiketten für die Teile</span>${tags(o)}</div></div>`;
   }
@@ -356,6 +353,7 @@
     const g = ui.geraete;
     const liste = !g ? `<p class="mini">Geräte werden geladen …</p>` : g.geraete.map((x) => `<div><span><b>${esc(x.geraet)}</b>${x.id === g.dieses ? " (dieses Gerät)" : ""}<br><span class="mini">zuletzt ${esc(new Date(x.zuletzt.replace(" ", "T") + "Z").toLocaleString("de-DE"))}</span></span>${x.id === g.dieses ? "" : `<button class="btn ghost small" data-geraetweg="${x.id}" type="button">Abmelden</button>`}</div>`).join("");
     return `<div class="grid2">
+      ${mitarbeiterPanel()}
       <div class="panel einst"><h2>Angemeldete Geräte</h2><div class="geraete">${liste}</div>
         <p class="mini">Ist ein Gerät verloren gegangen, hier abmelden. Es kommt dann ohne Passwort nicht mehr an die Daten.</p></div>
       <div class="panel einst"><h2>Sicherung</h2><p class="mini">Alle Kunden und Aufträge als Datei. Am besten einmal im Monat speichern, zusätzlich zur Sicherung bei ALL-INKL.</p>
@@ -394,7 +392,7 @@
   const ticketsZu = (nr) => tickets().filter((t) => t.auftrag === nr);
   const tPill = (t) => tUeberfaellig(t) ? `<span class="pill p-alt">Seit ${tAlter(t)} Tagen offen</span>` : `<span class="pill ${T_STATUS[t.status][1]}">${T_STATUS[t.status][0]}</span>`;
   const jetztText = () => new Date().toLocaleString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
-  function tLog(t, text) { (t.log ||= []).push({ am: jetztText(), geraet: meta.geraet || "", text }); }
+  function tLog(t, text) { (t.log ||= []).push({ am: jetztText(), geraet: meta.geraet || "", von: bedienerName(), text }); }
 
   function ticketRow(t) {
     const c = cust(t.cust);
@@ -456,14 +454,19 @@
     const notiz = document.getElementById("ta-notiz").value.trim();
     if (art === "abgelehnt" && !notiz) { toast("Bitte eine Begründung eintragen"); return; }
     if (art === "erstattung" && (!betrag || !beleg)) { toast("Bitte Betrag und Beleg-Nr. der Kasse eintragen"); return; }
-    t.ergebnis = { art, betrag, beleg, notiz, am: iso(today0()) }; t.status = "erledigt";
-    tLog(t, `Abgeschlossen: ${T_ERGEBNIS[art]}${betrag ? " · " + euro(betrag) : ""}${beleg ? " · Beleg " + beleg : ""}${notiz ? " · " + notiz : ""}`);
+    const zeuge = maName(document.getElementById("ta-zeuge")?.value || "");
+    t.ergebnis = { art, betrag, beleg, notiz, am: iso(today0()), von: bedienerName(), zeuge }; t.status = "erledigt";
+    tLog(t, `Abgeschlossen: ${T_ERGEBNIS[art]}${betrag ? " · " + euro(betrag) : ""}${beleg ? " · Beleg " + beleg : ""}${notiz ? " · " + notiz : ""}${zeuge ? " · Vier-Augen mit " + zeuge : ""}`);
     change(t); toast(`Ticket ${t.id} abgeschlossen`);
   }
 
   // Fotos: verkleinert (max. 1600 px) und auf dem Server gespeichert, nicht im Gerät
   async function fotoHochladen(t, datei) {
-    if (navigator.onLine === false) { toast("Fotos brauchen Internet"); return; }
+    const id = await fotoSpeichern(datei);
+    if (id) { (t.fotos ||= []).push(id); tLog(t, "Foto hinzugefügt"); change(t); }
+  }
+  async function fotoSpeichern(datei) {
+    if (navigator.onLine === false) { toast("Fotos brauchen Internet"); return null; }
     try {
       const bild = await createImageBitmap(datei);
       const f = Math.min(1, 1600 / Math.max(bild.width, bild.height));
@@ -471,9 +474,9 @@
       cv.getContext("2d").drawImage(bild, 0, 0, cv.width, cv.height);
       const daten = cv.toDataURL("image/jpeg", 0.82).split(",")[1];
       toast("Foto wird gespeichert …");
-      const r = await api("foto", { ticket: t.id, daten });
-      (t.fotos ||= []).push(r.id); tLog(t, "Foto hinzugefügt"); change(t); toast("Foto gespeichert");
-    } catch (err) { toast(err.status === 0 ? "Fotos brauchen Internet" : "Foto konnte nicht gespeichert werden: " + err.message); }
+      const r = await api("foto", { daten });
+      toast("Foto gespeichert"); return r.id;
+    } catch (err) { toast(err.status === 0 ? "Fotos brauchen Internet" : "Foto konnte nicht gespeichert werden: " + err.message); return null; }
   }
   const fotoCache = new Map();
   async function fotosZeigen() {
@@ -510,6 +513,7 @@
       ${["erstattung", "schadenersatz"].includes(ui.taArt) ? `<div class="row2"><label class="field" for="ta-betrag">Betrag in €<input id="ta-betrag" inputmode="decimal" placeholder="z. B. 12,50" autocomplete="off"></label><label class="field" for="ta-beleg">Beleg-Nr. der Kasse${ui.taArt === "schadenersatz" ? " (falls vorhanden)" : ""}<input id="ta-beleg" inputmode="numeric" autocomplete="off"></label></div>
       <span class="hint">Die Rückzahlung selbst wird in der Kasse gebucht. Hier nur Betrag und Beleg vermerken.</span>` : ""}
       ${T_PIN.includes(ui.taArt) && !ui.mgmt ? `<div class="row2"><label class="field" for="pin">Leitungs-PIN<input id="pin" type="password" inputmode="numeric" maxlength="8" autocomplete="off"></label><button class="btn ghost small" data-unlock type="button">Freigeben</button></div>` : ""}
+      ${aktiveMa().length ? `<label class="field" for="ta-zeuge">Vier-Augen-Prinzip: zweite Person (freiwillig)<select id="ta-zeuge">${maOptionen("", "– niemand –", bediener)}</select></label>` : ""}
       <div><button class="btn small" data-tfertig type="button">Ticket abschließen</button></div></div>` : `<div><button class="btn ghost small" data-tauf type="button">Wieder öffnen</button></div>`;
     return `<div class="panel detail-grid"><div class="detail"><h2>Reklamation ${t.id}</h2>
       <dl><dt>Status</dt><dd>${tPill(t)}</dd><dt>Kunde</dt><dd>${esc(c.name)} · <span class="num">${esc(c.tel)}</span></dd>
@@ -520,13 +524,14 @@
       ${erg}${schritte}
       <div class="row2"><label class="field" for="tv-text">Vermerk<input id="tv-text" placeholder="z. B. Gutachter Müller angerufen" autocomplete="off"></label>
       <label class="field" for="tv-wieder">Wiedervorlage<input type="date" id="tv-wieder" value="${esc(t.wieder || "")}"></label></div>
+      ${aktiveMa().length ? `<label class="field" for="tv-zeuge">Vier-Augen-Prinzip: zweite Person (freiwillig)<select id="tv-zeuge">${maOptionen("", "– niemand –", bediener)}</select></label>` : ""}
       <div class="chips"><button class="btn ghost small" data-tvermerk type="button">Vermerk speichern</button>
         <label class="btn ghost small foto-knopf">Foto aufnehmen<input type="file" accept="image/*" capture="environment" id="t-foto" hidden></label></div>
       ${nr ? `<div class="digi"><b>Kunde per WhatsApp informieren</b><div class="chips">${kdTexte(t).map(([n, text]) => `<a class="btn small wa-btn" href="https://wa.me/${nr}?text=${encodeURIComponent(text)}" target="_blank" rel="noopener">${n}</a>`).join("")}</div></div>` : ""}
       ${abschluss}
       <div class="chips"><button class="btn ghost" data-tclose2 type="button">Schließen</button></div></div>
       <div class="kd-seite">${fotos ? `<div class="fotos">${fotos}</div>` : `<p class="mini">Noch keine Fotos.</p>`}
-        <h3>Verlauf</h3><ol class="scanlog">${(t.log || []).slice().reverse().map((l) => `<li>${esc(l.am)} · ${esc(l.text)}${l.geraet ? ` <span class="mini">(${esc(l.geraet)})</span>` : ""}</li>`).join("")}</ol></div></div>`;
+        <h3>Verlauf</h3><ol class="scanlog">${(t.log || []).slice().reverse().map((l) => `<li>${esc(l.am)} · ${esc(l.text)}${l.von || l.geraet ? ` <span class="mini">(${esc(l.von || l.geraet)})</span>` : ""}</li>`).join("")}</ol></div></div>`;
   }
 
   function kundendienstAnsicht() {
@@ -572,6 +577,159 @@
         <div class="kpi ${kosten ? "alert" : ""}"><b class="num">${euro(kosten)}</b><small>Erstattung & Schadenersatz</small></div>
         <div class="kpi"><b class="num">${dauer}</b><small>Ø Tage bis erledigt</small></div></div>
       ${grS.map(([k, v]) => `<div class="hbar"><span>${esc(k)}</span><span class="track"><i style="width:${Math.round(v / gmax * 100)}%"></i></span><b class="num">${v}</b></div>`).join("") || `<p class="empty">Keine Reklamationen – sehr gut.</p>`}</div>`;
+  }
+
+  // ---------------------------------------------------------------- Mitarbeiterkartei und „wer arbeitet gerade“
+  // Mitarbeiter werden nie gelöscht, nur auf „ausgeschieden“ gesetzt – alte Einträge bleiben so nachvollziehbar.
+  const mitarbeiter = () => db.mitarbeiter || (db.mitarbeiter = []);
+  const aktiveMa = () => mitarbeiter().filter((m) => m.aktiv !== false).sort((a, b) => a.name.localeCompare(b.name, "de"));
+  const maName = (id) => (mitarbeiter().find((m) => m.id === id) || {}).name || "";
+  let bediener = LS.get("lb-bediener") || "";
+  const bedienerName = () => maName(bediener) || "";
+  // Wer hat es gemacht: Mitarbeiter, sonst das Gerät
+  const wer = () => bedienerName() || meta.geraet || "";
+  function maOptionen(gewaehlt, leer = "– bitte wählen –", ohne = "") {
+    return `<option value="">${leer}</option>` + aktiveMa().filter((m) => m.id !== ohne).map((m) => `<option value="${m.id}"${m.id === gewaehlt ? " selected" : ""}>${esc(m.name)}</option>`).join("");
+  }
+  function bedienerLeiste() {
+    const el = document.getElementById("bediener"); if (!el) return;
+    if (bediener && !aktiveMa().some((m) => m.id === bediener)) { bediener = ""; LS.set("lb-bediener", null); }
+    el.hidden = !aktiveMa().length;
+    el.innerHTML = maOptionen(bediener, "Wer arbeitet gerade?");
+  }
+  function mitarbeiterPanel() {
+    const rollen = ["Inhaber", "Mitarbeiter", "Aushilfe", "Fahrer / Außendienst", "Schneiderei"];
+    const zeile = (m) => `<div><span><b>${esc(m.name)}</b>${m.kuerzel ? ` (${esc(m.kuerzel)})` : ""}<br><span class="mini">${esc(m.rolle || "")}${m.tel ? " · " + esc(m.tel) : ""}${m.aktiv === false ? " · ausgeschieden" : ""}</span></span>
+      <button class="btn ghost small" data-maaktiv="${m.id}" type="button">${m.aktiv === false ? "Wieder aktiv" : "Ausgeschieden"}</button></div>`;
+    return `<div class="panel einst"><h2>Mitarbeiter</h2>
+      <div class="geraete">${mitarbeiter().slice().sort((a, b) => (a.aktiv === false) - (b.aktiv === false) || a.name.localeCompare(b.name, "de")).map(zeile).join("") || `<p class="mini">Noch niemand eingetragen.</p>`}</div>
+      <div class="row2"><label class="field" for="ma-name">Name<input id="ma-name" autocomplete="off" placeholder="Vor- und Nachname"></label><label class="field" for="ma-kurz">Kürzel<input id="ma-kurz" maxlength="4" autocomplete="off" placeholder="z. B. AY"></label></div>
+      <div class="row2"><label class="field" for="ma-rolle">Rolle<select id="ma-rolle">${rollen.map((r) => `<option>${r}</option>`).join("")}</select></label><label class="field" for="ma-tel">Telefon (freiwillig)<input id="ma-tel" type="tel" autocomplete="off"></label></div>
+      <div><button class="btn ghost" data-maneu type="button">Mitarbeiter eintragen</button></div>
+      <p class="mini">Ausgeschiedene bleiben in der Kartei, damit alte Einträge nachvollziehbar bleiben.</p></div>`;
+  }
+  function maNeu() {
+    const name = document.getElementById("ma-name").value.trim(); if (!name) { toast("Bitte einen Namen eintragen"); return; }
+    const m = { mitarbeiter: true, id: "M" + Date.now().toString(36).toUpperCase(), name, kuerzel: document.getElementById("ma-kurz").value.trim().toUpperCase(),
+      rolle: document.getElementById("ma-rolle").value, tel: document.getElementById("ma-tel").value.trim(), aktiv: true, seit: iso(today0()) };
+    mitarbeiter().push(m); change(m); toast(`${name} eingetragen`);
+  }
+
+  // ---------------------------------------------------------------- Mängel je Teil mit Umrisszeichnung, Markierung und Foto
+  // Umrisse als Strichzeichnung (Ansicht 200 × 240); „detail“ nur auf der Vorderseite
+  const UMRISS = {
+    hemd: { name: "Hemd / Bluse", form: "M70 28 L52 36 L22 58 L8 150 L28 155 L42 92 L46 226 L154 226 L158 92 L172 155 L192 150 L178 58 L148 36 L130 28 Q100 44 70 28 Z",
+      linien: "M8 150 L28 155 M172 155 L192 150 M12 138 L31 143 M169 143 L188 138", detail: "M70 28 L86 50 L100 40 L114 50 L130 28 M100 40 L100 226 M104 70 a2 2 0 1 0 0.1 0 M104 100 a2 2 0 1 0 0.1 0 M104 130 a2 2 0 1 0 0.1 0 M104 160 a2 2 0 1 0 0.1 0 M104 190 a2 2 0 1 0 0.1 0 M60 70 L80 70 L80 88 L60 88 Z" },
+    pullover: { name: "Pullover", form: "M72 26 L52 34 L22 58 L10 152 L30 156 L42 92 L46 226 L154 226 L158 92 L170 156 L190 152 L178 58 L148 34 L128 26 Q100 50 72 26 Z",
+      linien: "M46 214 L154 214 M12 140 L31 144 M169 144 L188 140", detail: "M78 30 Q100 56 122 30" },
+    sakko: { name: "Sakko / Jacke", form: "M70 24 L50 34 L20 58 L10 156 L32 160 L42 94 L44 222 L156 222 L158 94 L168 160 L190 156 L180 58 L150 34 L130 24 Q100 34 70 24 Z",
+      linien: "M10 156 L32 160 M168 160 L190 156", detail: "M70 24 L84 70 L100 132 L116 70 L130 24 M84 70 L74 64 M116 70 L126 64 M100 132 L100 222 M104 150 a3 3 0 1 0 0.1 0 M104 180 a3 3 0 1 0 0.1 0 M56 170 L84 170 M116 170 L144 170 M120 92 L140 92" },
+    mantel: { name: "Mantel", form: "M72 16 L52 26 L24 50 L12 160 L34 164 L44 90 L40 234 L160 234 L156 90 L166 164 L188 160 L176 50 L148 26 L128 16 Q100 26 72 16 Z",
+      linien: "M12 160 L34 164 M166 164 L188 160", detail: "M72 16 L86 64 L100 110 L114 64 L128 16 M100 110 L100 234 M106 130 a3 3 0 1 0 0.1 0 M106 165 a3 3 0 1 0 0.1 0 M106 200 a3 3 0 1 0 0.1 0 M54 180 L80 176 M120 176 L146 180" },
+    hose: { name: "Hose", form: "M56 14 L144 14 L150 40 L166 230 L116 230 L102 96 L98 96 L84 230 L34 230 L50 40 Z",
+      linien: "M55 28 L145 28", detail: "M100 28 L100 82 M62 34 Q70 54 54 60 M138 34 Q130 54 146 60 M76 28 L76 18 M124 28 L124 18" },
+    rock: { name: "Rock", form: "M62 30 L138 30 L176 222 L24 222 Z", linien: "M60 44 L140 44", detail: "M100 44 L100 80" },
+    kleid: { name: "Kleid", form: "M76 14 L90 14 Q100 32 110 14 L124 14 L130 72 Q120 92 126 102 L176 230 L24 230 L74 102 Q80 92 70 72 Z", linien: "M72 100 L128 100", detail: "" },
+    krawatte: { name: "Krawatte", form: "M88 10 L112 10 L107 36 L122 204 L100 228 L78 204 L93 36 Z", linien: "M93 36 L107 36", detail: "" },
+    decke: { name: "Decke", form: "M20 36 L180 36 L180 206 L20 206 Z", linien: "M30 46 L170 46 L170 196 L30 196 Z", detail: "" },
+    kissen: { name: "Kissen", form: "M34 66 Q100 54 166 66 Q178 120 166 174 Q100 186 34 174 Q22 120 34 66 Z", linien: "", detail: "" },
+    gardine: { name: "Gardine / Vorhang", form: "M24 30 L176 30 L176 226 L24 226 Z", linien: "M14 24 L186 24 M50 30 Q44 128 50 226 M80 30 Q74 128 80 226 M110 30 Q104 128 110 226 M140 30 Q134 128 140 226", detail: "" },
+  };
+  const ANSICHTEN = { hemd: ["hemd"], "hemd-g": ["hemd"], bluse: ["hemd"], hose: ["hose"], anzug: ["sakko", "hose"], jacke: ["sakko"], rock: ["rock"], kleid: ["kleid"], mantel: ["mantel"],
+    pullover: ["pullover"], daunenjacke: ["mantel"], krawatte: ["krawatte"], wolldecke: ["decke"], kissen: ["kissen"], bettdecke: ["decke"], tischdecke: ["decke"], gardine: ["gardine"], vorhang: ["gardine"],
+    lederjacke: ["sakko"], ledermantel: ["mantel"] };
+  const M_ARTEN = ["Loch / Masche gezogen", "Fleck", "Verfärbung / ausgeblichen", "Knopf fehlt / lose", "Naht offen", "Reißverschluss defekt", "Abgenutzt / Glanzstellen", "Pilling / Knötchen", "Brandloch", "Etikett fehlt (Pflegehinweis)", "Sonstiges"];
+  const M_ZEIT = { annahme: "Bei Annahme, Kunde anwesend", nachtraeglich: "Nachträglich, Kunde nicht anwesend", bearbeitung: "Während der Bearbeitung festgestellt" };
+  const maengelVon = (it) => (it.maengel || []).filter((m) => !m.gestrichen);
+
+  function umrissSvg(key, seite, it, neu) {
+    const u = UMRISS[key];
+    const marken = (it.maengel || []).map((m, i) => [m, i]).filter(([m]) => m.ansicht === key && m.seite === seite)
+      .map(([m, i]) => `<g class="marke${m.gestrichen ? " weg" : ""}"><circle cx="${m.x * 200}" cy="${m.y * 240}" r="9"/><text x="${m.x * 200}" y="${m.y * 240 + 4}">${i + 1}</text></g>`).join("");
+    const neuM = neu ? `<g class="marke neu"><circle cx="${neu.x * 200}" cy="${neu.y * 240}" r="9"/><text x="${neu.x * 200}" y="${neu.y * 240 + 4}">+</text></g>` : "";
+    return `<svg class="umriss" viewBox="0 0 200 240" role="img" aria-label="${u.name}, ${seite === "vorne" ? "Vorderseite" : "Rückseite"} – zum Markieren antippen" data-umriss="${key}" data-seite="${seite}">
+      <path class="form" d="${u.form}"/>${u.linien ? `<path class="linie" d="${u.linien}"/>` : ""}${seite === "vorne" && u.detail ? `<path class="linie" d="${u.detail}"/>` : ""}${marken}${neuM}</svg>`;
+  }
+
+  // Dialog für ein Teil: Umriss links, Mängelliste und Formular rechts
+  function maengelDialog(tnr) {
+    const f = allItems().find(({ it }) => it.tnr === tnr); if (!f) return;
+    const dlg = document.createElement("dialog"); dlg.className = "maengel-dlg"; document.body.append(dlg);
+    const zustand = { ansicht: (ANSICHTEN[f.it.id] || ["decke"])[0], seite: "vorne", neu: null, fotos: [], zeit: "annahme" };
+    const zeichnen = () => {
+      const { it, o } = allItems().find(({ it }) => it.tnr === tnr);
+      const ans = ANSICHTEN[it.id] || ["decke"];
+      const liste = (it.maengel || []).map((m, i) => `<li class="${m.gestrichen ? "weg" : ""}"><b>${i + 1}. ${esc(m.art)}</b> · ${UMRISS[m.ansicht].name}, ${m.seite === "vorne" ? "vorne" : "hinten"}${m.notiz ? ` – ${esc(m.notiz)}` : ""}
+        <br><span class="mini">${esc(m.amText)} · ${esc(M_ZEIT[m.zeit] || "")} · erfasst von ${esc(m.vonName || m.geraet || "?")}${m.zeugeName ? ` · Vier-Augen mit ${esc(m.zeugeName)}` : ""}${m.gestrichen ? ` · gestrichen von ${esc(m.gestrichen.von)} (${esc(m.gestrichen.am)})` : ""}</span>
+        ${(m.fotos || []).length ? `<span class="fotos klein">${m.fotos.map((id) => `<img class="foto" data-foto="${esc(id)}" alt="Foto zu Mangel ${i + 1}">`).join("")}</span>` : ""}
+        ${m.gestrichen ? "" : `<button class="btn ghost small" data-mweg="${m.id}" type="button">Als Irrtum streichen</button>`}</li>`).join("");
+      const n = zustand.neu;
+      dlg.innerHTML = `<div class="md-links"><h2>${it.tnr} · ${esc(ITEM[it.id].name)}</h2>
+          <p class="mini">Auftrag ${o.nr} · ${esc(cust(o.cust).name)}</p>
+          <div class="chips">${ans.length > 1 ? ans.map((k) => `<button class="chip" data-mans="${k}" aria-pressed="${k === zustand.ansicht}" type="button">${UMRISS[k].name}</button>`).join("") : ""}
+            <button class="chip" data-mseite="vorne" aria-pressed="${zustand.seite === "vorne"}" type="button">Vorderseite</button><button class="chip" data-mseite="hinten" aria-pressed="${zustand.seite === "hinten"}" type="button">Rückseite</button></div>
+          ${umrissSvg(zustand.ansicht, zustand.seite, it, n && n.ansicht === zustand.ansicht && n.seite === zustand.seite ? n : null)}
+          <p class="mini">Stelle des Mangels antippen.</p></div>
+        <div class="md-rechts">${liste ? `<ol class="mliste">${liste}</ol>` : `<p class="mini">Noch keine Mängel erfasst.</p>`}
+          ${n ? `<div class="kd md-form"><b>Neuer Mangel (Stelle markiert)</b>
+            <label class="field" for="m-art">Art<select id="m-art">${M_ARTEN.map((a) => `<option${a === zustand.art ? " selected" : ""}>${a}</option>`).join("")}</select></label>
+            <label class="field" for="m-notiz">Beschreibung<input id="m-notiz" value="${esc(zustand.notiz || "")}" placeholder="z. B. ca. 1 cm, Knie links" autocomplete="off"></label>
+            <label class="field" for="m-zeit">Wann erfasst?<select id="m-zeit">${Object.entries(M_ZEIT).map(([k, v]) => `<option value="${k}"${k === zustand.zeit ? " selected" : ""}>${v}</option>`).join("")}</select></label>
+            <label class="field" for="m-von">Erfasst von<select id="m-von">${maOptionen(zustand.von ?? bediener)}</select></label>
+            <label class="check"><input type="checkbox" id="m-4a"${zustand.vier ? " checked" : ""}> Vier-Augen-Prinzip: zweite Person war dabei</label>
+            ${zustand.vier ? `<label class="field" for="m-zeuge">Zweite Person<select id="m-zeuge">${maOptionen(zustand.zeuge, "– bitte wählen –", zustand.von ?? bediener)}</select></label>` : ""}
+            ${zustand.zeit === "nachtraeglich" && !zustand.vier ? `<span class="pay-warn">Nachträglich ohne Kunde: Vier-Augen-Prinzip wird empfohlen.</span>` : ""}
+            <div class="chips"><label class="btn ghost small foto-knopf">Foto aufnehmen (${zustand.fotos.length})<input type="file" accept="image/*" capture="environment" id="m-foto" hidden></label></div>
+            ${zustand.fotos.length ? `<span class="fotos klein">${zustand.fotos.map((id) => `<img class="foto" data-foto="${esc(id)}" alt="neues Foto">`).join("")}</span>` : ""}
+            <div class="chips"><button class="btn" data-msave type="button">Mangel speichern</button><button class="btn ghost" data-mabbr type="button">Verwerfen</button></div></div>` : ""}
+          <div class="chips"><button class="btn ghost" data-mzu type="button">Fertig</button></div></div>`;
+      fotosZeigen();
+    };
+    // Formularwerte beim Neuzeichnen behalten
+    const merken = () => { const g = (id) => dlg.querySelector("#" + id);
+      if (g("m-art")) Object.assign(zustand, { art: g("m-art").value, notiz: g("m-notiz").value, zeit: g("m-zeit").value, von: g("m-von").value, vier: g("m-4a").checked, zeuge: g("m-zeuge") ? g("m-zeuge").value : zustand.zeuge }); };
+    dlg.addEventListener("click", (e) => {
+      const svg = e.target.closest("svg.umriss");
+      if (svg) { merken(); const r = svg.getBoundingClientRect(); zustand.neu = { ansicht: svg.dataset.umriss, seite: svg.dataset.seite, x: Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)), y: Math.min(1, Math.max(0, (e.clientY - r.top) / r.height)) }; zeichnen(); return; }
+      const b = e.target.closest("button"); if (!b) return; const ds = b.dataset;
+      if (ds.mans) { merken(); zustand.ansicht = ds.mans; zeichnen(); }
+      else if (ds.mseite) { merken(); zustand.seite = ds.mseite; zeichnen(); }
+      else if ("mabbr" in ds) { zustand.neu = null; zustand.fotos = []; zustand.notiz = ""; zeichnen(); }
+      else if ("mzu" in ds) dlg.close();
+      else if (ds.mweg) {
+        const { it, o } = allItems().find(({ it }) => it.tnr === tnr); const m = it.maengel.find((x) => x.id === ds.mweg);
+        m.gestrichen = { am: jetztText(), von: wer() }; change(o); zeichnen();
+      }
+      else if ("msave" in ds) {
+        merken();
+        if (aktiveMa().length && !zustand.von) { toast("Bitte auswählen, wer den Mangel erfasst"); return; }
+        if (zustand.vier && !zustand.zeuge) { toast("Bitte die zweite Person auswählen"); return; }
+        const { it, o } = allItems().find(({ it }) => it.tnr === tnr);
+        const n = zustand.neu;
+        (it.maengel ||= []).push({ id: Date.now().toString(36), art: zustand.art || M_ARTEN[0], notiz: (zustand.notiz || "").trim(), ansicht: n.ansicht, seite: n.seite,
+          x: Math.round(n.x * 1000) / 1000, y: Math.round(n.y * 1000) / 1000, fotos: zustand.fotos.slice(), zeit: zustand.zeit,
+          am: new Date().toISOString(), amText: jetztText(), von: zustand.von || "", vonName: maName(zustand.von) || "", geraet: meta.geraet || "",
+          zeuge: zustand.vier ? zustand.zeuge : "", zeugeName: zustand.vier ? maName(zustand.zeuge) : "" });
+        change(o); toast("Mangel gespeichert");
+        Object.assign(zustand, { neu: null, fotos: [], notiz: "", vier: false, zeuge: "" }); zeichnen();
+      }
+    });
+    dlg.addEventListener("change", (e) => {
+      if (e.target.id === "m-foto" && e.target.files[0]) {
+        merken();
+        fotoSpeichern(e.target.files[0]).then((id) => { if (id) { zustand.fotos.push(id); zeichnen(); } });
+      } else if (["m-4a", "m-zeit", "m-von"].includes(e.target.id)) { merken(); zeichnen(); }
+    });
+    dlg.addEventListener("close", () => { dlg.remove(); render(); });
+    zeichnen(); dlg.showModal();
+  }
+
+  // Teileliste im Auftrag, immer sichtbar: Nummer, Station, Mängel
+  function teileZustand(o) {
+    const its = o.items || []; if (!its.length) return "";
+    return `<div class="teile-zustand"><b>Teile und Zustand</b>${its.map((it) => { const n = maengelVon(it).length;
+      return `<div class="tz"><button class="btn ghost small" data-teil="${it.tnr}" type="button">${it.tnr}</button><span>${esc(ITEM[it.id].name)} ${stPill(it.st)}</span>
+        <button class="btn small ${n ? "warnung" : "ghost"}" data-maengel="${it.tnr}" type="button">${n ? `${n} ${n === 1 ? "Mangel" : "Mängel"}` : "Mängel erfassen"}</button></div>`; }).join("")}</div>`;
   }
 
   // ---------------------------------------------------------------- Kundensuche, verzeiht Tippfehler und Sonderzeichen
@@ -710,7 +868,8 @@
       const detail = offenTeil ? (() => { const { it, o } = offenTeil;
         return `<div class="panel detail"><h2>Teil ${it.tnr}</h2>
           <dl><dt>Artikel</dt><dd>${esc(ITEM[it.id].name)}</dd><dt>Auftrag</dt><dd><button class="btn ghost small" data-order="${o.nr}" data-goauftrag type="button">${o.nr}</button></dd>
-          <dt>Kunde</dt><dd>${esc(cust(o.cust).name)}</dd><dt>Station</dt><dd>${stPill(it.st)}${it.platz ? " · " + esc(it.platz) : ""}</dd></dl>
+          <dt>Kunde</dt><dd>${esc(cust(o.cust).name)}</dd><dt>Station</dt><dd>${stPill(it.st)}${it.platz ? " · " + esc(it.platz) : ""}</dd>
+          <dt>Mängel</dt><dd>${maengelVon(it).map((m) => esc(m.art)).join(", ") || "keine erfasst"} <button class="btn small ghost" data-maengel="${it.tnr}" type="button">Mängel ansehen / erfassen</button></dd></dl>
           <h3 style="margin:6px 0 0;font-size:16px">Verlauf</h3><ol class="scanlog">${it.log.map((l) => `<li>${fmtDate(l.am)} · ${ST[l.st]}${l.platz && l.st === "fertig" ? " (" + esc(l.platz) + ")" : ""}</li>`).join("")}</ol>
           <div class="chips">${STATIONEN.filter(([k]) => !["storniert", "ausgegeben"].includes(k)).map(([k, n]) => `<button class="chip" data-tset="${k}" aria-pressed="${k === it.st}" type="button">${n}</button>`).join("")}</div>
           <div><button class="btn ghost small" data-tclose type="button">Schließen</button></div></div>`; })() : "";
@@ -824,7 +983,7 @@
     document.getElementById("title").textContent = TITLES[ui.view] + (ui.store === "ALL" ? " · alle Geschäfte" : ui.view === "annahme" ? " · " + geschaeft(ui.store) : "");
     const focus = document.activeElement && document.activeElement.id; const pos = focus && document.activeElement.selectionStart;
     document.getElementById("view").innerHTML = VIEWS[ui.view]();
-    fotosZeigen();
+    fotosZeigen(); bedienerLeiste();
     document.querySelectorAll("[data-qr]").forEach((el) => { if (window.QRCode) new QRCode(el, { text: el.dataset.qr, width: +(el.dataset.size || 176), height: +(el.dataset.size || 176), correctLevel: QRCode.CorrectLevel.L }); else el.textContent = "QR-Code lädt nicht (offline)"; });
     document.querySelectorAll("img[data-schein]").forEach((img) => { const o = db.orders.find((x) => x.nr === img.dataset.schein); if (o && window.QRCode) img.src = scheinBild(o).toDataURL("image/png"); });
     if (focus) { const el = document.getElementById(focus); if (el) { el.focus(); try { el.setSelectionRange(pos, pos); } catch {} } }
@@ -884,10 +1043,14 @@
     else if ("tvermerk" in ds) { const tk = tickets().find((x) => x.id === ui.openTicket); const text = document.getElementById("tv-text").value.trim(); const w = document.getElementById("tv-wieder").value;
       if (!text && w === (tk.wieder || "")) { toast("Bitte einen Vermerk eintragen"); return; }
       if (w !== (tk.wieder || "")) { tk.wieder = w; tLog(tk, w ? "Wiedervorlage am " + fmtDate(w) : "Wiedervorlage entfernt"); }
-      if (text) tLog(tk, text); change(tk); toast("Vermerk gespeichert"); }
+      const zg = maName(document.getElementById("tv-zeuge")?.value || "");
+      if (text) tLog(tk, text + (zg ? " · Vier-Augen mit " + zg : "")); change(tk); toast("Vermerk gespeichert"); }
     else if ("tfertig" in ds) { ticketAbschluss(tickets().find((x) => x.id === ui.openTicket)); }
     else if ("tauf" in ds) { const tk = tickets().find((x) => x.id === ui.openTicket); tk.status = "pruefung"; tk.ergebnis = null; tLog(tk, "Wieder geöffnet"); change(tk); }
     else if ("tclose2" in ds) { ui.openTicket = null; }
+    else if (ds.maengel) { maengelDialog(ds.maengel); return; }
+    else if ("maneu" in ds) { maNeu(); }
+    else if (ds.maaktiv) { const m = mitarbeiter().find((x) => x.id === ds.maaktiv); m.aktiv = m.aktiv === false; change(m); }
     else if (ds.tfilter2) { ui.tfilter2 = ds.tfilter2; }
     else if ("askstorno" in ds) { ui.askStorno = ui.openOrder; }
     else if ("nostorno" in ds) { ui.askStorno = null; }
@@ -947,7 +1110,8 @@
   });
   document.addEventListener("change", (e) => {
     const t = e.target;
-    if (t.id === "ta-art") { ui.taArt = t.value; render(); }
+    if (t.id === "bediener") { bediener = t.value; LS.set("lb-bediener", bediener || null); toast(bediener ? `Angemeldet: ${bedienerName()}` : "Kein Mitarbeiter gewählt"); }
+    else if (t.id === "ta-art") { ui.taArt = t.value; render(); }
     else if (t.id === "t-foto" && t.files[0]) { const tk = tickets().find((x) => x.id === ui.openTicket); fotoHochladen(tk, t.files[0]).then(render); t.value = ""; }
     else if (t.id === "d-date" && t.value) { ui.draft.date = t.value; ui.draft.due = iso(addWorkdays(new Date(t.value + "T00:00"), 3)); render(); }
     else if (t.id === "d-due" && t.value) { ui.draft.due = t.value; render(); }
