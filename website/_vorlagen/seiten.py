@@ -115,6 +115,7 @@ GOOGLE_BEWERTUNG = "https://g.page/r/CdzVc1rKl03iEAE/review"
 WA_NUMMER = "49511464252"
 WA_ABHOLUNG = "https://wa.me/" + WA_NUMMER + "?text=Hallo%2C%20ich%20m%C3%B6chte%20eine%20Abholung%20anfragen%3A%20"
 WA_B2B = "https://wa.me/" + WA_NUMMER + "?text=Hallo%20Tayfun%20Textilpflege%2C%20wir%20sind%20ein%20Unternehmen%20und%20m%C3%B6chten%20ein%20Angebot%20anfragen%3A%20"
+WA_KD = "https://wa.me/" + WA_NUMMER + "?text=Hallo%20Tayfun%20Textilpflege%2C%20ich%20habe%20ein%20Anliegen%3A%20"
 WA_FRAGE = "https://wa.me/" + WA_NUMMER + "?text=Hallo%20Tayfun%20Textilpflege%2C%20ich%20habe%20eine%20Frage%3A%20"
 WA_ICON = '<svg class="wa-ico" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6a2.7 2.7 0 0 0 1.8-1.2 2.2 2.2 0 0 0 .2-1.2c-.1-.1-.2-.2-.4-.3Z"/></svg>'
 
@@ -170,7 +171,7 @@ FOOT = f"""</main>
     <div class="logo">{logo()}<p style="margin-top:14px">Textilreinigung, Wäscherei und Änderungsschneiderei in Hannover-Wettbergen. Familienbetrieb seit 2001.</p></div>
     <div><h4>Kontakt</h4><p>Tayfun Textilpflege<br>An der Kirche 10<br>30457 Hannover<br>{TEL}<br><a href="mailto:info@tayfun-textilpflege.de">info@tayfun-textilpflege.de</a></p></div>
     <div><h4>Öffnungszeiten</h4><p>Mo, Di, Do, Fr 8–13 und 15–18 Uhr<br>Mi 8–13 Uhr<br>Sa 8–13 Uhr</p></div>
-    <div class="legal"><span>© Tayfun Textilpflege</span><a href="preisliste.html">Preisliste</a><a href="leistungen.html">Leistungen A–Z</a><a href="impressum.html">Impressum</a><a href="datenschutz.html">Datenschutz</a><a href="{GOOGLE_BEWERTUNG}" rel="noopener" target="_blank">Bei Google bewerten</a></div>
+    <div class="legal"><span>© Tayfun Textilpflege</span><a href="preisliste.html">Preisliste</a><a href="leistungen.html">Leistungen A–Z</a><a href="impressum.html">Impressum</a><a href="datenschutz.html">Datenschutz</a><a href="kundendienst.html">Kundendienst</a><a href="{GOOGLE_BEWERTUNG}" rel="noopener" target="_blank">Bei Google bewerten</a></div>
   </div>
 </footer>
 <a class="totop" href="#" aria-label="Nach oben">↑</a>
@@ -448,9 +449,10 @@ def index():
     <div class="wrap">
       <div>
         <p class="kicker">Ihre Meinung zählt</p>
-        <h2 id="r-title">Zufrieden mit uns? Wir freuen uns über Ihre Bewertung</h2>
-        <p>Sie waren mit unserer Arbeit zufrieden? Dann lassen Sie uns gern eine Bewertung bei Google da. Ein paar Worte genügen. Sie helfen anderen in Wettbergen und Umgebung, uns zu finden, und uns, noch besser zu werden. Vielen Dank!</p>
+        <h2 id="r-title">Wie war es bei uns? Wir freuen uns über Ihre Bewertung</h2>
+        <p>Lassen Sie uns gern eine Bewertung bei Google da. Ein paar Worte genügen. Sie helfen anderen in Wettbergen und Umgebung, uns zu finden, und uns, noch besser zu werden. Vielen Dank!</p>
         <a class="btn primary" href="{GOOGLE_BEWERTUNG}" rel="noopener" target="_blank"><span class="stars" aria-hidden="true">★★★★★</span> Jetzt bei Google bewerten</a>
+        <p class="review-kd">Ist etwas schiefgelaufen? Sprechen Sie uns direkt an, wir kümmern uns: <a href="kundendienst.html">Kundendienst</a></p>
       </div>
       <figure class="review-qr"><img src="assets/bewertung-qr.svg" alt="QR-Code zur Google-Bewertung von Tayfun Textilpflege" width="230" height="230"><figcaption>Mit dem Handy scannen</figcaption></figure>
     </div>
@@ -605,6 +607,24 @@ subpage("geschaeftskunden.html", "Textilreinigung für Geschäftskunden in Hanno
         img=("assets/fotos/reinigung-hemden.jpg", "Frisch gereinigte Hemden in Schutzhüllen am Kleiderförderband einer Reinigung"))
 
 az = "".join(f"<li><strong>{t}</strong> – {d.split(' <a')[0]}</li>" for t, d in LEISTUNGEN)
+subpage("kundendienst.html", "Kundendienst · Anliegen und Reklamationen · Tayfun Textilpflege",
+        "Ist bei uns etwas schiefgelaufen? Schreiben Sie unserem Kundendienst per E-Mail, WhatsApp oder Telefon. Wir kümmern uns persönlich um Ihr Anliegen.",
+        "Kundendienst", "Etwas nicht in Ordnung? Sagen Sie es uns",
+        "Wir geben uns jeden Tag Mühe. Wenn trotzdem einmal etwas nicht so ist, wie Sie es erwartet haben, möchten wir es wissen und wieder in Ordnung bringen.",
+        f"""<h2>Wir hören zu</h2>
+<p>Ein Fleck ist geblieben, ein Knopf fehlt, ein Termin hat nicht geklappt oder Sie haben eine Idee, was wir besser machen können? Schreiben Sie uns. Ihr Anliegen landet direkt bei uns im Betrieb, nicht in einer Warteschleife. Wir freuen uns auch über konstruktive Kritik, denn nur so können wir besser werden.</p>
+<div class="kd-box">
+<p><strong>Kundendienst per E-Mail</strong><br><a href="mailto:kundendienst@tayfun-textilpflege.de?subject=Mein%20Anliegen">kundendienst@tayfun-textilpflege.de</a></p>
+<div class="btns"><a class="btn primary" href="mailto:kundendienst@tayfun-textilpflege.de?subject=Mein%20Anliegen">E-Mail an den Kundendienst</a><a class="btn wa" href="{WA_KD}" rel="noopener" target="_blank">{WA_ICON}Per WhatsApp</a></div>
+</div>
+<h2>Damit wir schnell helfen können</h2>
+<ul class="checklist">
+<li>Ihr Name und eine Telefonnummer für Rückfragen</li>
+<li>Die Nummer auf Ihrem Abholschein, falls zur Hand</li>
+<li>Was genau nicht in Ordnung ist, gern mit einem Foto</li>
+</ul>
+<p>Wir melden uns in der Regel innerhalb von zwei Werktagen. Natürlich können Sie auch gern im Laden vorbeikommen oder uns unter {TEL} anrufen.</p>""", cta=False)
+
 subpage("leistungen.html", "Alle Leistungen · Textilreinigung Hannover-Wettbergen · Tayfun",
         "Spezialreinigung, Nassreinigung, Sofortdienst, Appretur, Imprägnierung, Hemdendienst, Wäschedienst, Teppich-, Leder- und Heimtextilienreinigung sowie Änderungsschneiderei in Hannover-Wettbergen.",
         "Leistungen", "Unsere Leistungen",
@@ -654,7 +674,7 @@ subpage("datenschutz.html", "Datenschutz · Tayfun Textilpflege", "Datenschutzer
 <p>Sie haben das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit und Widerspruch sowie das Recht, sich bei einer Datenschutz-Aufsichtsbehörde zu beschweren (in Niedersachsen: Die Landesbeauftragte für den Datenschutz Niedersachsen).</p>
 """, robots='<meta name="robots" content="noindex">\n', cta=False)
 
-urls = ["", "geschaeftskunden.html", "preisliste.html", "leistungen.html", "hemden-anzuege.html", "gardinenservice.html", "teppichreinigung.html"]
+urls = ["", "geschaeftskunden.html", "kundendienst.html", "preisliste.html", "leistungen.html", "hemden-anzuege.html", "gardinenservice.html", "teppichreinigung.html"]
 (OUT / "sitemap.xml").write_text('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
     + "".join(f"  <url><loc>{DOMAIN}/{u}</loc></url>\n" for u in urls) + "</urlset>\n", encoding="utf-8")
 (OUT / "robots.txt").write_text(f"User-agent: *\nAllow: /\nSitemap: {DOMAIN}/sitemap.xml\n", encoding="utf-8")
