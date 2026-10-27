@@ -168,7 +168,7 @@ FOOT = f"""</main>
 <footer>
   <div class="wrap">
     <div class="logo">{logo()}<p style="margin-top:14px">Textilreinigung, Wäscherei und Änderungsschneiderei in Hannover-Wettbergen. Familienbetrieb seit 2001.</p></div>
-    <div><h4>Kontakt</h4><p>Tayfun Textilpflege<br>An der Kirche 10<br>30457 Hannover<br>{TEL}</p></div>
+    <div><h4>Kontakt</h4><p>Tayfun Textilpflege<br>An der Kirche 10<br>30457 Hannover<br>{TEL}<br><a href="mailto:info@tayfun-textilpflege.de">info@tayfun-textilpflege.de</a></p></div>
     <div><h4>Öffnungszeiten</h4><p>Mo, Di, Do, Fr 8–13 und 15–18 Uhr<br>Mi 8–13 Uhr<br>Sa 8–13 Uhr</p></div>
     <div class="legal"><span>© Tayfun Textilpflege</span><a href="preisliste.html">Preisliste</a><a href="leistungen.html">Leistungen A–Z</a><a href="impressum.html">Impressum</a><a href="datenschutz.html">Datenschutz</a><a href="{GOOGLE_BEWERTUNG}" rel="noopener" target="_blank">Bei Google bewerten</a></div>
   </div>
@@ -591,7 +591,7 @@ subpage("geschaeftskunden.html", "Textilreinigung für Geschäftskunden in Hanno
 <li><strong>Abholung und Lieferung</strong> bei Ihnen im Betrieb, nach Absprache auch mit festen Tagen</li>
 <li><strong>Express- und 24-Stunden-Service</strong> nach Absprache, zum Beispiel während Messen und Veranstaltungen</li>
 <li><strong>Persönlicher Besuch vor Ort:</strong> Unser Ansprechpartner im Außendienst kommt gern zu Ihnen und bespricht alles direkt in Ihrem Betrieb</li>
-<li>Ein fester Ansprechpartner, auch per WhatsApp oder Telefon</li>
+<li>Ein fester Ansprechpartner, per WhatsApp, Telefon oder E-Mail</li>
 <li>Faire Mengenpreise bei regelmäßigen Aufträgen</li>
 <li>Abrechnung per Rechnung</li>
 </ul>
@@ -600,7 +600,8 @@ subpage("geschaeftskunden.html", "Textilreinigung für Geschäftskunden in Hanno
 <p class="note">Einzelpreise laut <a href="preisliste.html">Preisliste</a>. Für größere Mengen und regelmäßige Aufträge erstellen wir Ihnen gern ein individuelles Angebot.</p>
 <h2>Angebot anfragen</h2>
 <p>Schreiben Sie uns kurz, was Sie reinigen lassen möchten, wie viele Teile es ungefähr sind und bis wann Sie sie brauchen. Wir melden uns mit einem Angebot. Gern vereinbaren wir auch einen <strong>Termin bei Ihnen vor Ort</strong>.</p>
-<div class="btns" style="margin-top:16px"><a class="btn wa" href="{WA_B2B}" rel="noopener" target="_blank">{WA_ICON}Per WhatsApp anfragen</a><a class="btn outline" href="tel:+49511464252">0511 464252 anrufen</a></div>""",
+<div class="btns" style="margin-top:16px"><a class="btn wa" href="{WA_B2B}" rel="noopener" target="_blank">{WA_ICON}Per WhatsApp anfragen</a><a class="btn outline" href="mailto:info@tayfun-textilpflege.de?subject=Anfrage%20Gesch%C3%A4ftskunde">E-Mail schreiben</a><a class="btn outline" href="tel:+49511464252">0511 464252 anrufen</a></div>
+<p class="note" style="margin-top:12px">E-Mail: <a href="mailto:info@tayfun-textilpflege.de">info@tayfun-textilpflege.de</a></p>""",
         img=("assets/fotos/reinigung-hemden.jpg", "Frisch gereinigte Hemden in Schutzhüllen am Kleiderförderband einer Reinigung"))
 
 az = "".join(f"<li><strong>{t}</strong> – {d.split(' <a')[0]}</li>" for t, d in LEISTUNGEN)
