@@ -74,3 +74,22 @@ cd marke/_werkzeug && NODE_PATH=$(npm root -g) node logo.js && cd ../..
 # Alle Seiten, sitemap.xml, robots.txt
 python3 website/_vorlagen/seiten.py
 ```
+
+## Ladenbuch (TT Laden)
+
+Auftrags-, Teile- und Kundenverwaltung für den Laden, läuft unter `tt-laden.de` als Web-App (Home-Bildschirm des iPads).
+
+| Ordner / Datei | Was drin ist |
+|---|---|
+| `ladenbuch/web/` | Die App: `index.html`, `app.js`, `app.css`, Service Worker `sw.js` (offline), `api.php` + `lib.php` (Server, MySQL/MariaDB). |
+| `ladenbuch/installer-vorlage.php` | Vorlage der Installations-/Update-Datei. Fragt beim ersten Aufruf Datenbank, Laden-Passwort und Leitungs-PIN ab, sonst erneuert sie nur die Dateien. Löscht sich danach selbst. |
+| `ladenbuch/bau.py` | `python3 ladenbuch/bau.py` baut daraus `ladenbuch/ausgabe/ladenbuch-<zufall>.php` und `.zip` zum Hochladen. |
+| `ladenbuch/test-e2e.js` | Ablauftest mit zwei Geräten (Playwright) gegen einen lokalen PHP-Server mit MariaDB. |
+| `ladenbuch/prototyp/` | Der erste Prototyp mit Beispieldaten (Archiv). |
+
+Zugangsdaten liegen nur auf dem Server in `ladenbuch-geheim/config.php` neben dem Domain-Ordner, nie im Repository.
+
+## Abholschein für Kunden
+
+`website/beleg.html` zeigt den digitalen Abholschein. Die Daten stehen im Link hinter dem `#` und gehen nicht an den Server.
+Gebaut wird die Seite mit `python3 website/_vorlagen/schein/bau.py` aus `beleg-vorlage.html`, `schein.js` (dieselbe Zeichnung wie im Ladenbuch) und `qrcode.min.js` (MIT-Lizenz).

@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<title>Ihr Abholschein – Tayfun Textilpflege</title>
+<meta name="description" content="Digitaler Abholschein von Tayfun Textilpflege, Hannover-Wettbergen.">
+<meta name="theme-color" content="#d7262f">
+<link rel="icon" href="assets/apple-touch-icon.png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<style>
+@font-face { font-family: "Archivo"; src: url("fonts/archivo-latin.woff2") format("woff2"); font-weight: 100 900; font-stretch: 62% 125%; font-display: swap; }
+:root { --rot: #d7262f; --text: #1b1b1b; --muted: #5b5b5b; --bg: #f3f1ed; --karte: #fff; --linie: #dedad3; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 17px/1.5 "Archivo", "Helvetica Neue", Arial, sans-serif; }
+header { background: var(--rot); padding: 12px 16px; display: flex; justify-content: center; }
+header img { height: 44px; width: auto; display: block; }
+main { max-width: 460px; margin: 0 auto; padding: 20px 16px 40px; display: grid; gap: 16px; }
+h1 { font-size: 24px; line-height: 1.2; margin: 0; font-stretch: 112%; font-weight: 800; }
+p { margin: 0; }
+.schein { display: block; width: 100%; height: auto; border-radius: 6px; -webkit-touch-callout: default; }
+.btn { display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 52px; padding: 12px 18px; border-radius: 999px; border: 0; font-family: inherit; font-size: 17px; font-weight: 700; line-height: 1.2; text-decoration: none; cursor: pointer; }
+.btn.haupt { background: var(--rot); color: #fff; }
+.btn.wa { background: #fff; color: #128c4a; border: 2px solid #25d366; }
+.tipp { background: var(--karte); border: 1px solid var(--linie); border-radius: 14px; padding: 14px 16px; font-size: 15px; color: var(--muted); }
+.tipp b { color: var(--text); }
+.fehler { background: var(--karte); border-radius: 14px; padding: 20px; }
+footer { text-align: center; font-size: 14px; color: var(--muted); padding-bottom: 24px; }
+footer a { color: inherit; }
+[hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<header><a href="./"><img src="assets/tayfun-logo-rot.png" alt="Tayfun Textilpflege – zur Startseite" width="1355" height="325" id="logo"></a></header>
+<main>
+  <div id="ok" hidden>
+    <div style="display:grid;gap:16px">
+      <h1 id="titel">Ihr Abholschein</h1>
+      <img class="schein" id="bild" alt="">
+      <button class="btn haupt" id="speichern" type="button">Abholschein aufs Handy speichern</button>
+      <p class="tipp"><b>So haben Sie ihn immer dabei:</b> Bild gedrückt halten und „Zu Fotos hinzufügen“ bzw. „Bild speichern“ wählen. Bei der Abholung zeigen Sie einfach das Bild oder diese Seite.</p>
+      <a class="btn wa" id="frage" href="#" target="_blank" rel="noopener">Frage zum Auftrag per WhatsApp</a>
+      <p class="tipp">Der Schein zeigt den Stand bei der Annahme. Ist etwas früher fertig oder dauert es länger, melden wir uns.</p>
+    </div>
+  </div>
+  <div class="fehler" id="kaputt" hidden>
+    <h1>Abholschein nicht lesbar</h1>
+    <p style="margin-top:8px">Der Link ist unvollständig. Bitte öffnen Sie ihn noch einmal direkt aus WhatsApp oder fragen Sie uns: <a href="tel:+49511464252">0511 464252</a>.</p>
+  </div>
+</main>
+<footer>Tayfun Textilpflege · An der Kirche 10 · 30457 Hannover<br><a href="impressum.html">Impressum</a> · <a href="datenschutz.html">Datenschutz</a></footer>
+<script>
+/*! qrcodejs 1.0.0 · Copyright (c) 2012 davidshimjs · MIT-Lizenz · https://github.com/davidshimjs/qrcodejs */
+{{QRLIB}}
+</script>
+<script>
+{{SCHEIN}}
+(async function () {
+  let d;
+  try { d = SCHEIN.auspacken(location.hash.slice(1)); } catch (e) { document.getElementById("kaputt").hidden = false; return; }
+  document.getElementById("ok").hidden = false;
+  document.getElementById("titel").textContent = d.k ? `Ihr Abholschein, ${d.k}` : "Ihr Abholschein";
+  document.getElementById("frage").href = "https://wa.me/49511464252?text=" + encodeURIComponent(`Frage zu meinem Auftrag ${SCHEIN.code(d)}: `);
+  const logo = new Image(); logo.src = "assets/tayfun-logo-rot.png";
+  await Promise.all([logo.decode().catch(() => null), document.fonts ? document.fonts.load('800 40px Archivo').catch(() => null) : null]);
+  const cv = SCHEIN.zeichnen(d, logo.naturalWidth ? logo : null);
+  const bild = document.getElementById("bild");
+  bild.src = cv.toDataURL("image/png");
+  bild.alt = `Abholschein ${d.n}, Abholcode ${SCHEIN.code(d)}, ${d.t} Teile, abholbereit ab ${d.f}`;
+  const file = await SCHEIN.datei(cv, d);
+  document.getElementById("speichern").addEventListener("click", async () => {
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      try { await navigator.share({ files: [file], title: `Abholschein ${d.n}` }); return; } catch (e) { if (e.name === "AbortError") return; }
+    }
+    const a = document.createElement("a"); a.href = URL.createObjectURL(file); a.download = file.name; a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  });
+})();
+</script>
+</body>
+</html>
