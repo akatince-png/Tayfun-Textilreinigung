@@ -316,3 +316,11 @@ footer .logo svg { width: 230px; height: auto; color: #fff; }
 .b2b-card p { margin: 0; font-size: 15px; color: var(--muted); }
 @media (min-width: 1260px) { .subnav a { font-size: 12px; letter-spacing: .04em; padding-inline: 4px; } }
 @media (min-width: 1260px) { .subnav .wrap { max-width: 1240px; } }
+
+/* Kundendienst */
+.review-kd { margin-top: 18px !important; font-size: 14px; }
+.review-kd a { color: #fff; }
+.kd-box { background: var(--grey); border-left: 4px solid var(--red); padding: 18px 20px; margin: 18px 0 8px; display: grid; gap: 14px; }
+.kd-box p { margin: 0; }
+.kd-box a { color: var(--red); font-weight: 600; }
+.kd-box .btn { color: #fff; }
