@@ -112,7 +112,7 @@
   setInterval(render, 60000);
 })();
 
-// Startbild als Diashow: wechselt alle 5 Sekunden, pausiert bei Maus/Fokus, ohne Bewegung bei „weniger Bewegung“
+// Startbild als Diashow: wechselt alle 3 Sekunden, pausiert bei Maus/Fokus, ohne Bewegung bei „weniger Bewegung“
 (function () {
   const box = document.querySelector("[data-slides]");
   if (!box) return;
@@ -125,10 +125,12 @@
     dots.forEach((d, k) => (k === i ? d.setAttribute("aria-current", "true") : d.removeAttribute("aria-current")));
   };
   const ruhig = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const start = () => { if (!ruhig && !timer) timer = setInterval(() => show(i + 1), 5000); };
+  const start = () => { if (!ruhig && !timer) timer = setInterval(() => show(i + 1), 3000); };
   const stop = () => { clearInterval(timer); timer = null; };
   dots.forEach((d, k) => d.addEventListener("click", () => { show(k); stop(); start(); }));
-  box.addEventListener("mouseenter", stop); box.addEventListener("mouseleave", start);
+  // nur echte Maus hält an; ein Fingertipp auf dem Tablet soll die Diashow nicht stoppen
+  box.addEventListener("pointerenter", (e) => { if (e.pointerType === "mouse") stop(); });
+  box.addEventListener("pointerleave", (e) => { if (e.pointerType === "mouse") start(); });
   box.addEventListener("focusin", stop); box.addEventListener("focusout", start);
   document.addEventListener("visibilitychange", () => (document.hidden ? stop() : start()));
   start();

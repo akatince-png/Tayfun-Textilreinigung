@@ -6,3 +6,13 @@ RewriteRule ^ https://www.tayfun-textilpflege.de%{REQUEST_URI} [L,R=301]
 
 # Fehlerseite: unbekannte Adressen führen zur Startseite
 ErrorDocument 404 /index.html
+
+# Seiten, Gestaltung und Skript immer frisch laden (Änderungen sind sofort sichtbar); Bilder und Schriften 30 Tage zwischenspeichern
+<IfModule mod_headers.c>
+  <FilesMatch "\.(html|css|js|xml|txt)$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+  <FilesMatch "\.(jpg|jpeg|png|svg|woff2)$">
+    Header set Cache-Control "public, max-age=2592000"
+  </FilesMatch>
+</IfModule>

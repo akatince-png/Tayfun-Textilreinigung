@@ -280,3 +280,11 @@ footer .logo svg { width: 230px; height: auto; color: #fff; }
 .nachhaltig figcaption { font-size: 15px; color: var(--ink); }
 .nachhaltig strong { display: block; font-size: 17px; margin-bottom: 4px; color: #17733E; }
 @media (max-width: 560px) { .nachhaltig { grid-template-columns: 1fr; } .nachhaltig img { aspect-ratio: 16 / 9; } }
+
+/* Preis-Markierungen: Beschriftung links vom Punkt, Hochformat-Bilder begrenzen */
+.pin.links { flex-direction: row-reverse; transform: translate(calc(-100% + 11px), -11px); }
+.pin.links b { margin-left: 0; margin-right: 34px; }
+.pin.links b::before { right: auto; left: 100%; }
+.callouts.hoch { max-width: 460px; }
+.split .callouts { margin-top: 0; }
+.callouts.anzug { max-width: 560px; }
