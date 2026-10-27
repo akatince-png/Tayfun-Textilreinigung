@@ -209,12 +209,15 @@ LEISTUNGEN = [
 
 def index():
     strips = "".join(f'<div class="strip"><h3>{t}</h3><p>{d}</p></div>' for t, d in LEISTUNGEN)
-    tiles = [("hemden-anzuege.html", "hemden-holzbuegel.jpg", 1000, 1500, "Hemden &amp; Blusen", f"Hemd ab {P['Hemd, hängend']} €"),
-             ("hemden-anzuege.html", "anzug-navy.jpg", 1000, 667, "Sakkos &amp; Hosen", f"Jacke {P['Jacke']} €"),
-             ("preisliste.html#garderobe", "brautkleid.jpg", 1000, 1500, "Kleider &amp; Brautmode", f"Kleid ab {P['Kleid']} €"),
+    tisch = min(float(pr.replace(",", ".")) for g in PREISE for n, pr in g[2] if n == "Tischdecke" and pr)
+    tiles = [("hemden-anzuege.html", "reinigung-hemden.jpg", 1600, 1066, "Hemden &amp; Blusen", f"Hemd ab {P['Hemd, hängend']} €"),
+             ("hemden-anzuege.html", "anzug-smoking.jpg", 1280, 1600, "Anzüge &amp; Sakkos", f"Jacke {P['Jacke']} €"),
+             ("preisliste.html#garderobe", "brautkleid-buegel.jpg", 1066, 1600, "Kleider &amp; Brautmode", f"Kleid ab {P['Kleid']} €"),
              ("preisliste.html#garderobe", "mantel-herbst.jpg", 1000, 1500, "Mäntel &amp; Jacken", f"Mantel {P['Mantel']} €"),
-             ("#bettwaren", "schlafzimmer.jpg", 1600, 1067, "Bettdecken &amp; Kissen", f"Kissen ab {P['Kleines Kissen, kleines Daunenkissen, Kindersteppdecke']} €"),
-             ("gardinenservice.html", "gardine.jpg", 1200, 1600, "Gardinen", "3,20 € pro m²")]
+             ("#bettwaren", "kissen.jpg", 1066, 1600, "Bettdecken &amp; Kissen", f"Kissen ab {P['Kleines Kissen, kleines Daunenkissen, Kindersteppdecke']} €"),
+             ("gardinenservice.html", "vorhang-beige.jpg", 1600, 1600, "Gardinen &amp; Vorhänge", f"ab {P['Synthetische Gardinen, pro m²']} € pro m²"),
+             ("teppichreinigung.html", "teppich-berber.jpg", 1200, 1600, "Teppiche", f"ab {P['Maschinell hergestellte Teppiche, Flokati, pro m²']} € pro m²"),
+             ("preisliste.html#haushalt", "tischwaesche-tafel.jpg", 1600, 1066, "Tischwäsche", f"Tischdecke ab {tisch:.2f} €".replace(".", ","))]
     tiles_html = "".join(f'<a class="tile" href="{h}"><img src="assets/fotos/{img}" alt="" loading="lazy" width="{w}" height="{hh}"><span>{t}<br><small>{pr}</small></span></a>' for h, img, w, hh, t, pr in tiles)
     auszug = [("Hemd, hängend", None), ("Hemd, gelegt", None), ("Bluse", None), ("Hose", None), ("Rock", None), ("Jacke", None),
               ("Kleid", None), ("Mantel", None), ("Daunenjacke mit Imprägnierung", None), ("Krawatte", None),
@@ -289,7 +292,7 @@ def index():
         <p class="box">Die Kosten für Anfahrt, Ab- und Aufhängen oder Auf- und Ausrollen richten sich nach Aufwand. Wir nennen sie Ihnen vorher am Telefon.</p>
         <div class="btns" style="margin-top:22px"><a class="btn primary" href="#anfrage">Termin anfragen</a><a class="btn outline" href="tel:+49511464252">0511 464252</a></div>
       </div>
-      <img class="photo" src="assets/fotos/gardine.jpg" alt="Helle Gardine vor einem sonnigen Fenster" loading="lazy" width="1200" height="1600">
+      <img class="photo" src="assets/fotos/wohnzimmer-vorhang-teppich.jpg" alt="Helles Wohnzimmer mit hellgrauen Vorhängen und gemustertem Teppich" loading="lazy" width="1066" height="1600">
     </div>
   </section>
 
@@ -422,7 +425,7 @@ subpage("hemden-anzuege.html", "Hemdendienst & Anzugreinigung Hannover-Wettberge
 <h2>Angebote</h2>
 {table([(n, P[n]) for n in ["Dienstags: Hose", "Dienstags: Oberhemd, ab 10 Hemden, je Hemd", "Freitags: Anzug-Reinigung"]])}
 <p class="note">Alle Preise in Euro inkl. MwSt. Weitere Preise in der <a href="preisliste.html">Preisliste</a>.</p>""",
-        img=("assets/fotos/hemden-holzbuegel.jpg", "Weiße Hemden auf Holzbügeln"))
+        img=("assets/fotos/reinigung-hemden.jpg", "Frisch gereinigte Hemden in Schutzhüllen am Kleiderförderband einer Reinigung"))
 
 subpage("gardinenservice.html", "Gardinen reinigen lassen in Hannover · Ab- und Aufhängen · Tayfun",
         "Gardinenservice in Hannover: Wir hängen Ihre Gardinen und Vorhänge ab, reinigen sie und hängen sie wieder auf. Mit Abholung und Lieferung.",
@@ -439,7 +442,7 @@ subpage("gardinenservice.html", "Gardinen reinigen lassen in Hannover · Ab- und
 <h2>Preise</h2>
 {table(PREISE[4][2])}
 <div class="btns" style="margin-top:20px"><a class="btn primary" href="./#anfrage">Termin anfragen</a></div>""",
-        img=("assets/fotos/gardine.jpg", "Helle Gardine vor einem sonnigen Fenster"))
+        img=("assets/fotos/gardine-weiss.jpg", "Weiße, leichte Gardinen vor einem hohen Fenster in einem hellen Wohnraum"))
 
 subpage("teppichreinigung.html", "Teppichreinigung Hannover mit Abholung · Tayfun Textilpflege",
         "Teppichreinigung in Hannover: maschinell gefertigte Teppiche, Shaggy, Orient-, Berber- und Seidenteppiche. Wir rollen auf, holen ab und legen wieder aus.",
@@ -455,7 +458,8 @@ subpage("teppichreinigung.html", "Teppichreinigung Hannover mit Abholung · Tayf
 <p>Die Kosten für Abholung, Auf- und Ausrollen richten sich nach Größe und Aufwand. Wir nennen sie Ihnen vorher. Natürlich können Sie Ihren Teppich auch selbst im Laden abgeben.</p>
 <h2>Preise</h2>
 {table(PREISE[6][2])}
-<div class="btns" style="margin-top:20px"><a class="btn primary" href="./#anfrage">Termin anfragen</a></div>""")
+<div class="btns" style="margin-top:20px"><a class="btn primary" href="./#anfrage">Termin anfragen</a></div>""",
+        img=("assets/fotos/teppich-orient.jpg", "Orientteppich in Rot- und Orangetönen in einem hellen Wohnzimmer"))
 
 az = "".join(f"<li><strong>{t}</strong> – {d.split(' <a')[0]}</li>" for t, d in LEISTUNGEN)
 subpage("leistungen.html", "Alle Leistungen · Textilreinigung Hannover-Wettbergen · Tayfun",
