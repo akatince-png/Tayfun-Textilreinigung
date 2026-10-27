@@ -257,7 +257,6 @@ footer .logo svg { width: 230px; height: auto; color: #fff; }
 .btns .btn.wa { justify-self: auto; }
 /* Bildausschnitte, damit Teppiche im Bild bleiben */
 .page-photo[src*="teppich-orient"] { object-position: 50% 82%; }
-.photo[src*="wohnzimmer-vorhang-teppich"] { object-position: 50% 78%; }
 
 /* Startbild als Diashow: zeigt nacheinander unsere Leistungen */
 .slides { position: relative; aspect-ratio: 4 / 5; overflow: hidden; background: var(--charcoal); }
@@ -273,3 +272,4 @@ footer .logo svg { width: 230px; height: auto; color: #fff; }
 @media (max-width: 860px) { .slides { aspect-ratio: 16 / 11; } }
 @media (prefers-reduced-motion: reduce) { .slide { transition: none; } }
 .hero-photo .stamp { z-index: 3; }
+.photo[src*="vorhang-beige"] { aspect-ratio: 1 / 1; object-position: 50% 60%; }

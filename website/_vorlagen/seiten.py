@@ -236,7 +236,7 @@ def index():
              ("preisliste.html#garderobe", "brautkleid-buegel.jpg", 1066, 1600, "Kleider &amp; Brautmode", f"Kleid ab {P['Kleid']} €"),
              ("preisliste.html#garderobe", "mantel-herbst.jpg", 1000, 1500, "Mäntel &amp; Jacken", f"Mantel {P['Mantel']} €"),
              ("#bettwaren", "kissen.jpg", 1066, 1600, "Bettdecken &amp; Kissen", f"Kissen ab {P['Kleines Kissen, kleines Daunenkissen, Kindersteppdecke']} €"),
-             ("gardinenservice.html", "vorhang-beige.jpg", 1600, 1600, "Gardinen &amp; Vorhänge", f"ab {P['Synthetische Gardinen, pro m²']} € pro m²"),
+             ("gardinenservice.html", "gardine-weiss.jpg", 1600, 1384, "Gardinen &amp; Vorhänge", f"ab {P['Synthetische Gardinen, pro m²']} € pro m²"),
              ("teppichreinigung.html", "teppich-berber.jpg", 1200, 1600, "Teppiche", f"ab {P['Maschinell hergestellte Teppiche, Flokati, pro m²']} € pro m²"),
              ("preisliste.html#haushalt", "tischwaesche-tafel.jpg", 1600, 1066, "Tischwäsche", f"Tischdecke ab {tisch:.2f} €".replace(".", ","))]
     tiles_html = "".join(f'<a class="tile" href="{h}"><img src="assets/fotos/{img}" alt="" loading="lazy" width="{w}" height="{hh}"><span>{t}<br><small>{pr}</small></span></a>' for h, img, w, hh, t, pr in tiles)
@@ -313,7 +313,7 @@ def index():
         <p class="box">Die Kosten für Anfahrt, Ab- und Aufhängen oder Auf- und Ausrollen richten sich nach Aufwand. Wir nennen sie Ihnen vorher am Telefon.</p>
         <div class="btns" style="margin-top:22px"><a class="btn primary" href="#anfrage">Termin anfragen</a><a class="btn outline" href="tel:+49511464252">0511 464252</a></div>
       </div>
-      <img class="photo" src="assets/fotos/wohnzimmer-vorhang-teppich.jpg" alt="Helles Wohnzimmer mit hellgrauen Vorhängen und gemustertem Teppich" loading="lazy" width="1066" height="1600">
+      <img class="photo" src="assets/fotos/vorhang-beige.jpg" alt="Wohnzimmer mit beigen Vorhängen am Fenster und gestreiftem Teppich" loading="lazy" width="1600" height="1600">
     </div>
   </section>
 
