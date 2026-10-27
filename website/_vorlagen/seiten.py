@@ -130,6 +130,16 @@ def head(title, desc, file, robots="", home=False):
 <title>{title}</title>
 <meta name="description" content="{desc}">
 <link rel="canonical" href="{DOMAIN}/{file}">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="de_DE">
+<meta property="og:site_name" content="Tayfun Textilpflege">
+<meta property="og:title" content="{title}">
+<meta property="og:description" content="{desc}">
+<meta property="og:url" content="{DOMAIN}/{file}">
+<meta property="og:image" content="{DOMAIN}/assets/vorschaubild.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 {robots}<meta name="theme-color" content="#D7262E">
 <link rel="icon" href="assets/tayfun-monogramm.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
@@ -174,7 +184,10 @@ JSONLD = """<script type="application/ld+json">
 {"@type":"OpeningHoursSpecification","dayOfWeek":["Monday","Tuesday","Thursday","Friday"],"opens":"08:00","closes":"13:00"},
 {"@type":"OpeningHoursSpecification","dayOfWeek":["Monday","Tuesday","Thursday","Friday"],"opens":"15:00","closes":"18:00"},
 {"@type":"OpeningHoursSpecification","dayOfWeek":["Wednesday","Saturday"],"opens":"08:00","closes":"13:00"}],
-"priceRange":"€"}
+"priceRange":"€","logo":"https://www.tayfun-textilpflege.de/assets/tayfun-logo-rot.png",
+"hasMap":"https://www.google.com/maps/search/?api=1&query=Tayfun+Textilpflege+An+der+Kirche+10+30457+Hannover",
+"areaServed":["Hannover-Wettbergen","Hannover-Ricklingen","Hannover-Mühlenberg","Hannover-Oberricklingen","Hannover-Bornum","Ronnenberg-Empelde","Hannover"],
+"description":"Textilreinigung, Wäscherei, Lederreinigung und Änderungsschneiderei in Hannover-Wettbergen. Gardinen und Teppiche mit Abhol- und Bringservice."}
 </script>
 """
 
@@ -328,7 +341,7 @@ def index():
         <ul class="checklist">
           <li>Gardinen und Vorhänge abhängen, reinigen und wieder aufhängen</li>
           <li>Teppiche aufrollen, abholen, reinigen und wieder auslegen</li>
-          <li>Abholung und Lieferung in Hannover und Umgebung</li>
+          <li>Abholung und Lieferung in Hannover und Umgebung, zum Beispiel Wettbergen, Ricklingen, Mühlenberg, Bornum und Empelde</li>
         </ul>
         <p class="box">Die Kosten für Anfahrt, Ab- und Aufhängen oder Auf- und Ausrollen richten sich nach Aufwand. Wir nennen sie Ihnen vorher am Telefon.</p>
         <div class="btns" style="margin-top:22px"><a class="btn primary" href="#anfrage">Termin anfragen</a><a class="btn outline" href="tel:+49511464252">0511 464252</a></div>
@@ -397,10 +410,12 @@ def index():
         <h2 id="u-title">Familienbetrieb seit 2001</h2>
         <p>Seit 2001 ist Textilpflege unser Familienhandwerk. In Wettbergen kennen uns viele Kundinnen und Kunden seit Jahren: Sie geben ihre Kleidung bei uns An der Kirche ab und bekommen sie sauber, gebügelt und auf Wunsch geändert zurück.</p>
         <p>Wir beraten Sie gern persönlich im Laden, auch bei schwierigen Flecken und empfindlichen Materialien.</p>
+        <p>Zu uns kommen Kundinnen und Kunden aus Wettbergen, Ricklingen, Oberricklingen, Mühlenberg, Bornum und Empelde. Gardinen und Teppiche holen wir in ganz Hannover und Umgebung ab.</p>
       </div>
     </div>
   </section>
 
+  <script type="application/ld+json">{{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{{"@type": "Question", "name": "Holen Sie auch Kleidung ab?", "acceptedAnswer": {{"@type": "Answer", "text": "Kleidung, Bettwaren und Wäsche geben Sie bitte bei uns im Laden ab. Abholung und Lieferung bieten wir für Gardinen und Teppiche an."}}}}, {{"@type": "Question", "name": "Hängen Sie Gardinen auch ab und wieder auf?", "acceptedAnswer": {{"@type": "Answer", "text": "Ja. Wir nehmen Gardinen und Vorhänge bei Ihnen ab, reinigen sie und hängen sie wieder auf. Den Preis für den Service nennen wir Ihnen vorher."}}}}, {{"@type": "Question", "name": "Reinigen Sie auch Orientteppiche?", "acceptedAnswer": {{"@type": "Answer", "text": "Ja, auch handgeknüpfte Orient-, Berber-, China- und Seidenteppiche. Auf Wunsch rollen wir den Teppich bei Ihnen auf und legen ihn danach wieder aus."}}}}, {{"@type": "Question", "name": "Reinigen Sie Leder und Pelz?", "acceptedAnswer": {{"@type": "Answer", "text": "Ja, von der Lederjacke bis zum Pelzmantel. Die Preise finden Sie in unserer Preisliste."}}}}, {{"@type": "Question", "name": "Ändern Sie auch Kleidung?", "acceptedAnswer": {{"@type": "Answer", "text": "Ja, unsere Änderungsschneiderei kürzt, ändert und repariert. Bringen Sie das Teil einfach vorbei, wir beraten Sie im Laden."}}}}, {{"@type": "Question", "name": "Wie lange dauert die Reinigung?", "acceptedAnswer": {{"@type": "Answer", "text": "Das hängt vom Teil ab. Wir nennen Ihnen bei der Abgabe den Abholtermin. Wenn es eilig ist, fragen Sie nach unserem Sofortdienst."}}}}]}}</script>
   <section class="alt" aria-labelledby="faq-title">
     <div class="wrap split">
       <div>
@@ -466,7 +481,7 @@ subpage("preisliste.html", "Preisliste · Tayfun Textilpflege Hannover-Wettberge
         f'<ul class="toc">{toc}</ul><div class="pricelist">{groups}</div><p class="note">Abhol- und Bringservice für Gardinen und Teppiche sowie Ab- und Aufhängen bzw. Auf- und Ausrollen nach Aufwand, Preis auf Anfrage.</p>')
 
 # ---------------------------------------------------------------- Unterseiten
-subpage("hemden-anzuege.html", "Hemdendienst & Anzugreinigung Hannover-Wettbergen · Tayfun",
+subpage("hemden-anzuege.html", "Hemden waschen & bügeln, Anzugreinigung in Hannover · Tayfun",
         f"Hemden gewaschen und gebügelt ab {P['Hemd, hängend']} €, Sakko {P['Jacke']} €, Hose {P['Hose']} €. Tayfun Textilpflege in Hannover-Wettbergen.",
         "Hemden &amp; Anzüge", "Hemden und Anzüge, wie sie sein sollen",
         "Gewaschen, gebügelt und auf dem Bügel – bereit für den Schrank. Geben Sie Ihre Kleidung einfach bei uns im Laden ab.",
@@ -491,7 +506,7 @@ Bringen Sie uns Ihre alten Bügel und Folien gern wieder mit, wenn Sie ohnehin v
 <p class="note">Alle Preise in Euro inkl. MwSt. Weitere Preise in der <a href="preisliste.html">Preisliste</a>.</p>""",
         img=("assets/fotos/reinigung-hemden.jpg", "Frisch gereinigte Hemden in Schutzhüllen am Kleiderförderband einer Reinigung"))
 
-subpage("gardinenservice.html", "Gardinen reinigen lassen in Hannover · Ab- und Aufhängen · Tayfun",
+subpage("gardinenservice.html", "Gardinen & Vorhänge waschen lassen in Hannover · mit Ab- und Aufhängen · Tayfun",
         "Gardinenservice in Hannover: Wir hängen Ihre Gardinen und Vorhänge ab, reinigen sie und hängen sie wieder auf. Mit Abholung und Lieferung.",
         "Gardinenservice", "Gardinen ab, sauber, wieder dran",
         "Keine Leiter, kein Schleppen: Wir hängen Ihre Gardinen und Vorhänge ab, reinigen sie und hängen sie wieder auf.",
