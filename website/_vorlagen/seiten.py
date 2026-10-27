@@ -110,8 +110,8 @@ def rows(items):
 def table(items):
     return f'<div class="table-wrap"><table><tbody>{rows(items)}</tbody></table></div>'
 
-# Bewertungslink: sobald vorhanden durch den Link aus dem Google-Unternehmensprofil ersetzen („Rezensionen anfordern“, z. B. https://g.page/r/…/review)
-GOOGLE_BEWERTUNG = "https://www.google.com/maps/search/?api=1&amp;query=Tayfun+Textilpflege+An+der+Kirche+10+30457+Hannover"
+# Direkter Bewertungslink aus dem Google-Unternehmensprofil („Rezensionen anfordern“)
+GOOGLE_BEWERTUNG = "https://g.page/r/CdzVc1rKl03iEAE/review"
 WA_NUMMER = "49511464252"
 WA_ABHOLUNG = "https://wa.me/" + WA_NUMMER + "?text=Hallo%2C%20ich%20m%C3%B6chte%20eine%20Abholung%20anfragen%3A%20"
 WA_FRAGE = "https://wa.me/" + WA_NUMMER + "?text=Hallo%20Tayfun%20Textilpflege%2C%20ich%20habe%20eine%20Frage%3A%20"
