@@ -238,7 +238,7 @@ def index():
              ("#bettwaren", "kissen.jpg", 1066, 1600, "Bettdecken &amp; Kissen", f"Kissen ab {P['Kleines Kissen, kleines Daunenkissen, Kindersteppdecke']} €"),
              ("gardinenservice.html", "gardine-weiss.jpg", 1600, 1384, "Gardinen &amp; Vorhänge", f"ab {P['Synthetische Gardinen, pro m²']} € pro m²"),
              ("teppichreinigung.html", "teppich-berber.jpg", 1200, 1600, "Teppiche", f"ab {P['Maschinell hergestellte Teppiche, Flokati, pro m²']} € pro m²"),
-             ("preisliste.html#haushalt", "tischwaesche-tafel.jpg", 1600, 1066, "Tischwäsche", f"Tischdecke ab {tisch:.2f} €".replace(".", ","))]
+             ("preisliste.html#haushalt", "tischwaesche-fruehstueck.jpg", 1066, 1600, "Tischwäsche", f"Tischdecke ab {tisch:.2f} €".replace(".", ","))]
     tiles_html = "".join(f'<a class="tile" href="{h}"><img src="assets/fotos/{img}" alt="" loading="lazy" width="{w}" height="{hh}"><span>{t}<br><small>{pr}</small></span></a>' for h, img, w, hh, t, pr in tiles)
     auszug = [("Hemd, hängend", None), ("Hemd, gelegt", None), ("Bluse", None), ("Hose", None), ("Rock", None), ("Jacke", None),
               ("Kleid", None), ("Mantel", None), ("Daunenjacke mit Imprägnierung", None), ("Krawatte", None),
@@ -476,6 +476,7 @@ subpage("teppichreinigung.html", "Teppichreinigung Hannover mit Abholung · Tayf
 <p>Unser Tipp: einmal im Jahr reinigen lassen, bei Kindern und Haustieren gern öfter.</p>
 <img class="page-photo" src="assets/fotos/teppich-familie.jpg" alt="Familie mit Kleinkind sitzt auf einem hellen Hochflorteppich vor dem Sofa" loading="lazy" width="1600" height="1067">
 <h2>So läuft es ab</h2>
+<img class="page-photo" src="assets/fotos/teppich-einrollen.jpg" alt="Hände rollen einen hellen Webteppich auf einem Holzboden auf" loading="lazy" width="1600" height="1067">
 <ul>
 <li>Termin am Telefon oder per WhatsApp vereinbaren</li>
 <li>Wir rollen den Teppich bei Ihnen auf und nehmen ihn mit</li>
