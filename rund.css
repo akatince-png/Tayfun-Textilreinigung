@@ -34,3 +34,4 @@ input, select, textarea { border-radius: 12px; }
 .nachhaltig { border-left: 0; border-radius: var(--r); }
 .nachhaltig img { border-radius: 12px; }
 .review-qr img { border-radius: 12px; }
+.b2b-card { border-top: 1px solid var(--line); border-radius: var(--r); box-shadow: var(--schatten); }

@@ -59,8 +59,8 @@ section.alt { background: var(--grey); }
 .subnav a { flex: none; color: rgba(255,255,255,.82); text-decoration: none; font-size: 13px; font-weight: 600; font-stretch: 112%; letter-spacing: .05em; text-transform: uppercase; padding: 12px 12px 10px; border-bottom: 3px solid transparent; white-space: nowrap; }
 .subnav a:hover { color: #fff; }
 .subnav a.active { color: #fff; border-bottom-color: var(--red); }
-@media (min-width: 1100px) { .subnav .wrap { justify-content: space-between; } .subnav a { padding-inline: 6px; } }
-@media (max-width: 1099px) { .subnav { -webkit-mask-image: linear-gradient(90deg, #000 88%, transparent); mask-image: linear-gradient(90deg, #000 88%, transparent); } }
+@media (min-width: 1260px) { .subnav .wrap { justify-content: space-between; } .subnav a { padding-inline: 6px; } }
+@media (max-width: 1259px) { .subnav { -webkit-mask-image: linear-gradient(90deg, #000 88%, transparent); mask-image: linear-gradient(90deg, #000 88%, transparent); } }
 section[id], main [id] { scroll-margin-top: 130px; }
 
 /* Knöpfe */
@@ -302,3 +302,17 @@ footer .logo svg { width: 230px; height: auto; color: #fff; }
 /* Kinderbild auf dem Handy: Teppich sichtbar halten */
 .page-photo[src*="teppich-kinder"] { object-position: 50% 75%; }
 @media (max-width: 560px) { .page-photo[src*="teppich-kinder"] { aspect-ratio: 4 / 3; object-position: 50% 85%; } }
+
+/* Geschäftskunden */
+.b2b-link { display: inline-flex; gap: 6px; margin-top: 16px; color: var(--ink); font-size: 15px; text-decoration: none; border-bottom: 2px solid var(--red); padding-bottom: 2px; }
+.b2b-link strong { color: var(--red); }
+.b2b-band { background: var(--red); color: #fff; padding-block: 18px; }
+.b2b-band .wrap { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px; }
+.b2b-band p { margin: 0; font-size: 16px; }
+.b2b-band strong { font-stretch: 112%; text-transform: uppercase; letter-spacing: .06em; margin-right: 10px; }
+.b2b-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; margin: 16px 0 8px; }
+.b2b-card { border: 1px solid var(--line); border-top: 4px solid var(--red); padding: 14px 16px; background: #fff; }
+.b2b-card h3 { font-size: 18px; margin: 0 0 6px; }
+.b2b-card p { margin: 0; font-size: 15px; color: var(--muted); }
+@media (min-width: 1260px) { .subnav a { font-size: 12px; letter-spacing: .04em; padding-inline: 4px; } }
+@media (min-width: 1260px) { .subnav .wrap { max-width: 1240px; } }
