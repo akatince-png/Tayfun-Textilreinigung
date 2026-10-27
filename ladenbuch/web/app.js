@@ -1,6 +1,6 @@
 (function () {
   // ---------------------------------------------------------------- Stammdaten
-  const VERSION = "1.0.0";
+  const VERSION = "1.1.0";
   let STORES = { W: "Wettbergen" };
   const CATS = ["Garderobe", "Hemden", "Haushalt", "Gardinen", "Leder"];
   const ITEMS = [
@@ -58,16 +58,15 @@
     return { tx, alle, meta, setzeMeta, leeren };
   })();
 
-  let db = { customers: [], orders: [] };
+  let db = { customers: [], orders: [], tickets: [] };
   let meta = { rev: 0, nummern: {} };
   const ausstehend = new Map(); // k -> Änderungszähler; noch nicht beim Server
   let aenderung = 0;
-  const schluessel = (x) => (x.nr ? "auftrag:" + x.nr : "kunde:" + x.id);
   const save = () => IDB.setzeMeta("meta", meta).catch(() => {});
 
   async function laden() {
     const [daten, offenes, m] = await Promise.all([IDB.alle("daten"), IDB.alle("ausstehend"), IDB.meta("meta")]);
-    db = { customers: daten.filter((x) => x.typ === "kunde").map((x) => x.daten), orders: daten.filter((x) => x.typ === "auftrag").map((x) => x.daten) };
+    db = { customers: daten.filter((x) => x.typ === "kunde").map((x) => x.daten), orders: daten.filter((x) => x.typ === "auftrag").map((x) => x.daten), tickets: daten.filter((x) => x.typ === "ticket").map((x) => x.daten) };
     offenes.forEach((x) => { ausstehend.set(x.k, x.v); aenderung = Math.max(aenderung, x.v); });
     if (m) meta = m;
     if (meta.geschaefte) STORES = meta.geschaefte;
@@ -76,7 +75,7 @@
   // Jede Änderung: sofort auf dem Gerät speichern und zum Abgleich vormerken
   function change(...recs) {
     recs.filter(Boolean).forEach((x) => {
-      const typ = x.nr ? "auftrag" : "kunde"; const id = x.nr || x.id; const k = typ + ":" + id; const v = ++aenderung;
+      const typ = x.ticket ? "ticket" : x.nr ? "auftrag" : "kunde"; const id = x.ticket ? x.id : x.nr || x.id; const k = typ + ":" + id; const v = ++aenderung;
       ausstehend.set(k, v);
       const daten = JSON.parse(JSON.stringify(x));
       IDB.tx(["daten", "ausstehend"], "readwrite", (t) => { t.objectStore("daten").put({ k, typ, id, daten }); t.objectStore("ausstehend").put({ k, typ, id, daten, v }); }).catch(() => toast("Speichern auf dem Gerät fehlgeschlagen"));
@@ -124,7 +123,7 @@
           neu = true;
           await IDB.tx(["daten"], "readwrite", (t) => rein.forEach((x) => t.objectStore("daten").put({ k: x.typ + ":" + x.id, typ: x.typ, id: x.id, daten: x.daten })));
           rein.forEach((x) => {
-            const liste = x.typ === "kunde" ? db.customers : db.orders; const feld = x.typ === "kunde" ? "id" : "nr";
+            const liste = x.typ === "kunde" ? db.customers : x.typ === "ticket" ? tickets() : db.orders; const feld = x.typ === "auftrag" ? "nr" : "id";
             const i = liste.findIndex((y) => y[feld] === x.id);
             if (i >= 0) liste[i] = x.daten; else liste.push(x.daten);
           });
@@ -151,10 +150,10 @@
   addEventListener("offline", () => { syncZustand = "offline"; renderSync(); });
 
   // Nummernblöcke: der Server reserviert sie, damit auch offline jede Nummer nur einmal vergeben wird
-  const BLOCK = { auftrag: [30, 10], teil: [150, 60], kunde: [30, 10] };
+  const BLOCK = { auftrag: [30, 10], teil: [150, 60], kunde: [30, 10], ticket: [10, 3] };
   const rest = (key) => (meta.nummern[key] || []).reduce((s, [von, bis]) => s + bis - von + 1, 0);
   async function nummernAuffuellen() {
-    const keys = ["kunde", ...Object.keys(STORES).flatMap((g) => ["auftrag:" + g, "teil:" + g])];
+    const keys = ["kunde", "ticket", ...Object.keys(STORES).flatMap((g) => ["auftrag:" + g, "teil:" + g])];
     for (const key of keys) {
       const [art, g] = key.split(":"); const [gross, min] = BLOCK[art];
       if (rest(key) >= min) continue;
@@ -209,7 +208,7 @@
   function setItem(it, st, platz, d) { it.st = st; if (platz !== undefined) it.platz = platz; it.log.push({ am: d || iso(today0()), st, platz: it.platz || "" }); }
   function syncOrder(o) {
     if (!o.items || o.status === "storniert" || o.status === "abgeholt") return "";
-    if (o.status === "arbeit" && o.items.every((it) => it.st === "fertig")) { o.status = "bereit"; return ` · Auftrag ${o.nr} komplett, jetzt abholbereit`; }
+    if ((o.status === "arbeit" || o.status === "kundendienst") && o.items.every((it) => it.st === "fertig" || it.st === "ausgegeben") && o.items.some((it) => it.st === "fertig")) { o.status = "bereit"; return ` · Auftrag ${o.nr} komplett, jetzt abholbereit`; }
     return "";
   }
   function renderSync() {
@@ -227,7 +226,7 @@
   // ---------------------------------------------------------------- Bausteine
   const STATUS = { arbeit: ["In Arbeit", "p-arbeit"], bereit: ["Abholbereit", "p-bereit"], kundendienst: ["Kundendienst", "p-kd"], abgeholt: ["Abgeholt", "p-abgeholt"], storniert: ["Storniert", "p-storno"] };
   const zaehlt = (o) => o.status !== "storniert";
-  const KD_GRUENDE = ["Reklamation", "Fleck nicht entfernt", "Schaden am Teil", "Teil fehlt", "Reparatur extern veranlasst", "Beim Gutachter", "Ersatz/Erstattung", "Sonstiges"];
+  const KD_GRUENDE = ["Fleck nicht entfernt", "Schaden am Teil", "Verfärbt", "Eingelaufen / verformt", "Knopf oder Reißverschluss", "Teil fehlt / vertauscht", "Falsch gebügelt", "Sonstiges"];
   function pill(o) {
     const [t, c] = STATUS[o.status];
     if (o.status === "bereit" && daysSince(o.due) > 14) return `<span class="pill p-alt">Seit ${daysSince(o.due)} Tagen abholbereit</span>`;
@@ -318,14 +317,11 @@
   function orderDetail(o) {
     const c = cust(o.cust); const wd = D(o.date).getDay();
     const lines = o.lines.map((l) => { const [p, why] = unitPrice(l.id, wd, o.lines); return `<div class="line"><span class="num">${l.qty} ${ITEM[l.id].unit === "Stk" ? "×" : ITEM[l.id].unit}</span><span class="n">${esc(ITEM[l.id].name)}${why ? `<small>${why}</small>` : ""}</span><b class="num">${euro(p * l.qty)}</b></div>`; }).join("");
-    const next = o.status === "arbeit" ? `<button class="btn" data-set="bereit" type="button">Fertig – abholbereit</button>` : o.status === "bereit" ? `<button class="btn" data-set="abgeholt" type="button">Abgeholt</button>` : "";
+    const next = o.status === "arbeit" || o.status === "kundendienst" ? `<button class="btn" data-set="bereit" type="button">Fertig – abholbereit</button>` : o.status === "bereit" ? `<button class="btn" data-set="abgeholt" type="button">Abgeholt</button>` : "";
     const warn = o.status === "bereit" && !o.paid ? `<span class="pay-warn">Noch nicht bezahlt – vor der Ausgabe kassieren.</span>` : "";
-    const kdLog = (o.kd || []).map((k) => `<li><b>${fmtDate(k.am)}</b> · ${esc(k.grund)}${k.notiz ? ": " + esc(k.notiz) : ""}</li>`).join("");
-    const kdBox = o.status === "storniert" ? "" : `<div class="kd"><b>${o.status === "kundendienst" ? "Beim Kundendienst" : "Kundendienst"}</b>${kdLog ? `<ol>${kdLog}</ol>` : ""}
-      <div class="row2"><label class="field" for="kd-grund">Was ist passiert?<select id="kd-grund">${KD_GRUENDE.map((g) => `<option>${g}</option>`).join("")}</select></label>
-      <label class="field" for="kd-notiz">Vermerk<input id="kd-notiz" placeholder="z. B. an Gutachter Müller geschickt" autocomplete="off"></label></div>
-      <div class="chips"><button class="btn small" data-kd type="button">${o.status === "kundendienst" ? "Vermerk hinzufügen" : "An Kundendienst übergeben"}</button>
-      ${o.status === "kundendienst" ? `<button class="btn ghost small" data-set="bereit" type="button">Erledigt – abholbereit</button>` : ""}</div></div>`;
+    const ts = ticketsZu(o.nr);
+    const kdBox = o.status === "storniert" ? "" : `<div class="kd"><b>Kundendienst</b>${ts.length ? tList(ts, "") : `<span class="mini">Keine Reklamation zu diesem Auftrag.</span>`}
+      <div><button class="btn small" data-treklam="${o.nr}" type="button">Reklamation aufnehmen</button></div></div>`;
     const storno = o.status === "storniert" ? `<p class="hint">Storniert am ${fmtDate(o.storniertAm)}. Zählt nicht in Umsatz und Auswertung.</p>`
       : o.status === "abgeholt" ? "" : ui.askStorno === o.nr ? `<div class="storno-ask">Auftrag wirklich stornieren? <button class="btn small" data-storno type="button">Ja, stornieren</button><button class="btn ghost small" data-nostorno type="button">Nein</button></div>`
       : `<div><button class="btn ghost small" data-askstorno type="button">Auftrag stornieren</button></div>`;
@@ -383,6 +379,201 @@
     } catch (err) { leitungFehler(err); }
   }
 
+  // ---------------------------------------------------------------- Kundendienst: Reklamationen als Tickets (R-1001 …)
+  // Ablauf: Neu → In Prüfung → Nachbehandlung / Extern / Wartet auf Kunde → Erledigt (mit Ergebnis)
+  const T_STATUS = { neu: ["Neu", "p-arbeit"], pruefung: ["In Prüfung", "p-arbeit"], nachbehandlung: ["Nachbehandlung", "p-kd"], extern: ["Extern (Gutachter/Reparatur)", "p-kd"], wartet: ["Wartet auf Kunde", "p-alt"], erledigt: ["Erledigt", "p-abgeholt"] };
+  const T_KANAL = ["Im Laden", "Telefon", "WhatsApp", "E-Mail"];
+  const T_ERGEBNIS = { nachgebessert: "Nachgebessert (kostenlos)", erstattung: "Gutschrift / Erstattung", schadenersatz: "Schadenersatz", abgelehnt: "Abgelehnt" };
+  const T_PIN = ["erstattung", "schadenersatz", "abgelehnt"]; // nur mit Leitungs-PIN
+  const T_FRIST = 7;
+  const tOffen = (t) => t.status !== "erledigt";
+  const tAlter = (t) => daysSince(t.erstellt);
+  const tUeberfaellig = (t) => tOffen(t) && tAlter(t) > T_FRIST;
+  const tFaellig = (t) => tOffen(t) && t.wieder && t.wieder <= iso(today0());
+  const tickets = () => db.tickets || (db.tickets = []);
+  const ticketsZu = (nr) => tickets().filter((t) => t.auftrag === nr);
+  const tPill = (t) => tUeberfaellig(t) ? `<span class="pill p-alt">Seit ${tAlter(t)} Tagen offen</span>` : `<span class="pill ${T_STATUS[t.status][1]}">${T_STATUS[t.status][0]}</span>`;
+  const jetztText = () => new Date().toLocaleString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
+  function tLog(t, text) { (t.log ||= []).push({ am: jetztText(), geraet: meta.geraet || "", text }); }
+
+  function ticketRow(t) {
+    const c = cust(t.cust);
+    return `<button class="row" data-ticket="${t.id}" type="button">
+      <span class="t">${esc(c.name)} · ${esc(t.grund)}</span>
+      <span class="s num">${t.id} · Auftrag ${t.auftrag} · ${(t.teile || []).length} Teile · seit ${fmtDate(t.erstellt)}${t.wieder && tOffen(t) ? " · Wiedervorlage " + fmtDate(t.wieder) : ""}</span>
+      <span class="r">${tPill(t)}</span></button>`;
+  }
+  const tList = (arr, none) => arr.length ? `<div class="list">${arr.map(ticketRow).join("")}</div>` : `<p class="empty">${none}</p>`;
+
+  // Formular für eine neue Reklamation zu einem Auftrag
+  function ticketNeu(o) {
+    const its = o.items || [];
+    return `<div class="panel einst" id="t-neu"><h2>Reklamation zu Auftrag ${o.nr} aufnehmen</h2>
+      <p class="mini">${esc(cust(o.cust).name)} · angenommen ${fmtDate(o.date)} · ${pill(o)}</p>
+      <div class="row2"><label class="field" for="tn-kanal">Wie kam die Reklamation?<select id="tn-kanal">${T_KANAL.map((k) => `<option>${k}</option>`).join("")}</select></label>
+      <label class="field" for="tn-grund">Grund<select id="tn-grund">${KD_GRUENDE.map((g) => `<option>${g}</option>`).join("")}</select></label></div>
+      <label class="field" for="tn-text">Was genau? (Aussage des Kunden)<textarea id="tn-text" rows="3" placeholder="z. B. Rotweinfleck am linken Ärmel noch sichtbar"></textarea></label>
+      ${its.length ? `<fieldset class="teilwahl"><legend>Betroffene Teile</legend>${its.map((it) => `<label><input type="checkbox" value="${it.tnr}"${its.length === 1 ? " checked" : ""}> ${it.tnr} · ${esc(ITEM[it.id].name)} <span class="mini">(${ST[it.st]})</span></label>`).join("")}</fieldset>` : ""}
+      <label class="check"><input type="checkbox" id="tn-da" ${o.status === "abgeholt" ? "" : "checked"}> Die betroffenen Teile sind jetzt wieder bei uns im Laden</label>
+      <label class="field" for="tn-wieder">Wiedervorlage am<input type="date" id="tn-wieder" value="${iso(addWorkdays(today0(), 2))}"></label>
+      <div class="chips"><button class="btn" data-tanlegen="${o.nr}" type="button">Ticket anlegen</button><button class="btn ghost" data-tabbruch type="button">Abbrechen</button></div></div>`;
+  }
+
+  function ticketAnlegen(o) {
+    let id; try { id = "R-" + naechsteNummer("ticket"); } catch (err) { toast(err.message); return; }
+    const teile = [...document.querySelectorAll("#t-neu .teilwahl input:checked")].map((x) => x.value);
+    const da = document.getElementById("tn-da").checked;
+    const t = { ticket: true, id, auftrag: o.nr, cust: o.cust, store: o.store, erstellt: iso(today0()), kanal: document.getElementById("tn-kanal").value,
+      grund: document.getElementById("tn-grund").value, text: document.getElementById("tn-text").value.trim(), teile, status: "neu", wieder: document.getElementById("tn-wieder").value || "", fotos: [], log: [] };
+    tLog(t, `Reklamation aufgenommen (${t.kanal})${teile.length ? ": " + teile.join(", ") : ""}`);
+    // Teile, die der Kunde zurückbringt, kommen wieder in die Teile-Kartei
+    if (da && teile.length) {
+      (o.items || []).filter((it) => teile.includes(it.tnr)).forEach((it) => setItem(it, "kundendienst"));
+      if (o.status !== "storniert") o.status = "kundendienst";
+      tLog(t, "Teile im Laden angenommen");
+    }
+    tickets().push(t); change(t, o);
+    ui.tNeu = null; ui.view = "kundendienst"; ui.openTicket = id; ui.tfilter2 = "offen";
+    toast(`Ticket ${id} angelegt`); scrollTo({ top: 0 });
+  }
+
+  // Status ändern: Nachbehandlung schickt die Teile zurück in die Reinigung, Extern markiert sie beim Partner
+  function ticketStatus(t, st) {
+    const o = db.orders.find((x) => x.nr === t.auftrag);
+    t.status = st; tLog(t, "Status: " + T_STATUS[st][0]);
+    if (o && (st === "nachbehandlung" || st === "extern")) {
+      (o.items || []).filter((it) => (t.teile || []).includes(it.tnr)).forEach((it) => setItem(it, st === "nachbehandlung" ? "reinigung" : "extern"));
+      if (o.status !== "storniert") o.status = "kundendienst";
+    }
+    change(t, o);
+  }
+
+  function ticketAbschluss(t) {
+    const art = document.getElementById("ta-art").value;
+    if (T_PIN.includes(art) && !ui.mgmt) { toast("Dafür bitte zuerst unten die Leitungs-PIN eingeben"); return; }
+    const betrag = Math.round(parseFloat((document.getElementById("ta-betrag")?.value || "0").replace(",", ".")) * 100) || 0;
+    const beleg = (document.getElementById("ta-beleg")?.value || "").trim();
+    const notiz = document.getElementById("ta-notiz").value.trim();
+    if (art === "abgelehnt" && !notiz) { toast("Bitte eine Begründung eintragen"); return; }
+    if (art === "erstattung" && (!betrag || !beleg)) { toast("Bitte Betrag und Beleg-Nr. der Kasse eintragen"); return; }
+    t.ergebnis = { art, betrag, beleg, notiz, am: iso(today0()) }; t.status = "erledigt";
+    tLog(t, `Abgeschlossen: ${T_ERGEBNIS[art]}${betrag ? " · " + euro(betrag) : ""}${beleg ? " · Beleg " + beleg : ""}${notiz ? " · " + notiz : ""}`);
+    change(t); toast(`Ticket ${t.id} abgeschlossen`);
+  }
+
+  // Fotos: verkleinert (max. 1600 px) und auf dem Server gespeichert, nicht im Gerät
+  async function fotoHochladen(t, datei) {
+    if (navigator.onLine === false) { toast("Fotos brauchen Internet"); return; }
+    try {
+      const bild = await createImageBitmap(datei);
+      const f = Math.min(1, 1600 / Math.max(bild.width, bild.height));
+      const cv = document.createElement("canvas"); cv.width = Math.round(bild.width * f); cv.height = Math.round(bild.height * f);
+      cv.getContext("2d").drawImage(bild, 0, 0, cv.width, cv.height);
+      const daten = cv.toDataURL("image/jpeg", 0.82).split(",")[1];
+      toast("Foto wird gespeichert …");
+      const r = await api("foto", { ticket: t.id, daten });
+      (t.fotos ||= []).push(r.id); tLog(t, "Foto hinzugefügt"); change(t); toast("Foto gespeichert");
+    } catch (err) { toast(err.status === 0 ? "Fotos brauchen Internet" : "Foto konnte nicht gespeichert werden: " + err.message); }
+  }
+  const fotoCache = new Map();
+  async function fotosZeigen() {
+    for (const img of document.querySelectorAll("img[data-foto]")) {
+      const id = img.dataset.foto;
+      if (!fotoCache.has(id)) {
+        fotoCache.set(id, fetch(`${API}?a=foto&id=${encodeURIComponent(id)}`, { headers: { "X-Ladenbuch-Token": token || "" } })
+          .then((r) => (r.ok ? r.blob() : Promise.reject())).then((b) => URL.createObjectURL(b)).catch(() => { fotoCache.delete(id); return ""; }));
+      }
+      const url = await fotoCache.get(id);
+      if (url) img.src = url; else img.alt = "Foto nicht geladen (offline?)";
+    }
+  }
+
+  function kdTexte(t) {
+    const c = cust(t.cust); const v = vorname(c); const an = `Guten Tag${v ? " " + v : ""}`;
+    return [["Eingang bestätigen", `${an}, vielen Dank für Ihre Rückmeldung zu Auftrag ${t.auftrag}. Wir haben Ihre Reklamation unter der Nummer ${t.id} aufgenommen und melden uns, sobald wir mehr wissen. Ihr Team von Tayfun Textilpflege`],
+      ["Nachbehandelt, abholbereit", `${an}, Ihr Teil aus Auftrag ${t.auftrag} wurde nachbehandelt und ist ab sofort abholbereit. An der Kirche 10, Mo, Di, Do, Fr 8-13 + 15-18 Uhr, Mi + Sa 8-13 Uhr. Ihr Team von Tayfun Textilpflege`],
+      ["Beim Gutachter", `${an}, wir haben Ihr Teil aus Auftrag ${t.auftrag} zur Prüfung an einen unabhängigen Gutachter gegeben (Vorgang ${t.id}). Wir melden uns, sobald das Ergebnis vorliegt. Ihr Team von Tayfun Textilpflege`],
+      ["Rückfrage", `${an}, zu Ihrer Reklamation ${t.id} (Auftrag ${t.auftrag}) haben wir eine kurze Rückfrage: `]];
+  }
+
+  function ticketDetail(t) {
+    const c = cust(t.cust); const o = db.orders.find((x) => x.nr === t.auftrag);
+    const nr = handyNr(c.tel);
+    const teile = (o?.items || []).filter((it) => (t.teile || []).includes(it.tnr));
+    const fotos = (t.fotos || []).map((id) => `<img class="foto" data-foto="${esc(id)}" alt="Foto zu ${t.id}">`).join("");
+    const erg = t.ergebnis ? `<div class="pay ok"><b>${T_ERGEBNIS[t.ergebnis.art]}</b><span>${t.ergebnis.betrag ? euro(t.ergebnis.betrag) : ""}${t.ergebnis.beleg ? " · Kassenbeleg " + esc(t.ergebnis.beleg) : ""}${t.ergebnis.notiz ? " · " + esc(t.ergebnis.notiz) : ""} · ${fmtDate(t.ergebnis.am)}</span></div>` : "";
+    const schritte = tOffen(t) ? `<div class="chips">${["pruefung", "nachbehandlung", "extern", "wartet"].map((s) => `<button class="chip" data-tstatus="${s}" aria-pressed="${t.status === s}" type="button">${T_STATUS[s][0]}</button>`).join("")}</div>
+      <p class="mini">„Nachbehandlung“ schickt die betroffenen Teile zurück in die Reinigung. Sind sie wieder fertig gescannt, wird der Auftrag automatisch abholbereit.</p>` : "";
+    const abschluss = tOffen(t) ? `<div class="kd"><b>Abschließen</b>
+      <div class="row2"><label class="field" for="ta-art">Ergebnis<select id="ta-art">${Object.entries(T_ERGEBNIS).map(([k, n]) => `<option value="${k}"${ui.taArt === k ? " selected" : ""}>${n}${T_PIN.includes(k) ? " (Leitung)" : ""}</option>`).join("")}</select></label>
+      <label class="field" for="ta-notiz">${ui.taArt === "abgelehnt" ? "Begründung" : "Vermerk"}<input id="ta-notiz" autocomplete="off"></label></div>
+      ${["erstattung", "schadenersatz"].includes(ui.taArt) ? `<div class="row2"><label class="field" for="ta-betrag">Betrag in €<input id="ta-betrag" inputmode="decimal" placeholder="z. B. 12,50" autocomplete="off"></label><label class="field" for="ta-beleg">Beleg-Nr. der Kasse${ui.taArt === "schadenersatz" ? " (falls vorhanden)" : ""}<input id="ta-beleg" inputmode="numeric" autocomplete="off"></label></div>
+      <span class="hint">Die Rückzahlung selbst wird in der Kasse gebucht. Hier nur Betrag und Beleg vermerken.</span>` : ""}
+      ${T_PIN.includes(ui.taArt) && !ui.mgmt ? `<div class="row2"><label class="field" for="pin">Leitungs-PIN<input id="pin" type="password" inputmode="numeric" maxlength="8" autocomplete="off"></label><button class="btn ghost small" data-unlock type="button">Freigeben</button></div>` : ""}
+      <div><button class="btn small" data-tfertig type="button">Ticket abschließen</button></div></div>` : `<div><button class="btn ghost small" data-tauf type="button">Wieder öffnen</button></div>`;
+    return `<div class="panel detail-grid"><div class="detail"><h2>Reklamation ${t.id}</h2>
+      <dl><dt>Status</dt><dd>${tPill(t)}</dd><dt>Kunde</dt><dd>${esc(c.name)} · <span class="num">${esc(c.tel)}</span></dd>
+      <dt>Auftrag</dt><dd><button class="btn ghost small" data-order="${t.auftrag}" data-goauftrag type="button">${t.auftrag}</button></dd>
+      <dt>Eingang</dt><dd>${fmtDate(t.erstellt)} · ${esc(t.kanal)}</dd><dt>Grund</dt><dd>${esc(t.grund)}</dd>
+      ${t.text ? `<dt>Beschreibung</dt><dd>${esc(t.text)}</dd>` : ""}
+      <dt>Teile</dt><dd>${teile.length ? teile.map((it) => `<button class="btn ghost small" data-teil="${it.tnr}" type="button">${it.tnr} · ${esc(ITEM[it.id].name)}</button> ${stPill(it.st)}`).join("<br>") : "keine ausgewählt"}</dd></dl>
+      ${erg}${schritte}
+      <div class="row2"><label class="field" for="tv-text">Vermerk<input id="tv-text" placeholder="z. B. Gutachter Müller angerufen" autocomplete="off"></label>
+      <label class="field" for="tv-wieder">Wiedervorlage<input type="date" id="tv-wieder" value="${esc(t.wieder || "")}"></label></div>
+      <div class="chips"><button class="btn ghost small" data-tvermerk type="button">Vermerk speichern</button>
+        <label class="btn ghost small foto-knopf">Foto aufnehmen<input type="file" accept="image/*" capture="environment" id="t-foto" hidden></label></div>
+      ${nr ? `<div class="digi"><b>Kunde per WhatsApp informieren</b><div class="chips">${kdTexte(t).map(([n, text]) => `<a class="btn small wa-btn" href="https://wa.me/${nr}?text=${encodeURIComponent(text)}" target="_blank" rel="noopener">${n}</a>`).join("")}</div></div>` : ""}
+      ${abschluss}
+      <div class="chips"><button class="btn ghost" data-tclose2 type="button">Schließen</button></div></div>
+      <div class="kd-seite">${fotos ? `<div class="fotos">${fotos}</div>` : `<p class="mini">Noch keine Fotos.</p>`}
+        <h3>Verlauf</h3><ol class="scanlog">${(t.log || []).slice().reverse().map((l) => `<li>${esc(l.am)} · ${esc(l.text)}${l.geraet ? ` <span class="mini">(${esc(l.geraet)})</span>` : ""}</li>`).join("")}</ol></div></div>`;
+  }
+
+  function kundendienstAnsicht() {
+    const alle = tickets().filter((t) => ui.store === "ALL" || t.store === ui.store);
+    const f = ui.tfilter2 || "offen"; const q = norm(ui.kq2 || "");
+    const passt = (t, k) => k === "alle" ? true : k === "offen" ? tOffen(t) : k === "faellig" ? tFaellig(t) || tUeberfaellig(t) : k === "erledigt" ? !tOffen(t) : t.status === k;
+    let arr = alle.filter((t) => !q || norm(t.id).includes(q) || norm(t.auftrag).includes(q) || norm(cust(t.cust).name).includes(q));
+    const basis = arr; arr = arr.filter((t) => passt(t, f)).sort((a, b) => (b.erstellt.localeCompare(a.erstellt)) || b.id.localeCompare(a.id));
+    const F = [["offen", "Offen"], ["faellig", "Fällig & überfällig"], ["neu", "Neu"], ["nachbehandlung", "Nachbehandlung"], ["extern", "Extern"], ["wartet", "Wartet auf Kunde"], ["erledigt", "Erledigt"], ["alle", "Alle"]];
+    const d30 = alle.filter((t) => tAlter(t) < 30);
+    const neuForm = ui.tNeu ? ticketNeu(db.orders.find((o) => o.nr === ui.tNeu)) : "";
+    const auswahl = ui.tSuche !== undefined && !ui.tNeu ? (() => {
+      const sq = norm(ui.tSuche); const treffer = sq ? db.orders.filter(inStore).filter((o) => norm(o.nr).includes(sq) || norm(cust(o.cust).name).includes(sq)).sort((a, b) => b.date.localeCompare(a.date)).slice(0, 8) : [];
+      return `<div class="panel einst"><h2>Zu welchem Auftrag?</h2><label class="field" for="t-suche">Auftragsnummer, Abholcode oder Kundenname<input id="t-suche" value="${esc(ui.tSuche)}" autocomplete="off" autocapitalize="characters"></label>
+        ${treffer.length ? `<div class="list">${treffer.map((o) => `<button class="row" data-tfuer="${o.nr}" type="button"><span class="t">${esc(cust(o.cust).name)}</span><span class="s num">${o.nr} · ${fmtDate(o.date)} · ${pieces(o)} Teile</span><span class="r">${pill(o)}</span></button>`).join("")}</div>` : sq ? `<p class="empty">Kein Auftrag gefunden.</p>` : ""}
+        <div><button class="btn ghost small" data-tabbruch type="button">Abbrechen</button></div></div>`; })() : "";
+    const offenT = ui.openTicket && tickets().find((t) => t.id === ui.openTicket);
+    return `<div class="kpis">
+        <div class="kpi"><b class="num">${alle.filter(tOffen).length}</b><small>Offene Reklamationen</small></div>
+        <div class="kpi ${alle.some(tUeberfaellig) ? "alert" : ""}"><b class="num">${alle.filter(tUeberfaellig).length}</b><small>Länger als ${T_FRIST} Tage offen</small></div>
+        <div class="kpi ${alle.some(tFaellig) ? "alert" : ""}"><b class="num">${alle.filter(tFaellig).length}</b><small>Wiedervorlage heute</small></div>
+        <div class="kpi"><b class="num">${d30.length}</b><small>Neue Reklamationen (30 Tage)</small></div></div>
+      ${neuForm || auswahl || `<div><button class="btn" data-tneu type="button">+ Neue Reklamation</button></div>`}
+      ${offenT ? ticketDetail(offenT) : ""}
+      <label for="kq2" class="field">Reklamation suchen<input class="search" id="kq2" value="${esc(ui.kq2 || "")}" placeholder="R-Nummer, Auftrag oder Kundenname" autocomplete="off"></label>
+      <div class="chips">${F.map(([k, n]) => `<button class="chip" data-tfilter2="${k}" aria-pressed="${k === f}" type="button">${n}<span class="cnt">${basis.filter((t) => passt(t, k)).length}</span></button>`).join("")}</div>
+      <div class="panel">${tList(arr.slice(0, 80), "Keine Reklamationen in dieser Auswahl.")}</div>`;
+  }
+
+  // Auswertung für die Leitung
+  function kdAuswertung() {
+    const alle = tickets().filter((t) => ui.store === "ALL" || t.store === ui.store);
+    const d90 = alle.filter((t) => tAlter(t) < 90);
+    const auftr = db.orders.filter(inStore).filter((o) => zaehlt(o) && daysSince(o.date) < 90).length;
+    const quote = auftr ? (d90.length / auftr * 100).toFixed(1).replace(".", ",") : "0";
+    const kosten = d90.filter((t) => t.ergebnis && t.ergebnis.betrag).reduce((s, t) => s + t.ergebnis.betrag, 0);
+    const gr = {}; d90.forEach((t) => (gr[t.grund] = (gr[t.grund] || 0) + 1));
+    const grS = Object.entries(gr).sort((a, b) => b[1] - a[1]); const gmax = grS.length ? grS[0][1] : 1;
+    const erledigt = d90.filter((t) => t.ergebnis); const dauer = erledigt.length ? (erledigt.reduce((s, t) => s + Math.max(0, (D(t.ergebnis.am) - D(t.erstellt)) / DAY), 0) / erledigt.length).toFixed(1).replace(".", ",") : "–";
+    return `<div class="panel"><h2>Reklamationen (90 Tage)</h2>
+      <div class="kpis"><div class="kpi"><b class="num">${d90.length}</b><small>Reklamationen</small></div>
+        <div class="kpi"><b class="num">${quote} %</b><small>Anteil an Aufträgen</small></div>
+        <div class="kpi ${kosten ? "alert" : ""}"><b class="num">${euro(kosten)}</b><small>Erstattung & Schadenersatz</small></div>
+        <div class="kpi"><b class="num">${dauer}</b><small>Ø Tage bis erledigt</small></div></div>
+      ${grS.map(([k, v]) => `<div class="hbar"><span>${esc(k)}</span><span class="track"><i style="width:${Math.round(v / gmax * 100)}%"></i></span><b class="num">${v}</b></div>`).join("") || `<p class="empty">Keine Reklamationen – sehr gut.</p>`}</div>`;
+  }
+
   // ---------------------------------------------------------------- Kundensuche, verzeiht Tippfehler und Sonderzeichen
   const norm = (s) => s.toLowerCase().replace(/ı/g, "i").replace(/ß/g, "ss").normalize("NFD").replace(/[\u0300-\u036f]/g, "")
     .replace(/ae/g, "a").replace(/oe/g, "o").replace(/ue/g, "u").replace(/ph/g, "f").replace(/(.)\1/g, "$1").replace(/[^a-z0-9 ]/g, "");
@@ -410,6 +601,7 @@
 
   // ---------------------------------------------------------------- Ansichten
   const VIEWS = {
+    kundendienst: () => kundendienstAnsicht(),
     heute() {
       const t = iso(today0()); const os = db.orders.filter(inStore);
       const neu = os.filter((o) => o.date === t);
@@ -427,7 +619,7 @@
         <div class="grid2">
           <div class="panel"><h2>Heute fertig werden</h2>${list(faellig, "Nichts fällig – alles im Plan.")}</div>
           <div class="panel"><h2>Wartet auf Abholung</h2>${list(bereit.slice(0, 8), "Keine Aufträge abholbereit.")}</div>
-          ${os.some((o) => o.status === "kundendienst") ? `<div class="panel"><h2>Beim Kundendienst</h2>${list(os.filter((o) => o.status === "kundendienst"), "")}</div>` : ""}
+          ${(() => { const kt = tickets().filter((x) => inStore(x) && tOffen(x)).sort((a, b) => Number(tFaellig(b) || tUeberfaellig(b)) - Number(tFaellig(a) || tUeberfaellig(a)) || a.erstellt.localeCompare(b.erstellt)); return kt.length ? `<div class="panel"><h2>Kundendienst</h2>${tList(kt.slice(0, 6), "")}${kt.length > 6 ? `<p class="mini">${kt.length - 6} weitere unter Kundendienst.</p>` : ""}</div>` : ""; })()}
         </div>${ui.openOrder ? orderDetail(db.orders.find((o) => o.nr === ui.openOrder)) : ""}`;
     },
 
@@ -572,7 +764,7 @@
       const katS = Object.entries(kat).sort((a, b) => b[1] - a[1]); const kmax = katS.length ? katS[0][1] : 1;
       const alle = db.orders.filter(inStore);
       const storno = alle.length ? Math.round(alle.filter((o) => o.status === "storniert").length / alle.length * 100) : 0;
-      const kd = alle.filter((o) => (o.kd || []).length).length;
+      const kd = tickets().filter((x) => inStore(x) && tOffen(x)).length;
       const lieg = alle.filter((o) => o.status === "abgeholt" && o.picked).map((o) => Math.max(0, (D(o.picked) - D(o.due)) / DAY));
       const liegAvg = lieg.length ? (lieg.reduce((a, b) => a + b, 0) / lieg.length).toFixed(1).replace(".", ",") : "–";
       const offenF = alle.filter((o) => !o.paid && (o.status === "bereit" || o.status === "abgeholt")).reduce((s, o) => s + total(o), 0);
@@ -584,13 +776,14 @@
           <div class="kpi"><b class="num">${euro(im(30))}</b><small>Umsatz 30 Tage (bezahlt)</small></div>
           <div class="kpi ${offenF ? "alert" : ""}"><b class="num">${euro(offenF)}</b><small>Offene Beträge</small></div>
           <div class="kpi"><b class="num">${storno} %</b><small>Stornoquote</small></div>
-          <div class="kpi"><b class="num">${kd}</b><small>Kundendienst-Fälle</small></div>
+          <div class="kpi"><b class="num">${kd}</b><small>Offene Reklamationen</small></div>
           <div class="kpi"><b class="num">${liegAvg}</b><small>Ø Tage bis Abholung</small></div></div>
         <div class="grid2">
           <div class="panel"><h2>Auftragswert nach Bereich (30 Tage)</h2>${katS.map(([k, v]) => `<div class="hbar"><span>${k}</span><span class="track"><i style="width:${Math.round(v / kmax * 100)}%"></i></span><b class="num">${euro(v)}</b></div>`).join("")}</div>
           <div class="panel"><h2>Stärkste Kunden (bezahlt)</h2><div class="list">${top.map((x) => `<div class="row"><span class="t">${esc(x.c.name)}</span><span class="r"><b class="num">${euro(x.s)}</b></span></div>`).join("")}<div class="row"><span class="t mini">Laufkunden ohne Namen</span><span class="r"><b class="num">${euro(lauf)}</b></span></div></div></div>
         </div>
         ${VIEWS.auswertung()}
+        ${kdAuswertung()}
         ${einstellungen()}`;
     },
 
@@ -621,7 +814,7 @@
           <p class="hint" style="margin-top:10px">Auftragswert laut App. Der tatsächliche Umsatz kommt aus der Kasse.</p></div>`;
     },
   };
-  const TITLES = { heute: "Heute", annahme: "Neue Annahme", auftraege: "Aufträge", teile: "Teile-Kartei", kunden: "Kunden", kasse: "Kasse", management: "Geschäftsleitung", auswertung: "Auswertung" };
+  const TITLES = { kundendienst: "Kundendienst", heute: "Heute", annahme: "Neue Annahme", auftraege: "Aufträge", teile: "Teile-Kartei", kunden: "Kunden", kasse: "Kasse", management: "Geschäftsleitung", auswertung: "Auswertung" };
 
   function render() {
     document.querySelectorAll("[data-nav]").forEach((b) => b.closest(".rail") && b.setAttribute("aria-current", b.dataset.nav === ui.view ? "page" : "false"));
@@ -631,6 +824,7 @@
     document.getElementById("title").textContent = TITLES[ui.view] + (ui.store === "ALL" ? " · alle Geschäfte" : ui.view === "annahme" ? " · " + geschaeft(ui.store) : "");
     const focus = document.activeElement && document.activeElement.id; const pos = focus && document.activeElement.selectionStart;
     document.getElementById("view").innerHTML = VIEWS[ui.view]();
+    fotosZeigen();
     document.querySelectorAll("[data-qr]").forEach((el) => { if (window.QRCode) new QRCode(el, { text: el.dataset.qr, width: +(el.dataset.size || 176), height: +(el.dataset.size || 176), correctLevel: QRCode.CorrectLevel.L }); else el.textContent = "QR-Code lädt nicht (offline)"; });
     document.querySelectorAll("img[data-schein]").forEach((img) => { const o = db.orders.find((x) => x.nr === img.dataset.schein); if (o && window.QRCode) img.src = scheinBild(o).toDataURL("image/png"); });
     if (focus) { const el = document.getElementById(focus); if (el) { el.focus(); try { el.setSelectionRange(pos, pos); } catch {} } }
@@ -680,11 +874,21 @@
     else if ("pinneu" in ds) { const a = document.getElementById("pn1").value, b2 = document.getElementById("pn2").value; if (a !== b2) { toast("Die beiden PINs sind verschieden"); return; } api("pin_aendern", { neu: a }).then(() => { toast("PIN geändert"); render(); }).catch((err) => leitungFehler(err)); return; }
     else if ("sicherung" in ds) { sicherung(); return; }
     else if ("abmelden" in ds) { if (ausstehend.size) { toast("Erst abgleichen: es warten noch Änderungen"); sync(); return; } abmelden(true); IDB.leeren().then(() => location.reload()); return; }
-    else if ("kd" in ds) {
-      const o = db.orders.find((x) => x.nr === ui.openOrder);
-      (o.kd = o.kd || []).push({ am: iso(today0()), grund: document.getElementById("kd-grund").value, notiz: document.getElementById("kd-notiz").value.trim() });
-      o.status = "kundendienst"; if (o.items && o.items[0]) setItem(o.items[0], "kundendienst"); change(o); toast("Beim Kundendienst vermerkt");
-    }
+    else if (ds.treklam) { ui.view = "kundendienst"; ui.tNeu = ds.treklam; ui.tSuche = undefined; ui.openTicket = null; scrollTo({ top: 0 }); }
+    else if ("tneu" in ds) { ui.tSuche = ""; ui.tNeu = null; ui.openTicket = null; setTimeout(() => document.getElementById("t-suche")?.focus(), 0); }
+    else if (ds.tfuer) { ui.tNeu = ds.tfuer; ui.tSuche = undefined; }
+    else if ("tabbruch" in ds) { ui.tNeu = null; ui.tSuche = undefined; }
+    else if (ds.tanlegen) { ticketAnlegen(db.orders.find((x) => x.nr === ds.tanlegen)); }
+    else if (ds.ticket) { ui.view = "kundendienst"; ui.openTicket = ds.ticket; ui.taArt = "nachgebessert"; ui.tNeu = null; ui.tSuche = undefined; scrollTo({ top: 0, behavior: "smooth" }); }
+    else if (ds.tstatus) { const tk = tickets().find((x) => x.id === ui.openTicket); ticketStatus(tk, ds.tstatus); toast(`${tk.id}: ${T_STATUS[ds.tstatus][0]}`); }
+    else if ("tvermerk" in ds) { const tk = tickets().find((x) => x.id === ui.openTicket); const text = document.getElementById("tv-text").value.trim(); const w = document.getElementById("tv-wieder").value;
+      if (!text && w === (tk.wieder || "")) { toast("Bitte einen Vermerk eintragen"); return; }
+      if (w !== (tk.wieder || "")) { tk.wieder = w; tLog(tk, w ? "Wiedervorlage am " + fmtDate(w) : "Wiedervorlage entfernt"); }
+      if (text) tLog(tk, text); change(tk); toast("Vermerk gespeichert"); }
+    else if ("tfertig" in ds) { ticketAbschluss(tickets().find((x) => x.id === ui.openTicket)); }
+    else if ("tauf" in ds) { const tk = tickets().find((x) => x.id === ui.openTicket); tk.status = "pruefung"; tk.ergebnis = null; tLog(tk, "Wieder geöffnet"); change(tk); }
+    else if ("tclose2" in ds) { ui.openTicket = null; }
+    else if (ds.tfilter2) { ui.tfilter2 = ds.tfilter2; }
     else if ("askstorno" in ds) { ui.askStorno = ui.openOrder; }
     else if ("nostorno" in ds) { ui.askStorno = null; }
     else if ("storno" in ds) { const o = db.orders.find((x) => x.nr === ui.openOrder); o.status = "storniert"; o.storniertAm = iso(today0()); (o.items || []).forEach((it) => it.st !== "ausgegeben" && setItem(it, "storniert")); ui.askStorno = null; change(o); toast(`Auftrag ${o.nr} storniert`); }
@@ -737,11 +941,15 @@
     else if (t.id === "kq") { ui.q = t.value; render(); }
     else if (t.id === "aq") { ui.aq = t.value; render(); }
     else if (t.id === "tq") { ui.tq = t.value; render(); }
+    else if (t.id === "kq2") { ui.kq2 = t.value; render(); }
+    else if (t.id === "t-suche") { ui.tSuche = t.value; render(); }
     else if (t.id === "scan-platz") { ui.scanPlatz = t.value; }
   });
   document.addEventListener("change", (e) => {
     const t = e.target;
-    if (t.id === "d-date" && t.value) { ui.draft.date = t.value; ui.draft.due = iso(addWorkdays(new Date(t.value + "T00:00"), 3)); render(); }
+    if (t.id === "ta-art") { ui.taArt = t.value; render(); }
+    else if (t.id === "t-foto" && t.files[0]) { const tk = tickets().find((x) => x.id === ui.openTicket); fotoHochladen(tk, t.files[0]).then(render); t.value = ""; }
+    else if (t.id === "d-date" && t.value) { ui.draft.date = t.value; ui.draft.due = iso(addWorkdays(new Date(t.value + "T00:00"), 3)); render(); }
     else if (t.id === "d-due" && t.value) { ui.draft.due = t.value; render(); }
   });
 

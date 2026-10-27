@@ -120,7 +120,7 @@ switch ($a) {
         $log = $db->prepare('INSERT INTO lb_verlauf (zeit, geraet, typ, id, daten) VALUES (?, ?, ?, ?, ?)');
         foreach ($liste as $x) {
             $typ = $x['typ'] ?? ''; $id = (string) ($x['id'] ?? '');
-            if (!in_array($typ, ['kunde', 'auftrag'], true) || !preg_match('/^[A-Z0-9-]{2,32}$/', $id) || !is_array($x['daten'] ?? null)) {
+            if (!in_array($typ, ['kunde', 'auftrag', 'ticket'], true) || !preg_match('/^[A-Z0-9-]{2,32}$/', $id) || !is_array($x['daten'] ?? null)) {
                 $db->rollBack(); fehler('Ungültiger Datensatz.');
             }
             $json = json_encode($x['daten'], JSON_UNESCAPED_UNICODE);
@@ -142,13 +142,35 @@ switch ($a) {
         $g = (string) ($e['geschaeft'] ?? 'W');
         $anzahl = max(1, min(500, (int) ($e['anzahl'] ?? 20)));
         if (!preg_match('/^[A-Z]{1,2}$/', $g)) fehler('Ungültiges Geschäft.');
-        $start = ['auftrag' => 1000, 'teil' => 100000, 'kunde' => 1000][$art] ?? null;
+        $start = ['auftrag' => 1000, 'teil' => 100000, 'kunde' => 1000, 'ticket' => 1000][$art] ?? null;
         if ($start === null) fehler('Ungültige Art.');
-        $name = $art === 'kunde' ? 'kunde' : "$art:$g";
+        $name = in_array($art, ['kunde', 'ticket'], true) ? $art : "$art:$g";
         $db->beginTransaction();
         $bis = lb_zaehler($db, $name, $anzahl, $start);
         $db->commit();
         antwort(['von' => $bis - $anzahl + 1, 'bis' => $bis]);
+
+    // Fotos zu Reklamationen: liegen außerhalb des Web-Ordners und sind nur mit Anmeldung abrufbar
+    case 'foto':
+        if ($post) {
+            $e = eingabe();
+            $bild = base64_decode((string) ($e['daten'] ?? ''), true);
+            if ($bild === false || strlen($bild) > 4_000_000 || !str_starts_with($bild, "\xFF\xD8\xFF")) fehler('Ungültiges Foto.');
+            $id = gmdate('Y') . '-' . bin2hex(random_bytes(12));
+            $ordner = lb_geheim_ordner() . '/fotos/' . substr($id, 0, 4);
+            if (!is_dir($ordner) && !mkdir($ordner, 0700, true)) fehler('Fotoordner lässt sich nicht anlegen.', 500);
+            if (file_put_contents("$ordner/" . substr($id, 5) . '.jpg', $bild) === false) fehler('Foto lässt sich nicht speichern.', 500);
+            antwort(['id' => $id]);
+        }
+        $id = (string) ($_GET['id'] ?? '');
+        if (!preg_match('/^(\d{4})-([0-9a-f]{24})$/', $id, $m)) fehler('Ungültiges Foto.');
+        $datei = lb_geheim_ordner() . "/fotos/$m[1]/$m[2].jpg";
+        if (!is_file($datei)) fehler('Foto nicht gefunden.', 404);
+        header('Content-Type: image/jpeg');
+        header('Cache-Control: private, max-age=31536000, immutable');
+        header('Content-Length: ' . filesize($datei));
+        readfile($datei);
+        exit;
 
     case 'pin':
         if (!$post) fehler('Nur POST.', 405);
@@ -196,8 +218,8 @@ switch ($a) {
     // Komplette Sicherung als Datei
     case 'export':
         $s = $db->query('SELECT typ, id, daten, geaendert FROM lb_daten ORDER BY typ, id');
-        $alle = ['erstellt' => gmdate('c'), 'version' => LB_VERSION, 'kunden' => [], 'auftraege' => []];
-        foreach ($s as $z) $alle[$z['typ'] === 'kunde' ? 'kunden' : 'auftraege'][] = json_decode($z['daten'], true);
+        $alle = ['erstellt' => gmdate('c'), 'version' => LB_VERSION, 'kunden' => [], 'auftraege' => [], 'reklamationen' => []];
+        foreach ($s as $z) $alle[['kunde' => 'kunden', 'auftrag' => 'auftraege', 'ticket' => 'reklamationen'][$z['typ']] ?? 'sonstiges'][] = json_decode($z['daten'], true);
         header('Content-Disposition: attachment; filename="ladenbuch-sicherung-' . date('Y-m-d') . '.json"');
         antwort($alle);
 }

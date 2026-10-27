@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 const LB_SCHEMA = 1;
-const LB_VERSION = '1.0.0';
+const LB_VERSION = '1.1.0';
 
 // Zugangsdaten liegen außerhalb des Web-Ordners der Domain
 function lb_geheim_ordner(): string { return dirname(__DIR__) . '/ladenbuch-geheim'; }
