@@ -111,3 +111,25 @@
   render();
   setInterval(render, 60000);
 })();
+
+// Startbild als Diashow: wechselt alle 5 Sekunden, pausiert bei Maus/Fokus, ohne Bewegung bei „weniger Bewegung“
+(function () {
+  const box = document.querySelector("[data-slides]");
+  if (!box) return;
+  const slides = [...box.querySelectorAll(".slide")];
+  const dots = [...box.querySelectorAll(".dots button")];
+  let i = 0, timer = null;
+  const show = (n) => {
+    i = (n + slides.length) % slides.length;
+    slides.forEach((s, k) => s.classList.toggle("is-active", k === i));
+    dots.forEach((d, k) => (k === i ? d.setAttribute("aria-current", "true") : d.removeAttribute("aria-current")));
+  };
+  const ruhig = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const start = () => { if (!ruhig && !timer) timer = setInterval(() => show(i + 1), 5000); };
+  const stop = () => { clearInterval(timer); timer = null; };
+  dots.forEach((d, k) => d.addEventListener("click", () => { show(k); stop(); start(); }));
+  box.addEventListener("mouseenter", stop); box.addEventListener("mouseleave", start);
+  box.addEventListener("focusin", stop); box.addEventListener("focusout", start);
+  document.addEventListener("visibilitychange", () => (document.hidden ? stop() : start()));
+  start();
+})();
