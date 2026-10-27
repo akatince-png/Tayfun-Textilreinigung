@@ -28,4 +28,12 @@ log('Laufkunde:', await w.locator('.anfrage-dlg .pay-warn').textContent()); awai
 await w.waitForTimeout(1500);
 await a.click('#sync'); await a.waitForTimeout(1200); await a.click('.rail [data-nav="auftraege"]'); await a.click('[data-filter="alle"]'); await a.locator('.list .row', {hasText:'Nina'}).click();
 log('Laden sieht:', (await a.locator('.teile-zustand .anfragen').first().textContent()).replace(/\s+/g,' ').trim());
+// zweite Abgabe derselben Kundin: Werkstatt sieht Kunde und Vorgeschichte
+await a.click('.rail [data-nav="annahme"]'); await a.fill('#cust-q','Nina'); await a.waitForTimeout(200); await a.locator('[data-cust]').filter({hasText:'Nina'}).first().click(); await a.click('[data-cat="Garderobe"]'); await a.click('[data-add="mantel"]'); await a.click('[data-save]'); await a.waitForTimeout(1500);
+await w.click('#sync'); await w.waitForTimeout(1200); await w.fill('#ws-nr','1003'); await w.press('#ws-nr','Enter'); await w.waitForTimeout(300);
+log('Kundenkasten:', (await w.locator('.ws-kunde > div').first().textContent()).replace(/\s+/g,' ').trim());
+await w.click('.ws-historie summary'); log('Vorgeschichte:', (await w.locator('.ws-historie').textContent()).replace(/\s+/g,' ').trim().slice(0,260));
+log('WhatsApp-Knopf:', await w.getAttribute('.ws-kunde a.wa-btn','href').then(h=>decodeURIComponent(h).slice(0,90)));
+log('sichtbare Bereiche:', await w.locator('.rail button:not([hidden])').allTextContents());
+await w.screenshot({path:'shots/ws-kunde.png'});
 log('Fehler:', errs); await b.close();})();

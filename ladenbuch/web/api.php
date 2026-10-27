@@ -93,7 +93,7 @@ if ($sitzung['zuletzt'] < gmdate('Y-m-d H:i:s', time() - 300)) {
 $geraet = $sitzung['geraet'];
 $rolle = $sitzung['rolle'] ?? 'laden';
 $werkstatt = $rolle === 'werkstatt';
-// Die Werkstatt darf nur Sammler sehen und bearbeiten – keine Kunden, keine Kasse, keine Leitung
+// Die Werkstatt: lesen ja, aber keine Kasse, keine Annahme, keine Leitung
 if ($werkstatt && !in_array($a, ['abmelden', 'sync', 'push', 'foto', 'kontakt'], true)) fehler('Nicht für den Werkstatt-Zugang.', 403);
 $leitung = $sitzung['leitung_bis'] !== null && $sitzung['leitung_bis'] > jetzt();
 
@@ -105,7 +105,8 @@ switch ($a) {
     // Alles, was sich seit dem letzten Abgleich geändert hat
     case 'sync':
         $seit = max(0, (int) ($_GET['seit'] ?? 0));
-        $s = $db->prepare('SELECT typ, id, rev, daten FROM lb_daten WHERE rev > ?' . ($werkstatt ? " AND typ IN ('auftrag', 'mitarbeiter')" : '') . ' ORDER BY rev LIMIT 5000');
+        // Die Werkstatt sieht alles zum Lesen (Kunden, Vorgeschichte, Reklamationen); schreiben darf sie nur Teile (siehe push)
+        $s = $db->prepare('SELECT typ, id, rev, daten FROM lb_daten WHERE rev > ? ORDER BY rev LIMIT 5000');
         $s->execute([$seit]);
         $zeilen = $s->fetchAll();
         $rev = $seit;

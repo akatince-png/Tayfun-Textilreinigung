@@ -20,7 +20,7 @@ await a.locator('[data-maengel]').nth(1).click(); await a.waitForSelector('dialo
 // Werkstatt
 const w=await neu('Tablet Werkstatt','werkstatt99');
 await w.selectOption('#bediener',{label:'Kemal Reiniger'}); log('sichtbare Bereiche:', await w.locator('.rail button:not([hidden])').allTextContents());
-const s=await api(w,'sync',null,'&seit=0'); log('Werkstatt bekommt:', [...new Set(s[1].daten.map(x=>x.typ))], '| Telefon im Datenstrom:', JSON.stringify(s[1]).includes('0170 3333333'));
+const s=await api(w,'sync',null,'&seit=0'); log('Werkstatt bekommt:', [...new Set(s[1].daten.map(x=>x.typ))], '| Telefonnummern:', s[1].daten.filter(x=>x.typ==='kunde').map(x=>x.daten.tel));
 await w.fill('#ws-nr','1001'); await w.press('#ws-nr','Enter'); await w.waitForTimeout(300);
 log('Karten:', await w.locator('.ws-teil').evaluateAll(xs=>xs.map(x=>(x.classList.contains('rot')?'ROT ':'grün ')+x.querySelector('b').textContent)));
 await w.locator('.ws-teil').nth(1).locator('[data-maengel]').click(); await w.waitForSelector('dialog.maengel-dlg[open]');

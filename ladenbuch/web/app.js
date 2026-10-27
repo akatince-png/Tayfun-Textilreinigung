@@ -1,6 +1,6 @@
 (function () {
   // ---------------------------------------------------------------- Stammdaten
-  const VERSION = "1.5.0";
+  const VERSION = "1.6.0";
   let STORES = { W: "Wettbergen" };
   const CATS = ["Garderobe", "Hemden", "Haushalt", "Gardinen", "Leder"];
   const ITEMS = [
@@ -193,7 +193,7 @@
 
   const inStore = (o) => ui.store === "ALL" || o.store === ui.store;
   const LAUF = { id: "LAUF", name: "Laufkunde (ohne Namen)", tel: "–" };
-  const UNBEKANNT = { id: "?", get name() { return meta.rolle === "werkstatt" ? "–" : "(Kunde wird geladen)"; }, tel: "–" };
+  const UNBEKANNT = { id: "?", name: "(Kunde wird geladen)", tel: "–" };
   const cust = (id) => (id === "LAUF" ? LAUF : db.customers.find((c) => c.id === id) || UNBEKANNT);
   const geschaeft = (g) => STORES[g] || g;
   // Teile-Kartei: jedes Kleidungsstück bekommt eine eigene Nummer (Geschäftskürzel + laufende Zahl), unabhängig davon, ob der Kunde bekannt ist
@@ -850,19 +850,34 @@
     const o = kand.find((x) => x.store === ui.store) || kand[0];
     return o ? { o, pos: m[3] ? +m[3] : null } : null;
   }
+  // Kunde und Vorgeschichte für die Werkstatt: wer, was früher abgegeben, frühere Mängel und Reklamationen
+  function kundeKasten(o) {
+    const c = cust(o.cust); const lauf = c.id === "LAUF";
+    const frueher = lauf ? [] : db.orders.filter((x) => x.cust === c.id && x.nr !== o.nr).sort((a, b) => b.date.localeCompare(a.date));
+    const rekl = lauf ? [] : tickets().filter((t) => t.cust === c.id).sort((a, b) => b.erstellt.localeCompare(a.erstellt));
+    const nr = handyNr(c.tel);
+    const zeile = (x) => { const its = x.items || []; const hin = its.flatMap((it) => [...maengelVon(it).map((m) => `${ITEM[it.id].name}: ${m.art}`), ...(it.wuensche || []).map((w) => `${ITEM[it.id].name}: ${w.text}`), ...anfragenVon(it).filter((a) => a.antwort).map((a) => `${ITEM[it.id].name}: ${a.kurz} – ${a.antwort.ja ? "zugestimmt" : "abgelehnt"}`)]);
+      return `<li><b>${fmtDate(x.date)} · Sammler ${zahl(x.nr)}</b> · ${its.map((it) => ITEM[it.id].name).join(", ")} ${pill(x)}${hin.length ? `<br><span class="mini">${hin.map(esc).join(" · ")}</span>` : ""}</li>`; };
+    return `<div class="panel ws-kunde"><div><span class="mini">Kunde</span><b>${esc(c.name)}</b>
+        ${lauf ? `<span class="mini">Laufkunde ohne Namen und Telefonnummer</span>` : `<span>${c.tel && c.tel !== "–" ? `<a href="tel:${esc(c.tel.replace(/[^\d+]/g, ""))}">${esc(c.tel)}</a>` : "keine Telefonnummer"} · ${frueher.length ? `${frueher.length} frühere ${frueher.length === 1 ? "Abgabe" : "Abgaben"}` : "erste Abgabe"}${rekl.length ? ` · <b class="warn-text">${rekl.length} ${rekl.length === 1 ? "Reklamation" : "Reklamationen"}</b>` : ""}</span>`}</div>
+      ${nr ? `<a class="btn small wa-btn" href="https://wa.me/${nr}?text=${encodeURIComponent(`Guten Tag ${vorname(c)}, hier ist die Werkstatt von Tayfun Textilpflege zu Ihrem Auftrag ${zahl(o.nr)}: `)}" target="_blank" rel="noopener">WhatsApp an ${esc(vorname(c))}</a>` : ""}
+      ${frueher.length || rekl.length ? `<details class="ws-historie"><summary>Vorgeschichte anzeigen</summary>
+        ${rekl.length ? `<b>Reklamationen</b><ul>${rekl.map((t) => `<li><b>${fmtDate(t.erstellt)} · ${t.id}</b> (Sammler ${zahl(t.auftrag)}) · ${esc(t.grund)}${t.text ? ": " + esc(t.text) : ""} · ${t.ergebnis ? esc(T_ERGEBNIS[t.ergebnis.art]) : esc(T_STATUS[t.status][0])}</li>`).join("")}</ul>` : ""}
+        ${frueher.length ? `<b>Frühere Abgaben</b><ul>${frueher.slice(0, 15).map(zeile).join("")}</ul>${frueher.length > 15 ? `<p class="mini">… und ${frueher.length - 15} ältere</p>` : ""}` : ""}</details>` : ""}</div>`;
+  }
   function werkstattAnsicht() {
     const f = ui.wsNr ? findeSammler(ui.wsNr) : null; const o = f && f.o;
     const its = o ? o.items || [] : [];
     const kopf = `<div class="pickbox"><b>Sammler aufrufen</b><label class="field" for="ws-nr">Nummer vom Etikett oder Sammler eintippen oder scannen, dann Enter<input id="ws-nr" inputmode="numeric" value="${esc(ui.wsNr || "")}" placeholder="z. B. 1001" autocomplete="off" enterkeyhint="go"></label></div>`;
     if (!ui.wsNr) {
       const offen = db.orders.filter(inStore).filter((x) => ["arbeit", "kundendienst"].includes(x.status)).sort((a, b) => a.due.localeCompare(b.due));
-      return kopf + `<div class="panel"><h2>In Arbeit (${offen.length})</h2>${offen.length ? `<div class="list">${offen.slice(0, 40).map((x) => `<button class="row" data-ws="${zahl(x.nr)}" type="button"><span class="t">Sammler ${zahl(x.nr)} · ${(x.items || []).length} Teile${(x.items || []).some(rot) ? ` <span class="pill p-alt">${x.items.filter(rot).length} mit Vermerk</span>` : ""}</span><span class="s num">abholbereit ab ${fmtDate(x.due)}</span><span class="r">${pill(x)}</span></button>`).join("")}</div>` : `<p class="empty">Nichts in Arbeit.</p>`}</div>`;
+      return kopf + `<div class="panel"><h2>In Arbeit (${offen.length})</h2>${offen.length ? `<div class="list">${offen.slice(0, 40).map((x) => `<button class="row" data-ws="${zahl(x.nr)}" type="button"><span class="t">Sammler ${zahl(x.nr)} · ${esc(cust(x.cust).name)} · ${(x.items || []).length} Teile${(x.items || []).some(rot) ? ` <span class="pill p-alt">${x.items.filter(rot).length} mit Vermerk</span>` : ""}</span><span class="s num">abholbereit ab ${fmtDate(x.due)}</span><span class="r">${pill(x)}</span></button>`).join("")}</div>` : `<p class="empty">Nichts in Arbeit.</p>`}</div>`;
     }
     if (!o) return kopf + `<p class="empty">Kein Sammler mit der Nummer ${esc(ui.wsNr)} gefunden.</p>`;
     const zaehl = o.zaehlung;
-    return kopf + `<div class="panel ws-kopf"><div><span class="mini">Sammler</span><b class="ws-nr">${zahl(o.nr)}</b></div>
+    return kopf + `${kundeKasten(o)}<div class="panel ws-kopf"><div><span class="mini">Sammler</span><b class="ws-nr">${zahl(o.nr)}</b></div>
         <div><b class="ws-anz">${its.length} ${its.length === 1 ? "Teil" : "Teile"}</b><span class="mini">${its.filter(rot).length} mit Vermerk · abholbereit ab <b>${fmtDate(o.due)}</b></span>
-        ${zaehl ? `<span class="ok-text">Anzahl geprüft: ${esc(zaehl.von)}, ${esc(zaehl.am)}</span>` : `<button class="btn small" data-wszaehl type="button">${its.length} Teile nachgezählt – stimmt</button>`}</div>
+        ${zaehl ? `<span class="ok-text">Anzahl geprüft: ${esc(zaehl.von)}, ${esc(zaehl.am)}</span>` : `<button class="btn small" data-wszaehl type="button">${its.length} ${its.length === 1 ? "Teil" : "Teile"} nachgezählt – stimmt</button>`}</div>
         <div class="chips"><button class="btn ghost small" data-wsalle="reinigung" type="button">Alle in Reinigung</button><button class="btn ghost small" data-wsalle="finish" type="button">Alle ins Finish</button><button class="btn small" data-wsalle="fertig" type="button">Alle fertig</button></div></div>
       ${its.map((it) => `<div class="panel ws-teil ${rot(it) ? "rot" : "gruen"}${f.pos === teilPos(o, it) ? " gewaehlt" : ""}">
         <div class="ws-teil-kopf"><span class="ampel ${rot(it) ? "rot" : "gruen"}"></span><b>${teilLabel(o, it)} · ${esc(ITEM[it.id].name)}</b>${stPill(it.st)}</div>
@@ -925,8 +940,9 @@
     });
     dlg.addEventListener("close", () => { dlg.remove(); render(); });
     zeichnen(); dlg.showModal();
-    api("kontakt", null, `&nr=${encodeURIComponent(f.o.nr)}`).then((r) => { z.kontakt = r; zeichnen(); })
-      .catch((err) => { z.fehler = err.status === 0 ? "Keine Verbindung – die Telefonnummer wird online geholt." : err.message; zeichnen(); });
+    const c = cust(f.o.cust);
+    if (c.tel && c.tel !== "–" && handyNr(c.tel)) { z.kontakt = { tel: c.tel, vorname: vorname(c) }; zeichnen(); }
+    else { z.fehler = "Für diesen Kunden ist keine Handynummer hinterlegt."; zeichnen(); }
   }
   // Liste der Anfragen mit Antwort-Knöpfen (in Werkstatt-Karte, Dialogen und Auftrag)
   function anfragenListe(it, knoepfe) {
