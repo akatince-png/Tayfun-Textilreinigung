@@ -4,6 +4,9 @@ RewriteCond %{HTTPS} off [OR]
 RewriteCond %{HTTP_HOST} !^www\. [NC]
 RewriteRule ^ https://www.tayfun-textilpflege.de%{REQUEST_URI} [L,R=301]
 
+# Visitenkarte: Handys bieten beim Öffnen „Kontakt hinzufügen“ an
+AddType text/vcard .vcf
+
 # Fehlerseite: unbekannte Adressen führen zur Startseite
 ErrorDocument 404 /index.html
 
