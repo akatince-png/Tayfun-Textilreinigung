@@ -1,6 +1,6 @@
 (function () {
   // ---------------------------------------------------------------- Stammdaten
-  const VERSION = "1.6.0";
+  const VERSION = "1.7.0";
   let STORES = { W: "Wettbergen" };
   const CATS = ["Garderobe", "Hemden", "Haushalt", "Gardinen", "Leder"];
   const ITEMS = [
@@ -267,20 +267,6 @@
   function scheinText(o) {
     const v = vorname(cust(o.cust));
     return `Guten Tag${v ? " " + v : ""}, hier ist Ihr Abholschein von Tayfun Textilpflege:\n${SCHEIN.link(belegDaten(o))}\n\nAbholcode: ${abholcode(o)}\nAbholbereit ab ${fmtDate(o.due)}\nBitte bei der Abholung vorzeigen.`;
-  }
-  function digitalBox(o) {
-    if (o.status === "storniert") return "";
-    const c = cust(o.cust); const nr = handyNr(c.tel);
-    const kannSenden = nr && c.id !== "LAUF";
-    const bereitText = `Guten Tag, Ihr Auftrag ${o.nr} bei Tayfun Textilpflege ist abholbereit. Summe ${euro(total(o))}${o.paid ? " (bereits bezahlt)" : ""}. Wir freuen uns auf Sie! An der Kirche 10, Mo, Di, Do, Fr 8-13 + 15-18 Uhr, Mi + Sa 8-13 Uhr.`;
-    const hinweis = kannSenden ? `WhatsApp öffnet sich direkt im Chat mit ${esc(vorname(c))} (${esc(c.tel)}). Die Nachricht mit dem Schein-Link ist fertig, nur noch auf Senden tippen.`
-      : "Keine Handynummer hinterlegt: Code zeigen, der Kunde scannt ihn mit seiner Handykamera.";
-    return `<div class="digi"><b>Abholschein aufs Handy</b>
-      <div class="chips">${kannSenden ? `<a class="btn small wa-btn" href="https://wa.me/${nr}?text=${encodeURIComponent(scheinText(o))}" target="_blank" rel="noopener">Per WhatsApp an ${esc(vorname(c))} senden</a>` : ""}
-      <button class="btn small" data-zeigen type="button">Code für Kunden zeigen</button>
-      <button class="btn ghost small" data-teilen type="button">Als Bild teilen</button>
-      ${kannSenden && o.status === "bereit" ? `<a class="btn ghost small" href="https://wa.me/${nr}?text=${encodeURIComponent(bereitText)}" target="_blank" rel="noopener">„Abholbereit“ melden</a>` : ""}</div>
-      <span class="mini">${hinweis}</span></div>`;
   }
   // Kundenansicht: iPad zum Kunden drehen, er scannt den Code und hat den Schein als Seite/Bild auf dem Handy
   function zeigen(o) {
@@ -859,7 +845,7 @@
     const zeile = (x) => { const its = x.items || []; const hin = its.flatMap((it) => [...maengelVon(it).map((m) => `${ITEM[it.id].name}: ${m.art}`), ...(it.wuensche || []).map((w) => `${ITEM[it.id].name}: ${w.text}`), ...anfragenVon(it).filter((a) => a.antwort).map((a) => `${ITEM[it.id].name}: ${a.kurz} – ${a.antwort.ja ? "zugestimmt" : "abgelehnt"}`)]);
       return `<li><b>${fmtDate(x.date)} · Sammler ${zahl(x.nr)}</b> · ${its.map((it) => ITEM[it.id].name).join(", ")} ${pill(x)}${hin.length ? `<br><span class="mini">${hin.map(esc).join(" · ")}</span>` : ""}</li>`; };
     return `<div class="panel ws-kunde"><div><span class="mini">Kunde</span><b>${esc(c.name)}</b>
-        ${lauf ? `<span class="mini">Laufkunde ohne Namen und Telefonnummer</span>` : `<span>${c.tel && c.tel !== "–" ? `<a href="tel:${esc(c.tel.replace(/[^\d+]/g, ""))}">${esc(c.tel)}</a>` : "keine Telefonnummer"} · ${frueher.length ? `${frueher.length} frühere ${frueher.length === 1 ? "Abgabe" : "Abgaben"}` : "erste Abgabe"}${rekl.length ? ` · <b class="warn-text">${rekl.length} ${rekl.length === 1 ? "Reklamation" : "Reklamationen"}</b>` : ""}</span>`}</div>
+        ${!lauf && anschrift(c) ? `<span class="mini">${esc(anschrift(c))}</span>` : ""}${lauf ? `<span class="mini">Laufkunde ohne Namen und Telefonnummer</span>` : `<span>${c.tel && c.tel !== "–" ? `<a href="tel:${esc(c.tel.replace(/[^\d+]/g, ""))}">${esc(c.tel)}</a>` : "keine Telefonnummer"} · ${frueher.length ? `${frueher.length} frühere ${frueher.length === 1 ? "Abgabe" : "Abgaben"}` : "erste Abgabe"}${rekl.length ? ` · <b class="warn-text">${rekl.length} ${rekl.length === 1 ? "Reklamation" : "Reklamationen"}</b>` : ""}</span>`}</div>
       ${nr ? `<a class="btn small wa-btn" href="https://wa.me/${nr}?text=${encodeURIComponent(`Guten Tag ${vorname(c)}, hier ist die Werkstatt von Tayfun Textilpflege zu Ihrem Auftrag ${zahl(o.nr)}: `)}" target="_blank" rel="noopener">WhatsApp an ${esc(vorname(c))}</a>` : ""}
       ${frueher.length || rekl.length ? `<details class="ws-historie"><summary>Vorgeschichte anzeigen</summary>
         ${rekl.length ? `<b>Reklamationen</b><ul>${rekl.map((t) => `<li><b>${fmtDate(t.erstellt)} · ${t.id}</b> (Sammler ${zahl(t.auftrag)}) · ${esc(t.grund)}${t.text ? ": " + esc(t.text) : ""} · ${t.ergebnis ? esc(T_ERGEBNIS[t.ergebnis.art]) : esc(T_STATUS[t.status][0])}</li>`).join("")}</ul>` : ""}
@@ -960,6 +946,97 @@
     return true;
   }
 
+  // ---------------------------------------------------------------- Kundenkartei: Stammkunden mit Adresse, Lage, Kontaktweg und Einwilligungen
+  const KONTAKTWEGE = { whatsapp: "WhatsApp", sms: "SMS", mail: "E-Mail", anruf: "Anruf" };
+  const mailOk = (m) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(m || "");
+  const telDa = (t) => !!t && t !== "–";
+  const anschrift = (c) => [[c.strasse, c.lage].filter(Boolean).join(", "), [c.plz, c.ort].filter(Boolean).join(" ")].filter(Boolean).join(" · ");
+  // Name aus Firma oder Vor- und Nachname, damit Suche und Listen weiter funktionieren
+  const kundenName = (c) => (c.firma ? c.firma + (c.nachname ? ` (${[c.vorname, c.nachname].filter(Boolean).join(" ")})` : "") : [c.vorname, c.nachname].filter(Boolean).join(" ")) || c.name || "";
+
+  function karteiDialog(id, vorgabe, danach) {
+    const alt = id ? db.customers.find((c) => c.id === id) : null;
+    const k = alt ? { ...alt } : { vorname: "", nachname: "", ...(vorgabe || {}) };
+    // Bisher nur „Name“ (Schnell-Kunde): in Vor- und Nachname aufteilen
+    const quelle = !alt ? vorgabe && !vorgabe.vorname && vorgabe.name : !alt.vorname && !alt.nachname && !alt.firma && alt.name;
+    if (quelle) { const t = quelle.trim().split(/\s+/); k.nachname = t.length > 1 ? t.pop() : ""; k.vorname = t.join(" "); }
+    const dlg = document.createElement("dialog"); dlg.className = "maengel-dlg kartei-dlg"; document.body.append(dlg);
+    const f = (feld, label, extra = "") => `<label class="field" for="k-${feld}">${label}<input id="k-${feld}" value="${esc(k[feld] || "")}" autocomplete="off" ${extra}></label>`;
+    const ein = k.einwilligung || {};
+    dlg.innerHTML = `<form class="kartei-form" method="dialog">
+      <h2>${alt ? `Karteikarte ${esc(alt.id)}` : "Neuer Stammkunde"}</h2>
+      <div class="row2"><label class="field" for="k-anrede">Anrede<select id="k-anrede">${["", "Frau", "Herr", "Divers / keine"].map((a) => `<option${a === (k.anrede || "") ? " selected" : ""}>${a}</option>`).join("")}</select></label>${f("firma", "Firma (falls Geschäftskunde)")}</div>
+      <div class="row2">${f("vorname", "Vorname")}${f("nachname", "Nachname")}</div>
+      <div class="row2">${f("tel", "Handy (für WhatsApp und SMS)", 'type="tel" inputmode="tel"')}${f("tel2", "Festnetz", 'type="tel" inputmode="tel"')}</div>
+      ${f("mail", "E-Mail", 'type="email" inputmode="email"')}
+      <div class="row2">${f("strasse", "Straße und Hausnummer")}${f("lage", "Stockwerk / Lage / Klingel", 'placeholder="z. B. 3. OG links, Klingel Müller"')}</div>
+      <div class="row2">${f("plz", "PLZ", 'inputmode="numeric" maxlength="5"')}${f("ort", "Ort", 'placeholder="z. B. Hannover-Wettbergen"')}</div>
+      ${f("lieferhinweis", "Hinweis für Abholung und Lieferung", 'placeholder="z. B. Hinterhof, Hund, nachmittags erreichbar"')}
+      <label class="field" for="k-kontakt">Bevorzugter Kontaktweg<select id="k-kontakt">${Object.entries(KONTAKTWEGE).map(([w, n]) => `<option value="${w}"${w === (k.kontakt || "whatsapp") ? " selected" : ""}>${n}</option>`).join("")}</select></label>
+      <label class="field" for="k-notiz">Notizen (Vorlieben, Besonderheiten)<textarea id="k-notiz" rows="2">${esc(k.notiz || "")}</textarea></label>
+      <fieldset class="teilwahl"><legend>Einwilligungen (bitte mit dem Kunden besprechen)</legend>
+        <label class="check"><input type="checkbox" id="k-ein-kontakt"${ein.kontakt ? " checked" : ""}> Darf über Aufträge per WhatsApp, SMS oder E-Mail informiert werden (Abholschein, „abholbereit“, Rückfragen)</label>
+        <label class="check"><input type="checkbox" id="k-ein-werbung"${ein.werbung ? " checked" : ""}> Möchte Angebote und Neuigkeiten erhalten (Werbung)</label>
+        ${ein.am ? `<span class="mini">Zuletzt geändert ${esc(ein.am)} von ${esc(ein.von || "?")}</span>` : ""}</fieldset>
+      <p class="pay-warn" id="k-fehler" hidden></p>
+      <div class="chips"><button class="btn" id="k-speichern" type="button">${alt ? "Speichern" : "In die Kartei aufnehmen"}</button><button class="btn ghost" id="k-abbruch" type="button">Abbrechen</button></div></form>`;
+    dlg.addEventListener("click", (e) => {
+      e.stopPropagation();
+      if (e.target.id === "k-abbruch") { dlg.close(); return; }
+      if (e.target.id !== "k-speichern") return;
+      const g = (x) => dlg.querySelector("#k-" + x).value.trim();
+      const neu = { ...k, anrede: g("anrede"), firma: g("firma"), vorname: g("vorname"), nachname: g("nachname"), tel: g("tel") || "–", tel2: g("tel2"), mail: g("mail"),
+        strasse: g("strasse"), lage: g("lage"), plz: g("plz"), ort: g("ort"), lieferhinweis: g("lieferhinweis"), kontakt: g("kontakt"), notiz: dlg.querySelector("#k-notiz").value.trim(), karte: true };
+      const fehler = !kundenName(neu) ? "Bitte Name oder Firma eintragen." : neu.mail && !mailOk(neu.mail) ? "Die E-Mail-Adresse sieht nicht richtig aus." : neu.plz && !/^\d{5}$/.test(neu.plz) ? "Die PLZ hat 5 Ziffern." : "";
+      if (fehler) { const p = dlg.querySelector("#k-fehler"); p.textContent = fehler; p.hidden = false; return; }
+      const ek = dlg.querySelector("#k-ein-kontakt").checked, ew = dlg.querySelector("#k-ein-werbung").checked;
+      if (ek !== !!ein.kontakt || ew !== !!ein.werbung) neu.einwilligung = { kontakt: ek, werbung: ew, am: jetztText(), von: wer() };
+      neu.name = kundenName(neu);
+      if (alt) { Object.assign(alt, neu); change(alt); toast("Karteikarte gespeichert"); if (danach) danach(alt); }
+      else {
+        try { neu.id = "K" + naechsteNummer("kunde"); } catch (err) { toast(err.message); return; }
+        neu.store = ui.store; neu.seit = iso(today0()); db.customers.push(neu); change(neu); toast(`${neu.name} in die Kartei aufgenommen`); if (danach) danach(neu);
+      }
+      dlg.close();
+    });
+    dlg.addEventListener("close", () => { dlg.remove(); render(); });
+    dlg.showModal();
+  }
+
+  // ---------------------------------------------------------------- Abholschein verschicken: WhatsApp, SMS oder E-Mail
+  // Kontakt kommt aus der Kartei; Laufkunden geben ihn nur für diesen Auftrag an (o.scheinKontakt)
+  function kontaktFuer(o) {
+    const c = cust(o.cust); const s = o.scheinKontakt || {};
+    const tel = (c.id !== "LAUF" && telDa(c.tel) ? c.tel : "") || s.tel || "";
+    return { tel, nr: handyNr(tel), mail: (c.id !== "LAUF" && c.mail) || s.mail || "", weg: c.kontakt || s.weg || "", nurAuftrag: !!(s.tel || s.mail) && !(c.id !== "LAUF" && (telDa(c.tel) || c.mail)) };
+  }
+  function versandKnoepfe(o, text, betreff, klein) {
+    const k = kontaktFuer(o); const b = [];
+    const cls = (w) => `btn small${w === (k.weg || "whatsapp") ? "" : " ghost"}${w === "whatsapp" ? " wa-btn" : ""}`;
+    if (k.nr) b.push(["whatsapp", `<a class="${cls("whatsapp")}" href="https://wa.me/${k.nr}?text=${encodeURIComponent(text)}" target="_blank" rel="noopener">${klein || "Per"} WhatsApp</a>`]);
+    if (k.nr) b.push(["sms", `<a class="${cls("sms")}" href="sms:+${k.nr}&body=${encodeURIComponent(text)}">${klein || "Per"} SMS</a>`]);
+    if (mailOk(k.mail)) b.push(["mail", `<a class="${cls("mail")}" href="mailto:${encodeURIComponent(k.mail)}?subject=${encodeURIComponent(betreff)}&body=${encodeURIComponent(text)}">${klein || "Per"} E-Mail</a>`]);
+    // bevorzugten Weg zuerst
+    return b.sort((x, y) => (y[0] === k.weg) - (x[0] === k.weg)).map((x) => x[1]).join("");
+  }
+  function digitalBox(o) {
+    if (o.status === "storniert") return "";
+    const c = cust(o.cust); const k = kontaktFuer(o);
+    const bereitText = `Guten Tag${vorname(c) ? " " + vorname(c) : ""}, Ihr Auftrag ${zahl(o.nr)} bei Tayfun Textilpflege ist abholbereit. Summe ${euro(total(o))}${o.paid ? " (bereits bezahlt)" : ""}. Wir freuen uns auf Sie! An der Kirche 10, Mo, Di, Do, Fr 8-13 + 15-18 Uhr, Mi + Sa 8-13 Uhr.`;
+    const knoepfe = versandKnoepfe(o, scheinText(o), `Ihr Abholschein ${zahl(o.nr)} – Tayfun Textilpflege`);
+    const ohne = !k.nr && !mailOk(k.mail);
+    const nurFuerSchein = ohne || ui.scheinKontakt === o.nr ? `<div class="row2"><label class="field" for="sk-tel">Handynummer (WhatsApp oder SMS)<input id="sk-tel" type="tel" inputmode="tel" value="${esc((o.scheinKontakt || {}).tel || "")}" autocomplete="off"></label>
+        <label class="field" for="sk-mail">oder E-Mail<input id="sk-mail" type="email" inputmode="email" value="${esc((o.scheinKontakt || {}).mail || "")}" autocomplete="off"></label></div>
+        <div class="chips"><button class="btn small" data-skok type="button">Für diesen Abholschein übernehmen</button></div>
+        <span class="mini">Wird nur bei diesem Auftrag gespeichert, nicht in der Kundenkartei.</span>` : "";
+    return `<div class="digi"><b>Abholschein aufs Handy</b>
+      ${knoepfe ? `<div class="chips">${knoepfe}</div><span class="mini">An ${esc([k.nr ? k.tel : "", k.mail].filter(Boolean).join(" · "))}${k.nurAuftrag ? " (nur für diesen Auftrag)" : ""}${c.kontakt ? ` · bevorzugt: ${KONTAKTWEGE[c.kontakt]}` : ""}. Die Nachricht ist fertig, nur noch auf Senden tippen.${k.nr ? " SMS vom iPad geht nur, wenn ein iPhone mit SMS-Weiterleitung verbunden ist." : ""}</span>` : ""}
+      ${nurFuerSchein}
+      ${!ohne && ui.scheinKontakt !== o.nr && c.id === "LAUF" ? `<div><button class="btn ghost small" data-skandern type="button">Kontakt für diesen Schein ändern</button></div>` : ""}
+      <div class="chips"><button class="btn small" data-zeigen type="button">Code für Kunden zeigen</button><button class="btn ghost small" data-teilen type="button">Als Bild teilen</button></div>
+      ${o.status === "bereit" && !ohne ? `<div class="chips"><span class="mini">„Abholbereit“ melden:</span>${versandKnoepfe(o, bereitText, `Ihr Auftrag ${zahl(o.nr)} ist abholbereit`, " ")}</div>` : ""}</div>`;
+  }
+
   // ---------------------------------------------------------------- Kundensuche, verzeiht Tippfehler und Sonderzeichen
   const norm = (s) => s.toLowerCase().replace(/ı/g, "i").replace(/ß/g, "ss").normalize("NFD").replace(/[\u0300-\u036f]/g, "")
     .replace(/ae/g, "a").replace(/oe/g, "o").replace(/ue/g, "u").replace(/ph/g, "f").replace(/(.)\1/g, "$1").replace(/[^a-z0-9 ]/g, "");
@@ -972,7 +1049,8 @@
   function findCustomers(q) {
     const digits = q.replace(/\D/g, ""); const nq = norm(q); const out = [];
     db.customers.forEach((c) => {
-      if (digits.length >= 3 && c.tel.replace(/\D/g, "").includes(digits)) return out.push({ c, score: 0 });
+      if (digits.length >= 3 && [c.tel, c.tel2].join(" ").replace(/\D/g, "").includes(digits)) return out.push({ c, score: 0 });
+      if (q.includes("@") && (c.mail || "").toLowerCase().includes(q.trim().toLowerCase())) return out.push({ c, score: 0 });
       if (!nq) return;
       const words = norm(c.name).split(" ").filter(Boolean); const full = words.join(" ");
       if (full.includes(nq)) return out.push({ c, score: words.some((w) => w.startsWith(nq)) ? 0 : 1 });
@@ -1043,7 +1121,7 @@
                  <div class="cust-tools"><button class="btn ghost small" data-cust="LAUF" type="button">Ohne Namen (Laufkunde)</button><button class="btn ghost small" data-togglelist type="button">${ui.showList ? "Kundenliste schließen" : "Aus Kundenliste wählen"}</button><span class="hint">Tippfehler sind kein Problem, ähnliche Namen werden gefunden.</span></div>
                  ${listHtml}
                  ${hits.length ? `<div class="suggest lang">${hits.map((h) => item(h.c, h.fuzzy)).join("")}</div>` : ""}
-                 ${q && !hits.length ? `<div class="cust-tools"><label class="field" for="new-tel" style="flex:1">Handynummer (für WhatsApp, freiwillig)<input id="new-tel" type="tel" inputmode="tel" placeholder="z. B. 0170 1234567" autocomplete="off"></label><button class="btn ghost small" data-newcust type="button">„${esc(d.custQ)}“ als neuen Kunden anlegen</button></div>` : ""}`}
+                 ${q && !hits.length ? `<div class="cust-tools"><label class="field" for="new-tel" style="flex:1">Handy oder E-Mail (freiwillig)<input id="new-tel" inputmode="email" placeholder="z. B. 0170 1234567 oder name@mail.de" autocomplete="off"></label><button class="btn ghost small" data-newcust type="button">„${esc(d.custQ)}“ schnell anlegen</button><button class="btn small" data-kneuannahme type="button">Als Stammkunde mit Karteikarte</button></div>` : ""}`}
           <div class="grid2" style="gap:10px;grid-template-columns:1fr 1fr">
             <label class="field" for="d-date">Annahmetag (${tag})<input type="date" id="d-date" value="${d.date}"></label>
             <label class="field" for="d-due">Abholbar ab<input type="date" id="d-due" value="${d.due}"></label></div>
@@ -1072,14 +1150,26 @@
     },
 
     kunden() {
-      const q = ui.q.trim().toLowerCase();
+      const q = ui.q.trim().toLowerCase(); const nq = norm(ui.q.trim());
       const stats = db.customers.map((c) => { const os = db.orders.filter((o) => o.cust === c.id && inStore(o) && zaehlt(o)); return { c, n: os.length, sum: os.reduce((s, o) => s + total(o), 0), last: os.map((o) => o.date).sort().pop() }; })
-        .filter((x) => x.n && (!q || x.c.name.toLowerCase().includes(q) || x.c.tel.includes(q))).sort((a, b) => b.sum - a.sum);
+        .filter((x) => !q || norm(x.c.name).includes(nq) || [x.c.tel, x.c.tel2].join(" ").replace(/\D/g, "").includes(q.replace(/\D/g, "") || "#") || (x.c.mail || "").toLowerCase().includes(q) || norm(anschrift(x.c)).includes(nq))
+        .sort((a, b) => b.sum - a.sum || a.c.name.localeCompare(b.c.name, "de"));
       const open = ui.openCust && stats.find((x) => x.c.id === ui.openCust);
-      return `<label for="kq" class="field">Suchen<input class="search" id="kq" value="${esc(ui.q)}" placeholder="Name oder Telefon" autocomplete="off"></label>
-        ${open ? `<div class="panel detail"><h2>${esc(open.c.name)}</h2><dl><dt>Telefon</dt><dd class="num">${open.c.tel}</dd><dt>Kundennummer</dt><dd>${open.c.id}</dd><dt>Aufträge</dt><dd>${open.n}</dd><dt>Umsatz</dt><dd class="num">${euro(open.sum)}</dd></dl>
-          ${list(db.orders.filter((o) => o.cust === open.c.id && inStore(o)).sort((a, b) => b.date.localeCompare(a.date)), "")}<div><button class="btn ghost" data-closecust type="button">Schließen</button></div></div>` : ""}
-        <div class="panel"><div class="list">${stats.map((x) => `<button class="row" data-custopen="${x.c.id}" type="button"><span class="t">${esc(x.c.name)} ${x.n >= 5 ? `<span class="pill p-stamm">Stammkunde</span>` : ""}</span><span class="s num">${x.n} Aufträge · zuletzt ${fmtDate(x.last)}</span><span class="r"><b class="num">${euro(x.sum)}</b></span></button>`).join("") || `<p class="empty">Kein Kunde gefunden.</p>`}</div></div>`;
+      const stamm = (x) => x.c.karte || x.n >= 5;
+      const karte = (c) => { const ein = c.einwilligung || {};
+        return `<dl>${c.firma ? `<dt>Firma</dt><dd>${esc(c.firma)}</dd>` : ""}<dt>Name</dt><dd>${esc([c.anrede, c.vorname, c.nachname].filter(Boolean).join(" ") || c.name)}</dd>
+          <dt>Handy</dt><dd class="num">${telDa(c.tel) ? esc(c.tel) : "–"}</dd>${c.tel2 ? `<dt>Festnetz</dt><dd class="num">${esc(c.tel2)}</dd>` : ""}<dt>E-Mail</dt><dd>${c.mail ? esc(c.mail) : "–"}</dd>
+          <dt>Anschrift</dt><dd>${anschrift(c) ? esc(anschrift(c)) : "–"}</dd>${c.lieferhinweis ? `<dt>Lieferhinweis</dt><dd>${esc(c.lieferhinweis)}</dd>` : ""}
+          <dt>Kontaktweg</dt><dd>${KONTAKTWEGE[c.kontakt] || "–"}</dd>
+          <dt>Einwilligung</dt><dd>${ein.kontakt ? "Nachrichten zu Aufträgen: ja" : "Nachrichten zu Aufträgen: nicht erfasst"} · ${ein.werbung ? "Werbung: ja" : "Werbung: nein"}${ein.am ? ` <span class="mini">(${esc(ein.am)}, ${esc(ein.von || "")})</span>` : ""}</dd>
+          ${c.notiz ? `<dt>Notizen</dt><dd>${esc(c.notiz)}</dd>` : ""}<dt>Kundennummer</dt><dd>${c.id}${c.seit ? ` · seit ${fmtDate(c.seit)}` : ""}</dd></dl>`; };
+      return `<div class="chips"><button class="btn" data-kneu type="button">+ Neuer Stammkunde</button></div>
+        <label for="kq" class="field">Suchen<input class="search" id="kq" value="${esc(ui.q)}" placeholder="Name, Telefon, E-Mail oder Straße" autocomplete="off"></label>
+        ${open ? `<div class="panel detail"><h2>${esc(open.c.name)} ${stamm(open) ? `<span class="pill p-stamm">Stammkunde</span>` : ""}</h2>${karte(open.c)}
+          <dl><dt>Aufträge</dt><dd>${open.n}</dd><dt>Umsatz</dt><dd class="num">${euro(open.sum)}</dd></dl>
+          <div class="chips">${werkstattZugang() ? "" : `<button class="btn small" data-kedit="${open.c.id}" type="button">${open.c.karte ? "Karteikarte bearbeiten" : "Zur Karteikarte erweitern"}</button>`}<button class="btn ghost" data-closecust type="button">Schließen</button></div>
+          ${list(db.orders.filter((o) => o.cust === open.c.id && inStore(o)).sort((a, b) => b.date.localeCompare(a.date)), "Noch keine Aufträge.")}</div>` : ""}
+        <div class="panel"><div class="list">${stats.map((x) => `<button class="row" data-custopen="${x.c.id}" type="button"><span class="t">${esc(x.c.name)} ${stamm(x) ? `<span class="pill p-stamm">Stammkunde</span>` : ""}</span><span class="s num">${x.n ? `${x.n} Aufträge · zuletzt ${fmtDate(x.last)}` : "noch keine Aufträge"}${anschrift(x.c) ? " · " + esc(anschrift(x.c)) : ""}</span><span class="r"><b class="num">${euro(x.sum)}</b></span></button>`).join("") || `<p class="empty">Kein Kunde gefunden.</p>`}</div></div>`;
     },
 
     teile() {
@@ -1236,9 +1326,21 @@
     else if (ds.cust) { d.cust = ds.cust; ui.showList = false; d.custQ = ""; }
     else if ("uncust" in ds) { d.cust = null; }
     else if ("togglelist" in ds) { ui.showList = !ui.showList; d.custQ = ""; }
+    else if (ds.kneu !== undefined) { karteiDialog(null); return; }
+    else if (ds.kedit) { karteiDialog(ds.kedit); return; }
+    else if ("kneuannahme" in ds) { const kv = (document.getElementById("new-tel") || {}).value?.trim() || "";
+      karteiDialog(null, { name: d.custQ.trim(), tel: kv && !kv.includes("@") ? kv : "", mail: kv.includes("@") ? kv : "" }, (k) => { ui.draft.cust = k.id; ui.draft.custQ = ""; ui.showList = false; }); return; }
+    else if ("skandern" in ds) { ui.scheinKontakt = ui.openOrder; }
+    else if ("skok" in ds) { const o = db.orders.find((x) => x.nr === ui.openOrder); const tel = document.getElementById("sk-tel").value.trim(), mail = document.getElementById("sk-mail").value.trim();
+      if (!tel && !mail) { toast("Bitte Handynummer oder E-Mail eintragen"); return; }
+      if (tel && !handyNr(tel)) { toast("Die Handynummer bitte mit Vorwahl, z. B. 0170 …"); return; }
+      if (mail && !mailOk(mail)) { toast("Die E-Mail-Adresse sieht nicht richtig aus"); return; }
+      o.scheinKontakt = { tel, mail, weg: tel ? "whatsapp" : "mail", am: jetztText(), von: wer() }; ui.scheinKontakt = null; change(o); toast("Kontakt für diesen Abholschein übernommen"); }
     else if ("newcust" in ds) {
       let id; try { id = "K" + naechsteNummer("kunde"); } catch (err) { toast(err.message); return; }
-      const k = { id, name: d.custQ.trim(), tel: (document.getElementById("new-tel") || {}).value?.trim() || "–", store: ui.store, seit: iso(today0()) };
+      const kontakt = (document.getElementById("new-tel") || {}).value?.trim() || "";
+      if (kontakt.includes("@") && !mailOk(kontakt)) { toast("Die E-Mail-Adresse sieht nicht richtig aus"); return; }
+      const k = { id, name: d.custQ.trim(), tel: kontakt && !kontakt.includes("@") ? kontakt : "–", mail: kontakt.includes("@") ? kontakt : "", store: ui.store, seit: iso(today0()) };
       db.customers.push(k); d.cust = id; change(k); toast("Kunde angelegt"); }
     else if ("save" in ds) {
       if (rest("auftrag:" + ui.store) < 1) { toast("Keine freien Nummern auf diesem Gerät – bitte kurz mit dem Internet verbinden."); sync(); return; }

@@ -322,3 +322,8 @@ textarea { font: inherit; color: inherit; background: var(--surface); border: 1p
 .ws-historie summary { cursor: pointer; font-weight: 700; }
 .ws-historie ul { margin: 6px 0 10px; padding-left: 20px; display: grid; gap: 6px; }
 .warn-text { color: var(--warn); }
+
+.kartei-dlg[open] { display: block; max-width: 760px; }
+.kartei-form { display: grid; gap: 12px; }
+.kartei-form h2 { margin: 0; }
+a.btn { text-decoration: none; }
