@@ -222,6 +222,7 @@ LEISTUNGEN = [
  ("Teppichreinigung", 'Vom Velours bis zum Orientteppich, mit Abholung. <a href="teppichreinigung.html">Mehr</a>'),
  ("Lederreinigung", "Lederjacken, -mäntel und -hosen, Lammfell, Pelz und Webpelz."),
  ("Änderungsschneiderei", "Kürzen, Enger- und Weitermachen, Reißverschlüsse und Reparaturen."),
+ ("Schuh- und Schlüsseldienst", "Schuhe zur Reparatur und Schlüssel zum Nachmachen einfach bei uns abgeben. Ausgeführt von unserem Partnerbetrieb, abholen bei uns."),
 ]
 
 HERO_SLIDES = [
@@ -427,7 +428,7 @@ def index():
     </div>
   </section>
 
-  <script type="application/ld+json">{{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{{"@type": "Question", "name": "Holen Sie auch Kleidung ab?", "acceptedAnswer": {{"@type": "Answer", "text": "Kleidung, Bettwaren und Wäsche geben Sie bitte bei uns im Laden ab. Abholung und Lieferung bieten wir für Gardinen und Teppiche an."}}}}, {{"@type": "Question", "name": "Hängen Sie Gardinen auch ab und wieder auf?", "acceptedAnswer": {{"@type": "Answer", "text": "Ja. Wir nehmen Gardinen und Vorhänge bei Ihnen ab, reinigen sie und hängen sie wieder auf. Den Preis für den Service nennen wir Ihnen vorher."}}}}, {{"@type": "Question", "name": "Reinigen Sie auch Orientteppiche?", "acceptedAnswer": {{"@type": "Answer", "text": "Ja, auch handgeknüpfte Orient-, Berber-, China- und Seidenteppiche. Auf Wunsch rollen wir den Teppich bei Ihnen auf und legen ihn danach wieder aus."}}}}, {{"@type": "Question", "name": "Reinigen Sie Leder und Pelz?", "acceptedAnswer": {{"@type": "Answer", "text": "Ja, von der Lederjacke bis zum Pelzmantel. Die Preise finden Sie in unserer Preisliste."}}}}, {{"@type": "Question", "name": "Ändern Sie auch Kleidung?", "acceptedAnswer": {{"@type": "Answer", "text": "Ja, unsere Änderungsschneiderei kürzt, ändert und repariert. Bringen Sie das Teil einfach vorbei, wir beraten Sie im Laden."}}}}, {{"@type": "Question", "name": "Wie lange dauert die Reinigung?", "acceptedAnswer": {{"@type": "Answer", "text": "Das hängt vom Teil ab. Wir nennen Ihnen bei der Abgabe den Abholtermin. Wenn es eilig ist, fragen Sie nach unserem Sofortdienst."}}}}]}}</script>
+  <script type="application/ld+json">{{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{{"@type": "Question", "name": "Holen Sie auch Kleidung ab?", "acceptedAnswer": {{"@type": "Answer", "text": "Kleidung, Bettwaren und Wäsche geben Sie bitte bei uns im Laden ab. Abholung und Lieferung bieten wir für Gardinen und Teppiche an."}}}}, {{"@type": "Question", "name": "Hängen Sie Gardinen auch ab und wieder auf?", "acceptedAnswer": {{"@type": "Answer", "text": "Ja. Wir nehmen Gardinen und Vorhänge bei Ihnen ab, reinigen sie und hängen sie wieder auf. Den Preis für den Service nennen wir Ihnen vorher."}}}}, {{"@type": "Question", "name": "Reinigen Sie auch Orientteppiche?", "acceptedAnswer": {{"@type": "Answer", "text": "Ja, auch handgeknüpfte Orient-, Berber-, China- und Seidenteppiche. Auf Wunsch rollen wir den Teppich bei Ihnen auf und legen ihn danach wieder aus."}}}}, {{"@type": "Question", "name": "Reinigen Sie Leder und Pelz?", "acceptedAnswer": {{"@type": "Answer", "text": "Ja, von der Lederjacke bis zum Pelzmantel. Die Preise finden Sie in unserer Preisliste."}}}}, {{"@type": "Question", "name": "Ändern Sie auch Kleidung?", "acceptedAnswer": {{"@type": "Answer", "text": "Ja, unsere Änderungsschneiderei kürzt, ändert und repariert. Bringen Sie das Teil einfach vorbei, wir beraten Sie im Laden."}}}}, {{"@type": "Question", "name": "Kann ich auch Schuhe und Schlüssel abgeben?", "acceptedAnswer": {{"@type": "Answer", "text": "Ja. Schuhreparaturen und Schlüssel zum Nachmachen nehmen wir im Laden an. Die Arbeit macht unser Partnerbetrieb, Sie holen alles wieder bei uns ab. Den Preis nennen wir Ihnen bei der Abgabe."}}}}, {{"@type": "Question", "name": "Wie lange dauert die Reinigung?", "acceptedAnswer": {{"@type": "Answer", "text": "Das hängt vom Teil ab. Wir nennen Ihnen bei der Abgabe den Abholtermin. Wenn es eilig ist, fragen Sie nach unserem Sofortdienst."}}}}]}}</script>
   <section class="alt" aria-labelledby="faq-title">
     <div class="wrap split">
       <div>
@@ -440,6 +441,7 @@ def index():
         <details><summary>Reinigen Sie auch Orientteppiche?</summary><p>Ja, auch handgeknüpfte Orient-, Berber-, China- und Seidenteppiche. Auf Wunsch rollen wir den Teppich bei Ihnen auf und legen ihn danach wieder aus.</p></details>
         <details><summary>Reinigen Sie Leder und Pelz?</summary><p>Ja, von der Lederjacke bis zum Pelzmantel. Die Preise finden Sie in unserer <a href="preisliste.html#leder">Preisliste</a>.</p></details>
         <details><summary>Ändern Sie auch Kleidung?</summary><p>Ja, unsere Änderungsschneiderei kürzt, ändert und repariert. Bringen Sie das Teil einfach vorbei, wir beraten Sie im Laden.</p></details>
+        <details><summary>Kann ich auch Schuhe und Schlüssel abgeben?</summary><p>Ja. Schuhreparaturen und Schlüssel zum Nachmachen nehmen wir im Laden an. Die Arbeit macht unser Partnerbetrieb, Sie holen alles wieder bei uns ab. Den Preis nennen wir Ihnen bei der Abgabe.</p></details>
         <details><summary>Wie lange dauert die Reinigung?</summary><p>Das hängt vom Teil ab. Wir nennen Ihnen bei der Abgabe den Abholtermin. Wenn es eilig ist, fragen Sie nach unserem Sofortdienst.</p></details>
       </div>
     </div>
@@ -626,7 +628,7 @@ subpage("kundendienst.html", "Kundendienst · Anliegen und Reklamationen · Tayf
 <p>Wir melden uns in der Regel innerhalb von zwei Werktagen. Natürlich können Sie auch gern im Laden vorbeikommen oder uns unter {TEL} anrufen.</p>""", cta=False)
 
 subpage("leistungen.html", "Alle Leistungen · Textilreinigung Hannover-Wettbergen · Tayfun",
-        "Spezialreinigung, Nassreinigung, Sofortdienst, Appretur, Imprägnierung, Hemdendienst, Wäschedienst, Teppich-, Leder- und Heimtextilienreinigung sowie Änderungsschneiderei in Hannover-Wettbergen.",
+        "Spezialreinigung, Nassreinigung, Sofortdienst, Appretur, Imprägnierung, Hemdendienst, Wäschedienst, Teppich-, Leder- und Heimtextilienreinigung, Änderungsschneiderei sowie Annahme für Schuh- und Schlüsseldienst in Hannover-Wettbergen.",
         "Leistungen", "Unsere Leistungen",
         "Was Sie bei uns im Schaufenster lesen, bekommen Sie auch im Laden. Fehlt etwas? Schreiben Sie uns per WhatsApp oder rufen Sie an.",
         f"""<ul>{az}</ul>

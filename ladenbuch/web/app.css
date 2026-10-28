@@ -327,3 +327,6 @@ textarea { font: inherit; color: inherit; background: var(--surface); border: 1p
 .kartei-form { display: grid; gap: 12px; }
 .kartei-form h2 { margin: 0; }
 a.btn { text-decoration: none; }
+
+.line .frei { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 1fr) 140px; gap: 8px; }
+.line .frei input { font-size: 15px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); min-width: 0; }

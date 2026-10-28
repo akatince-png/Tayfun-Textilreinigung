@@ -1,8 +1,8 @@
 (function () {
   // ---------------------------------------------------------------- Stammdaten
-  const VERSION = "1.7.0";
+  const VERSION = "1.8.0";
   let STORES = { W: "Wettbergen" };
-  const CATS = ["Garderobe", "Hemden", "Haushalt", "Gardinen", "Leder"];
+  const CATS = ["Garderobe", "Hemden", "Haushalt", "Gardinen", "Leder", "Schuhe & Schlüssel"];
   const ITEMS = [
     ["hemd", "Hemd, hängend", "Hemden", 325], ["hemd-g", "Hemd, gelegt", "Hemden", 460], ["bluse", "Bluse", "Hemden", 720],
     ["hose", "Hose", "Garderobe", 1020], ["anzug", "Anzug (Sakko + Hose)", "Garderobe", 2340], ["jacke", "Jacke / Sakko", "Garderobe", 1320],
@@ -11,7 +11,10 @@
     ["wolldecke", "Wolldecke", "Haushalt", 1030], ["kissen", "Kissen, Daunenkissen", "Haushalt", 1810], ["bettdecke", "Daunenbettdecke", "Haushalt", 3320], ["tischdecke", "Tischdecke", "Haushalt", 1230],
     ["gardine", "Synthetische Gardinen, pro m²", "Gardinen", 320, "m²"], ["vorhang", "Vorhänge, pro kg", "Gardinen", 1200, "kg"],
     ["lederjacke", "Lederjacke bis 80 cm", "Leder", 6100], ["ledermantel", "Ledermantel", "Leder", 7900],
-  ].map(([id, name, cat, price, unit]) => ({ id, name, cat, price, unit: unit || "Stk" }));
+    // Fremdleistungen über den Partnerbetrieb: Preis wird bei der Annahme eingetragen
+    ["schuh", "Schuhreparatur", "Schuhe & Schlüssel", 0, "Stk", true], ["schuhpflege", "Schuhpflege / Färben", "Schuhe & Schlüssel", 0, "Stk", true],
+    ["schluessel", "Schlüssel nachmachen", "Schuhe & Schlüssel", 0, "Stk", true], ["fremd", "Sonstige Fremdleistung", "Schuhe & Schlüssel", 0, "Stk", true],
+  ].map(([id, name, cat, price, unit, frei]) => ({ id, name, cat, price, unit: unit || "Stk", frei: !!frei }));
   const ITEM = Object.fromEntries(ITEMS.map((i) => [i.id, i]));
 
   // Angebote aus dem Schaufenster – werden beim Erfassen automatisch gerechnet
@@ -24,7 +27,11 @@
     if (weekday === 5 && id === "anzug") return [1990, "Freitagsangebot"];
     return [ITEM[id].price, ""];
   }
-  const total = (o) => o.lines.reduce((s, l) => s + l.qty * unitPrice(l.id, D(o.date).getDay(), o.lines)[0], 0);
+  // Preis einer Zeile: bei Fremdleistungen der bei der Annahme eingetragene Preis
+  const linePrice = (l, weekday, lines) => (ITEM[l.id].frei ? [l.preis || 0, ""] : unitPrice(l.id, weekday, lines));
+  const lineName = (l) => ITEM[l.id].name + (l.text ? `: ${l.text}` : "");
+  const teilName = (it) => ITEM[it.id].name + (it.text ? ` (${it.text})` : "");
+  const total = (o) => o.lines.reduce((s, l) => s + l.qty * linePrice(l, D(o.date).getDay(), o.lines)[0], 0);
   const pieces = (o) => o.lines.reduce((s, l) => s + (ITEM[l.id].unit === "Stk" ? l.qty : 1), 0);
 
   // ---------------------------------------------------------------- Hilfen
@@ -202,7 +209,7 @@
   const stPill = (s) => `<span class="st st-${s}">${ST[s]}</span>`;
   function makeItems(o, d) {
     const out = [];
-    o.lines.forEach((l) => { const n = ITEM[l.id].unit === "Stk" ? l.qty : 1; for (let i = 0; i < n; i++) out.push({ tnr: `${o.nr}-${out.length + 1}`, id: l.id, st: "angenommen", platz: "", log: [{ am: d || o.date, st: "angenommen" }] }); });
+    o.lines.forEach((l) => { const n = ITEM[l.id].unit === "Stk" ? l.qty : 1; for (let i = 0; i < n; i++) out.push({ tnr: `${o.nr}-${out.length + 1}`, id: l.id, ...(l.text ? { text: l.text } : {}), st: "angenommen", platz: "", log: [{ am: d || o.date, st: "angenommen" }] }); });
     return out;
   }
   const allItems = () => db.orders.flatMap((o) => (o.items || []).map((it) => ({ it, o })));
@@ -244,7 +251,7 @@
 
   // Code 39 Strichcode für die Auftragsnummer (Scanner können ihn ohne Zusatzsoftware lesen)
   function tags(o) {
-    const its = o.items || []; const out = its.slice(0, 12).map((it) => `<span class="tag">${rot(it) ? "● " : ""}${teilLabel(o, it)} · ${esc(ITEM[it.id].name)}</span>`);
+    const its = o.items || []; const out = its.slice(0, 12).map((it) => `<span class="tag">${rot(it) ? "● " : ""}${teilLabel(o, it)} · ${esc(teilName(it))}</span>`);
     return `<div class="tags" aria-label="Etiketten">${out.join("")}${its.length > 12 ? `<span class="tag">…</span>` : ""}</div>`;
   }
   // Abholcode = Auftragsnummer + 4 Prüfzeichen; nur wer den Schein (Papier oder Handy) hat, kennt die Prüfzeichen
@@ -258,9 +265,9 @@
   function belegDaten(o) {
     const c = cust(o.cust); const wd = D(o.date).getDay();
     return { v: 1, n: o.nr, c: o.code, k: vorname(c), a: langDatum(o.date), f: langDatum(o.due), t: pieces(o),
-      p: o.lines.map((l) => { const [p, why] = unitPrice(l.id, wd, o.lines); const u = ITEM[l.id].unit; return [u === "Stk" ? `${l.qty}x` : `${l.qty} ${u}`, ITEM[l.id].name, p * l.qty, why || ""]; }),
+      p: o.lines.map((l) => { const [p, why] = linePrice(l, wd, o.lines); const u = ITEM[l.id].unit; return [u === "Stk" ? `${l.qty}x` : `${l.qty} ${u}`, lineName(l), p * l.qty, why || ""]; }),
       s: total(o), b: o.paid ? o.paid.beleg : "", z: o.paid ? o.paid.art : "",
-      m: (o.items || []).flatMap((it) => maengelVon(it).filter((m) => m.zeit === "annahme").map((m) => `${ITEM[it.id].name}: ${m.art}${m.notiz ? " (" + m.notiz + ")" : ""}`)) };
+      m: (o.items || []).flatMap((it) => maengelVon(it).filter((m) => m.zeit === "annahme").map((m) => `${teilName(it)}: ${m.art}${m.notiz ? " (" + m.notiz + ")" : ""}`)) };
   }
   const LOGO = new Image(); LOGO.src = "logo.png";
   const scheinBild = (o) => SCHEIN.zeichnen(belegDaten(o), LOGO.complete && LOGO.naturalWidth ? LOGO : null);
@@ -300,7 +307,7 @@
 
   function orderDetail(o) {
     const c = cust(o.cust); const wd = D(o.date).getDay();
-    const lines = o.lines.map((l) => { const [p, why] = unitPrice(l.id, wd, o.lines); return `<div class="line"><span class="num">${l.qty} ${ITEM[l.id].unit === "Stk" ? "×" : ITEM[l.id].unit}</span><span class="n">${esc(ITEM[l.id].name)}${why ? `<small>${why}</small>` : ""}</span><b class="num">${euro(p * l.qty)}</b></div>`; }).join("");
+    const lines = o.lines.map((l) => { const [p, why] = linePrice(l, wd, o.lines); return `<div class="line"><span class="num">${l.qty} ${ITEM[l.id].unit === "Stk" ? "×" : ITEM[l.id].unit}</span><span class="n">${esc(lineName(l))}${why ? `<small>${why}</small>` : ""}</span><b class="num">${euro(p * l.qty)}</b></div>`; }).join("");
     const next = o.status === "arbeit" || o.status === "kundendienst" ? `<button class="btn" data-set="bereit" type="button">Fertig – abholbereit</button>` : o.status === "bereit" ? `<button class="btn" data-set="abgeholt" type="button">Abgeholt</button>` : "";
     const warn = o.status === "bereit" && !o.paid ? `<span class="pay-warn">Noch nicht bezahlt – vor der Ausgabe kassieren.</span>` : "";
     const ts = ticketsZu(o.nr);
@@ -396,7 +403,7 @@
       <div class="row2"><label class="field" for="tn-kanal">Wie kam die Reklamation?<select id="tn-kanal">${T_KANAL.map((k) => `<option>${k}</option>`).join("")}</select></label>
       <label class="field" for="tn-grund">Grund<select id="tn-grund">${KD_GRUENDE.map((g) => `<option>${g}</option>`).join("")}</select></label></div>
       <label class="field" for="tn-text">Was genau? (Aussage des Kunden)<textarea id="tn-text" rows="3" placeholder="z. B. Rotweinfleck am linken Ärmel noch sichtbar"></textarea></label>
-      ${its.length ? `<fieldset class="teilwahl"><legend>Betroffene Teile</legend>${its.map((it) => `<label><input type="checkbox" value="${it.tnr}"${its.length === 1 ? " checked" : ""}> ${it.tnr} · ${esc(ITEM[it.id].name)} <span class="mini">(${ST[it.st]})</span></label>`).join("")}</fieldset>` : ""}
+      ${its.length ? `<fieldset class="teilwahl"><legend>Betroffene Teile</legend>${its.map((it) => `<label><input type="checkbox" value="${it.tnr}"${its.length === 1 ? " checked" : ""}> ${it.tnr} · ${esc(teilName(it))} <span class="mini">(${ST[it.st]})</span></label>`).join("")}</fieldset>` : ""}
       <label class="check"><input type="checkbox" id="tn-da" ${o.status === "abgeholt" ? "" : "checked"}> Die betroffenen Teile sind jetzt wieder bei uns im Laden</label>
       <label class="field" for="tn-wieder">Wiedervorlage am<input type="date" id="tn-wieder" value="${iso(addWorkdays(today0(), 2))}"></label>
       <div class="chips"><button class="btn" data-tanlegen="${o.nr}" type="button">Ticket anlegen</button><button class="btn ghost" data-tabbruch type="button">Abbrechen</button></div></div>`;
@@ -505,7 +512,7 @@
       <dt>Auftrag</dt><dd><button class="btn ghost small" data-order="${t.auftrag}" data-goauftrag type="button">${t.auftrag}</button></dd>
       <dt>Eingang</dt><dd>${fmtDate(t.erstellt)} · ${esc(t.kanal)}</dd><dt>Grund</dt><dd>${esc(t.grund)}</dd>
       ${t.text ? `<dt>Beschreibung</dt><dd>${esc(t.text)}</dd>` : ""}
-      <dt>Teile</dt><dd>${teile.length ? teile.map((it) => `<button class="btn ghost small" data-teil="${it.tnr}" type="button">${it.tnr} · ${esc(ITEM[it.id].name)}</button> ${stPill(it.st)}`).join("<br>") : "keine ausgewählt"}</dd></dl>
+      <dt>Teile</dt><dd>${teile.length ? teile.map((it) => `<button class="btn ghost small" data-teil="${it.tnr}" type="button">${it.tnr} · ${esc(teilName(it))}</button> ${stPill(it.st)}`).join("<br>") : "keine ausgewählt"}</dd></dl>
       ${erg}${schritte}
       <div class="row2"><label class="field" for="tv-text">Vermerk<input id="tv-text" placeholder="z. B. Gutachter Müller angerufen" autocomplete="off"></label>
       <label class="field" for="tv-wieder">Wiedervorlage<input type="date" id="tv-wieder" value="${esc(t.wieder || "")}"></label></div>
@@ -618,11 +625,17 @@
     krawatte: { name: "Krawatte", form: "M88 10 L112 10 L107 36 L122 204 L100 228 L78 204 L93 36 Z", linien: "M93 36 L107 36", detail: "" },
     decke: { name: "Decke", form: "M20 36 L180 36 L180 206 L20 206 Z", linien: "M30 46 L170 46 L170 196 L30 196 Z", detail: "" },
     kissen: { name: "Kissen", form: "M34 66 Q100 54 166 66 Q178 120 166 174 Q100 186 34 174 Q22 120 34 66 Z", linien: "", detail: "" },
+    schuh: { name: "Schuh", seiten: ["Linker Schuh", "Rechter Schuh"], form: "M18 172 L18 142 Q20 122 40 114 L96 100 Q110 72 118 58 L152 58 Q156 88 170 104 Q188 116 188 142 L188 172 Z",
+      linien: "M18 160 L188 160 M118 58 L116 100 M44 114 L96 114 M150 160 L150 172", detail: "M122 70 L146 70 M121 82 L148 82 M120 94 L152 94" },
+    schluessel: { name: "Schlüssel", seiten: ["Schlüssel"], form: "M62 78 A42 42 0 1 0 102 132 L186 132 L186 112 L102 112 A42 42 0 0 0 62 78 Z",
+      linien: "M48 120 a14 14 0 1 0 28 0 a14 14 0 1 0 -28 0 M150 132 L150 148 L162 148 L162 132 M170 132 L170 144 L180 144 L180 132", detail: "" },
     gardine: { name: "Gardine / Vorhang", form: "M24 30 L176 30 L176 226 L24 226 Z", linien: "M14 24 L186 24 M50 30 Q44 128 50 226 M80 30 Q74 128 80 226 M110 30 Q104 128 110 226 M140 30 Q134 128 140 226", detail: "" },
   };
   const ANSICHTEN = { hemd: ["hemd"], "hemd-g": ["hemd"], bluse: ["hemd"], hose: ["hose"], anzug: ["sakko", "hose"], jacke: ["sakko"], rock: ["rock"], kleid: ["kleid"], mantel: ["mantel"],
     pullover: ["pullover"], daunenjacke: ["mantel"], krawatte: ["krawatte"], wolldecke: ["decke"], kissen: ["kissen"], bettdecke: ["decke"], tischdecke: ["decke"], gardine: ["gardine"], vorhang: ["gardine"],
-    lederjacke: ["sakko"], ledermantel: ["mantel"] };
+    lederjacke: ["sakko"], ledermantel: ["mantel"], schuh: ["schuh"], schuhpflege: ["schuh"], schluessel: ["schluessel"], fremd: ["decke"] };
+  const seitenNamen = (key) => UMRISS[key].seiten || ["Vorderseite", "Rückseite"];
+  const seiteText = (key, seite) => { const s = UMRISS[key].seiten; if (!s) return seite === "vorne" ? "vorne" : "hinten"; return s.length === 1 ? "" : seite === "vorne" ? s[0] : s[1]; };
   const M_ARTEN = ["Loch / Masche gezogen", "Fleck", "Verfärbung / ausgeblichen", "Knopf fehlt / lose", "Naht offen", "Reißverschluss defekt", "Abgenutzt / Glanzstellen", "Pilling / Knötchen", "Brandloch", "Etikett fehlt (Pflegehinweis)", "Sonstiges"];
   const M_ZEIT = { annahme: "Bei Annahme, Kunde anwesend", nachtraeglich: "Nachträglich, Kunde nicht anwesend", bearbeitung: "Während der Bearbeitung festgestellt" };
   const maengelVon = (it) => (it.maengel || []).filter((m) => !m.gestrichen);
@@ -632,7 +645,7 @@
     const marken = (it.maengel || []).map((m, i) => [m, i]).filter(([m]) => m.ansicht === key && m.seite === seite)
       .map(([m, i]) => `<g class="marke${m.gestrichen ? " weg" : ""}"><circle cx="${m.x * 200}" cy="${m.y * 240}" r="9"/><text x="${m.x * 200}" y="${m.y * 240 + 4}">${i + 1}</text></g>`).join("");
     const neuM = neu ? `<g class="marke neu"><circle cx="${neu.x * 200}" cy="${neu.y * 240}" r="9"/><text x="${neu.x * 200}" y="${neu.y * 240 + 4}">+</text></g>` : "";
-    return `<svg class="umriss" viewBox="0 0 200 240" role="img" aria-label="${u.name}, ${seite === "vorne" ? "Vorderseite" : "Rückseite"} – zum Markieren antippen" data-umriss="${key}" data-seite="${seite}">
+    return `<svg class="umriss" viewBox="0 0 200 240" role="img" aria-label="${u.name}, ${seiteText(key, seite) || "Ansicht"} – zum Markieren antippen" data-umriss="${key}" data-seite="${seite}">
       <path class="form" d="${u.form}"/>${u.linien ? `<path class="linie" d="${u.linien}"/>` : ""}${seite === "vorne" && u.detail ? `<path class="linie" d="${u.detail}"/>` : ""}${marken}${neuM}</svg>`;
   }
 
@@ -643,8 +656,8 @@
       ${(it.wuensche || []).length || (it.hinweis || "").trim() ? `<ul class="ws-vermerke">${(it.wuensche || []).map((w) => `<li class="w">${esc(w.text)}</li>`).join("")}${(it.hinweis || "").trim() ? `<li class="w">Hinweis: ${esc(it.hinweis)}</li>` : ""}</ul>` : `<span class="ok-text">Keine Kundenwünsche – nach Pflegeetikett und Fachkenntnis.</span>`}</div>`;
     return `<div class="kd md-schau"><b>Warenschau</b>
       ${opts.map(([k, n, werte]) => `<div class="chips"><span class="mini">${n}:</span>${werte.map((w) => `<button class="chip" data-mopt="${k}" data-wert="${esc(w)}" aria-pressed="${(it.opt || {})[k] === w}" type="button">${esc(w)}</button>`).join("")}</div>`).join("")}
-      <div class="wunsch">${WUENSCHE.map((w, i) => `<label class="check"><input type="checkbox" data-mwunsch="${i}"${(it.wuensche || []).some((x) => x.text === w) ? " checked" : ""}> ${esc(w)}</label>`).join("")}</div>
-      <label class="field" for="m-hinweis">Hinweis für die Reinigung<input id="m-hinweis" value="${esc(it.hinweis || "")}" placeholder="z. B. nur dämpfen, nicht bügeln" autocomplete="off"></label>
+      <div class="wunsch">${(ITEM[it.id].frei ? [] : WUENSCHE).map((w, i) => `<label class="check"><input type="checkbox" data-mwunsch="${i}"${(it.wuensche || []).some((x) => x.text === w) ? " checked" : ""}> ${esc(w)}</label>`).join("")}</div>
+      <label class="field" for="m-hinweis">${ITEM[it.id].frei ? "Hinweis für den Partnerbetrieb" : "Hinweis für die Reinigung"}<input id="m-hinweis" value="${esc(it.hinweis || "")}" placeholder="${ITEM[it.id].frei ? "z. B. Absatz schwarz, bis Freitag" : "z. B. nur dämpfen, nicht bügeln"}" autocomplete="off"></label>
       ${it.schau ? `<span class="ok-text">Warenschau: ${esc(it.schau.von)}, ${esc(it.schau.am)} · Kunde bestätigt</span>` : `<div><button class="btn small" data-mok type="button">${maengelVon(it).length ? "Warenschau abgeschlossen" : "Einwandfrei"} – Kunde bestätigt</button></div>`}
       <span class="mini">Was hier eingetragen wird, ist mit dem Kunden besprochen und gilt als von ihm bestätigt.</span></div>`;
   }
@@ -656,15 +669,15 @@
     const zeichnen = () => {
       const { it, o } = allItems().find(({ it }) => it.tnr === tnr);
       const ans = ANSICHTEN[it.id] || ["decke"];
-      const liste = (it.maengel || []).map((m, i) => `<li class="${m.gestrichen ? "weg" : ""}"><b>${i + 1}. ${esc(m.art)}${m.fleckart ? ` (${esc(m.fleckart)})` : ""}</b> · ${UMRISS[m.ansicht].name}, ${m.seite === "vorne" ? "vorne" : "hinten"}${m.notiz ? ` – ${esc(m.notiz)}` : ""}${m.behandlung ? `<br>Behandlung: ${esc(m.behandlung)}` : ""}${m.kunde ? ` <span class="ok-text">Kunde bestätigt</span>` : ""}
+      const liste = (it.maengel || []).map((m, i) => `<li class="${m.gestrichen ? "weg" : ""}"><b>${i + 1}. ${esc(m.art)}${m.fleckart ? ` (${esc(m.fleckart)})` : ""}</b> · ${UMRISS[m.ansicht].name}, ${seiteText(m.ansicht, m.seite)}${m.notiz ? ` – ${esc(m.notiz)}` : ""}${m.behandlung ? `<br>Behandlung: ${esc(m.behandlung)}` : ""}${m.kunde ? ` <span class="ok-text">Kunde bestätigt</span>` : ""}
         <br><span class="mini">${esc(m.amText)} · ${esc(M_ZEIT[m.zeit] || "")} · erfasst von ${esc(m.vonName || m.geraet || "?")}${m.zeugeName ? ` · Vier-Augen mit ${esc(m.zeugeName)}` : ""}${m.gestrichen ? ` · gestrichen von ${esc(m.gestrichen.von)} (${esc(m.gestrichen.am)})` : ""}</span>
         ${(m.fotos || []).length ? `<span class="fotos klein">${m.fotos.map((id) => `<img class="foto" data-foto="${esc(id)}" alt="Foto zu Mangel ${i + 1}">`).join("")}</span>` : ""}
         ${m.gestrichen || (werkstattZugang() && m.zeit !== "bearbeitung") ? "" : `<button class="btn ghost small" data-mweg="${m.id}" type="button">Als Irrtum streichen</button>`}</li>`).join("");
       const n = zustand.neu;
-      dlg.innerHTML = `<div class="md-links"><h2><span class="ampel ${rot(it) ? "rot" : geprueft(it) ? "gruen" : "grau"}"></span> ${teilLabel(o, it)} · ${esc(ITEM[it.id].name)}</h2>
+      dlg.innerHTML = `<div class="md-links"><h2><span class="ampel ${rot(it) ? "rot" : geprueft(it) ? "gruen" : "grau"}"></span> ${teilLabel(o, it)} · ${esc(teilName(it))}</h2>
           <p class="mini">Auftrag ${o.nr} · ${esc(cust(o.cust).name)}</p>
           <div class="chips">${ans.length > 1 ? ans.map((k) => `<button class="chip" data-mans="${k}" aria-pressed="${k === zustand.ansicht}" type="button">${UMRISS[k].name}</button>`).join("") : ""}
-            <button class="chip" data-mseite="vorne" aria-pressed="${zustand.seite === "vorne"}" type="button">Vorderseite</button><button class="chip" data-mseite="hinten" aria-pressed="${zustand.seite === "hinten"}" type="button">Rückseite</button></div>
+            ${seitenNamen(zustand.ansicht).length > 1 ? `<button class="chip" data-mseite="vorne" aria-pressed="${zustand.seite === "vorne"}" type="button">${seitenNamen(zustand.ansicht)[0]}</button><button class="chip" data-mseite="hinten" aria-pressed="${zustand.seite === "hinten"}" type="button">${seitenNamen(zustand.ansicht)[1]}</button>` : ""}</div>
           ${umrissSvg(zustand.ansicht, zustand.seite, it, n && n.ansicht === zustand.ansicht && n.seite === zustand.seite ? n : null)}
           <p class="mini">Stelle des Mangels antippen.</p></div>
         <div class="md-rechts">${schauHtml(it)}${liste ? `<ol class="mliste">${liste}</ol>` : `<p class="mini">Noch keine Mängel erfasst. Mangel? Stelle links antippen.</p>`}
@@ -753,7 +766,7 @@
     const out = [];
     (it.wuensche || []).forEach((w) => out.push(`<li class="w">${esc(w.text)}</li>`));
     if ((it.hinweis || "").trim()) out.push(`<li class="w">Hinweis: ${esc(it.hinweis)}</li>`);
-    maengelVon(it).forEach((m) => out.push(`<li>${esc(m.art)}${m.fleckart ? ` (${esc(m.fleckart)})` : ""} · ${esc(UMRISS[m.ansicht].name)} ${m.seite === "vorne" ? "vorne" : "hinten"}${m.notiz ? ` – ${esc(m.notiz)}` : ""}${m.behandlung ? `<br><b>Behandlung:</b> ${esc(m.behandlung)}` : ""}${m.kunde ? ` <span class="ok-text">Kunde bestätigt</span>` : ""}</li>`));
+    maengelVon(it).forEach((m) => out.push(`<li>${esc(m.art)}${m.fleckart ? ` (${esc(m.fleckart)})` : ""} · ${esc(UMRISS[m.ansicht].name)} ${seiteText(m.ansicht, m.seite)}${m.notiz ? ` – ${esc(m.notiz)}` : ""}${m.behandlung ? `<br><b>Behandlung:</b> ${esc(m.behandlung)}` : ""}${m.kunde ? ` <span class="ok-text">Kunde bestätigt</span>` : ""}</li>`));
     return out.join("");
   }
   const optText = (it) => (OPTIONEN[it.id] || []).filter(([k]) => it.opt && it.opt[k]).map(([k, n]) => `${n}: ${it.opt[k]}`).join(" · ");
@@ -764,7 +777,7 @@
     const offen = its.filter((it) => !geprueft(it)).length;
     return `<div class="teile-zustand"><div class="tz-kopf"><b>Warenschau · Sammler ${zahl(o.nr)} · ${its.length} ${its.length === 1 ? "Teil" : "Teile"}</b>${offen ? `<span class="pay-warn">${offen} noch nicht geprüft</span>` : `<span class="ok-text">alle geprüft</span>`}</div>
       ${its.map((it) => `<div class="tz"><span class="ampel ${rot(it) ? "rot" : geprueft(it) ? "gruen" : "grau"}" aria-label="${rot(it) ? "Vermerk beachten" : geprueft(it) ? "geprüft, einwandfrei" : "noch nicht geprüft"}"></span>
-        <span><b>${teilPos(o, it)}/${its.length} ${esc(ITEM[it.id].name)}</b> ${stPill(it.st)}${optText(it) ? `<br><span class="mini">${esc(optText(it))}</span>` : ""}${rot(it) ? `<br><span class="mini">${[...(it.wuensche || []).map((w) => w.text), ...maengelVon(it).map((m) => m.art)].map(esc).join(" · ")}</span>` : ""}${anfragenListe(it, true)}</span>
+        <span><b>${teilPos(o, it)}/${its.length} ${esc(teilName(it))}</b> ${stPill(it.st)}${optText(it) ? `<br><span class="mini">${esc(optText(it))}</span>` : ""}${rot(it) ? `<br><span class="mini">${[...(it.wuensche || []).map((w) => w.text), ...maengelVon(it).map((m) => m.art)].map(esc).join(" · ")}</span>` : ""}${anfragenListe(it, true)}</span>
         <span class="chips">${geprueft(it) ? "" : `<button class="btn small ghost" data-schauok="${it.tnr}" type="button">Einwandfrei</button>`}<button class="btn small ${rot(it) ? "warnung" : "ghost"}" data-maengel="${it.tnr}" type="button">Prüfen</button></span></div>`).join("")}
       <span class="mini">Grün: nach Pflegeetikett und Fachwissen. Rot: Vermerk beachten (Mangel, Kundenwunsch oder Hinweis).</span></div>`;
   }
@@ -778,12 +791,12 @@
     const W = 576, X = 24, IW = W - 48; const its = o.items || [];
     const zeilen = []; // [text, font, extra]
     its.forEach((it) => {
-      zeilen.push([`${rot(it) ? "●" : "✓"} ${teilPos(o, it)}/${its.length}  ${ITEM[it.id].name}`, `700 26px ${SANS}`]);
+      zeilen.push([`${rot(it) ? "●" : "✓"} ${teilPos(o, it)}/${its.length}  ${teilName(it)}`, `700 26px ${SANS}`]);
       if (optText(it)) zeilen.push([`   ${optText(it)}`, `22px ${MONO}`]);
       (it.wuensche || []).forEach((w) => zeilen.push([`   ! ${w.text}`, `22px ${MONO}`]));
       if ((it.hinweis || "").trim()) zeilen.push([`   ! ${it.hinweis}`, `22px ${MONO}`]);
       anfragenVon(it).forEach((a) => zeilen.push([`   ? ${a.kurz} – ${a.antwort ? (a.antwort.ja ? "Kunde hat zugestimmt" : "Kunde hat abgelehnt") : "wartet auf Antwort"}`, `22px ${MONO}`]));
-      maengelVon(it).forEach((m) => zeilen.push([`   - ${m.art}${m.fleckart ? " (" + m.fleckart + ")" : ""}, ${UMRISS[m.ansicht].name} ${m.seite}${m.notiz ? ": " + m.notiz : ""}${m.behandlung ? " → " + m.behandlung : ""}${m.kunde ? " [Kunde bestätigt]" : ""}`, `22px ${MONO}`]));
+      maengelVon(it).forEach((m) => zeilen.push([`   - ${m.art}${m.fleckart ? " (" + m.fleckart + ")" : ""}, ${UMRISS[m.ansicht].name} ${seiteText(m.ansicht, m.seite)}${m.notiz ? ": " + m.notiz : ""}${m.behandlung ? " → " + m.behandlung : ""}${m.kunde ? " [Kunde bestätigt]" : ""}`, `22px ${MONO}`]));
     });
     const [, mg] = leinwand(1, 1); const fertig = zeilen.flatMap(([t, f]) => umbruch(mg, t, f, IW).map((z) => [z, f]));
     const H = 580 + fertig.length * 32;
@@ -804,7 +817,7 @@
     g.fillStyle = "#111"; g.font = `800 92px ${SANS}`; g.fillText(zahl(o.nr), 24, 100);
     const zw = g.measureText(zahl(o.nr)).width;
     g.font = `700 34px ${SANS}`; g.fillText(`${teilPos(o, it)}/${(o.items || []).length}`, 40 + zw, 96);
-    g.font = `26px ${MONO}`; g.fillText(ITEM[it.id].name.slice(0, 32), 24, 146);
+    g.font = `26px ${MONO}`; g.fillText(teilName(it).slice(0, 32), 24, 146);
     if (optText(it)) { g.font = `20px ${MONO}`; g.fillText(optText(it).slice(0, 44), 24, 176); }
     if (rot(it)) { g.beginPath(); g.arc(W - 60, 64, 38, 0, Math.PI * 2); g.fill(); g.fillStyle = "#fff"; g.font = `800 44px ${SANS}`; g.textAlign = "center"; g.fillText("!", W - 60, 80); g.textAlign = "left"; g.fillStyle = "#111"; }
     SCHEIN.strichcode(g, `${zahl(o.nr)}-${teilPos(o, it)}`, W - 150, 150, 230, 56);
@@ -842,8 +855,8 @@
     const frueher = lauf ? [] : db.orders.filter((x) => x.cust === c.id && x.nr !== o.nr).sort((a, b) => b.date.localeCompare(a.date));
     const rekl = lauf ? [] : tickets().filter((t) => t.cust === c.id).sort((a, b) => b.erstellt.localeCompare(a.erstellt));
     const nr = handyNr(c.tel);
-    const zeile = (x) => { const its = x.items || []; const hin = its.flatMap((it) => [...maengelVon(it).map((m) => `${ITEM[it.id].name}: ${m.art}`), ...(it.wuensche || []).map((w) => `${ITEM[it.id].name}: ${w.text}`), ...anfragenVon(it).filter((a) => a.antwort).map((a) => `${ITEM[it.id].name}: ${a.kurz} – ${a.antwort.ja ? "zugestimmt" : "abgelehnt"}`)]);
-      return `<li><b>${fmtDate(x.date)} · Sammler ${zahl(x.nr)}</b> · ${its.map((it) => ITEM[it.id].name).join(", ")} ${pill(x)}${hin.length ? `<br><span class="mini">${hin.map(esc).join(" · ")}</span>` : ""}</li>`; };
+    const zeile = (x) => { const its = x.items || []; const hin = its.flatMap((it) => [...maengelVon(it).map((m) => `${teilName(it)}: ${m.art}`), ...(it.wuensche || []).map((w) => `${teilName(it)}: ${w.text}`), ...anfragenVon(it).filter((a) => a.antwort).map((a) => `${teilName(it)}: ${a.kurz} – ${a.antwort.ja ? "zugestimmt" : "abgelehnt"}`)]);
+      return `<li><b>${fmtDate(x.date)} · Sammler ${zahl(x.nr)}</b> · ${its.map((it) => teilName(it)).join(", ")} ${pill(x)}${hin.length ? `<br><span class="mini">${hin.map(esc).join(" · ")}</span>` : ""}</li>`; };
     return `<div class="panel ws-kunde"><div><span class="mini">Kunde</span><b>${esc(c.name)}</b>
         ${!lauf && anschrift(c) ? `<span class="mini">${esc(anschrift(c))}</span>` : ""}${lauf ? `<span class="mini">Laufkunde ohne Namen und Telefonnummer</span>` : `<span>${c.tel && c.tel !== "–" ? `<a href="tel:${esc(c.tel.replace(/[^\d+]/g, ""))}">${esc(c.tel)}</a>` : "keine Telefonnummer"} · ${frueher.length ? `${frueher.length} frühere ${frueher.length === 1 ? "Abgabe" : "Abgaben"}` : "erste Abgabe"}${rekl.length ? ` · <b class="warn-text">${rekl.length} ${rekl.length === 1 ? "Reklamation" : "Reklamationen"}</b>` : ""}</span>`}</div>
       ${nr ? `<a class="btn small wa-btn" href="https://wa.me/${nr}?text=${encodeURIComponent(`Guten Tag ${vorname(c)}, hier ist die Werkstatt von Tayfun Textilpflege zu Ihrem Auftrag ${zahl(o.nr)}: `)}" target="_blank" rel="noopener">WhatsApp an ${esc(vorname(c))}</a>` : ""}
@@ -866,7 +879,7 @@
         ${zaehl ? `<span class="ok-text">Anzahl geprüft: ${esc(zaehl.von)}, ${esc(zaehl.am)}</span>` : `<button class="btn small" data-wszaehl type="button">${its.length} ${its.length === 1 ? "Teil" : "Teile"} nachgezählt – stimmt</button>`}</div>
         <div class="chips"><button class="btn ghost small" data-wsalle="reinigung" type="button">Alle in Reinigung</button><button class="btn ghost small" data-wsalle="finish" type="button">Alle ins Finish</button><button class="btn small" data-wsalle="fertig" type="button">Alle fertig</button></div></div>
       ${its.map((it) => `<div class="panel ws-teil ${rot(it) ? "rot" : "gruen"}${f.pos === teilPos(o, it) ? " gewaehlt" : ""}">
-        <div class="ws-teil-kopf"><span class="ampel ${rot(it) ? "rot" : "gruen"}"></span><b>${teilLabel(o, it)} · ${esc(ITEM[it.id].name)}</b>${stPill(it.st)}</div>
+        <div class="ws-teil-kopf"><span class="ampel ${rot(it) ? "rot" : "gruen"}"></span><b>${teilLabel(o, it)} · ${esc(teilName(it))}</b>${stPill(it.st)}</div>
         ${optText(it) ? `<div class="ws-opt">${esc(optText(it))}</div>` : ""}
         ${rot(it) ? `${vermerke(it) ? `<ul class="ws-vermerke">${vermerke(it)}</ul>` : ""}${anfragenListe(it, true)}` : `<p class="ok-text">Nach Pflegeetikett und eigener Fachkenntnis behandeln.</p>`}
         ${maengelVon(it).some((m) => (m.fotos || []).length) ? `<div class="fotos klein">${maengelVon(it).flatMap((m) => m.fotos || []).map((id) => `<img class="foto" data-foto="${esc(id)}" alt="Foto">`).join("")}</div>` : ""}
@@ -892,11 +905,11 @@
     const letzter = maengelVon(f.it).slice(-1)[0];
     const z = { vorlage: "rueckfrage", fest: letzter ? `${letzter.art}${letzter.notiz ? " (" + letzter.notiz + ")" : ""}` : "", mass: "", kontakt: null, fehler: "" };
     const text = () => { const { o, it } = allItems().find(({ it }) => it.tnr === tnr); const v = z.kontakt && z.kontakt.vorname ? `Guten Tag ${z.kontakt.vorname}` : "Guten Tag";
-      return VORLAGEN.find((x) => x[0] === z.vorlage)[2](v, `${zahl(o.nr)} (${ITEM[it.id].name}, Teil ${teilPos(o, it)}/${o.items.length})`, z.fest.trim(), z.mass.trim()); };
+      return VORLAGEN.find((x) => x[0] === z.vorlage)[2](v, `${zahl(o.nr)} (${teilName(it)}, Teil ${teilPos(o, it)}/${o.items.length})`, z.fest.trim(), z.mass.trim()); };
     const zeichnen = () => {
       const { it, o } = allItems().find(({ it }) => it.tnr === tnr);
       const nr = z.kontakt ? handyNr(z.kontakt.tel) : "";
-      dlg.innerHTML = `<div class="md-links"><h2>Kunde fragen · ${teilLabel(o, it)} · ${esc(ITEM[it.id].name)}</h2>
+      dlg.innerHTML = `<div class="md-links"><h2>Kunde fragen · ${teilLabel(o, it)} · ${esc(teilName(it))}</h2>
           <label class="field" for="af-vorlage">Vorlage<select id="af-vorlage">${VORLAGEN.map(([k, n]) => `<option value="${k}"${k === z.vorlage ? " selected" : ""}>${n}</option>`).join("")}</select></label>
           ${z.vorlage !== "frei" ? `<label class="field" for="af-fest">Was wurde festgestellt?<input id="af-fest" value="${esc(z.fest)}" placeholder="z. B. Wasserflecken am Saum" autocomplete="off"></label>` : ""}
           ${["rueckfrage", "reparatur"].includes(z.vorlage) ? `<label class="field" for="af-mass">Was möchten wir tun?<input id="af-mass" value="${esc(z.mass)}" placeholder="z. B. eine Nassreinigung" autocomplete="off"></label>` : ""}
@@ -1105,11 +1118,12 @@
       }
       const tiles = ITEMS.filter((i) => i.cat === ui.cat).map((i) => {
         const [p, why] = unitPrice(i.id, wd, d.lines.concat(i.id === "hemd" ? [{ id: "hemd", qty: 99 }] : []));
-        const offer = why && !(i.id === "hemd") ? `<span class="offer num">${euro(p)} · ${why}</span>` : `<span class="num">${euro(i.price)}${i.unit !== "Stk" ? " / " + i.unit : ""}</span>`;
+        const offer = i.frei ? `<span>Preis bei Annahme · Partnerbetrieb</span>` : why && !(i.id === "hemd") ? `<span class="offer num">${euro(p)} · ${why}</span>` : `<span class="num">${euro(i.price)}${i.unit !== "Stk" ? " / " + i.unit : ""}</span>`;
         return `<button class="item" data-add="${i.id}" type="button"><b>${esc(i.name)}</b>${offer}</button>`;
       }).join("");
-      const sum = d.lines.reduce((s, l) => s + l.qty * unitPrice(l.id, wd, d.lines)[0], 0);
-      const lines = d.lines.map((l, k) => { const [p, why] = unitPrice(l.id, wd, d.lines); return `<div class="line"><span class="qty"><button data-dec="${k}" type="button" aria-label="weniger">−</button><span class="num">${l.qty}</span><button data-inc="${k}" type="button" aria-label="mehr">+</button></span><span class="n">${esc(ITEM[l.id].name)}${why ? `<small>${why}</small>` : ""}</span><b class="num">${euro(p * l.qty)}</b></div>`; }).join("");
+      const sum = d.lines.reduce((s, l) => s + l.qty * linePrice(l, wd, d.lines)[0], 0);
+      const lines = d.lines.map((l, k) => { const [p, why] = linePrice(l, wd, d.lines); return `<div class="line"><span class="qty"><button data-dec="${k}" type="button" aria-label="weniger">−</button><span class="num">${l.qty}</span><button data-inc="${k}" type="button" aria-label="mehr">+</button></span><span class="n">${esc(ITEM[l.id].name)}${why ? `<small>${why}</small>` : ""}</span><b class="num">${euro(p * l.qty)}</b>${ITEM[l.id].frei ? `<span class="frei"><input id="lt-${k}" data-ltext="${k}" value="${esc(l.text || "")}" placeholder="Was genau? z. B. Absätze erneuern" autocomplete="off"><input id="lp-${k}" data-lpreis="${k}" class="num" inputmode="decimal" value="${l.preis ? (l.preis / 100).toFixed(2).replace(".", ",") : ""}" placeholder="Preis je Stück €" autocomplete="off"></span>` : ""}</div>`; }).join("");
+      const ohnePreis = d.lines.some((l) => ITEM[l.id].frei && !l.preis);
       const tag = ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"][wd];
       return `<div class="annahme">
         <div class="panel"><div class="chips cats">${CATS.map((k) => `<button class="chip" data-cat="${k}" aria-pressed="${k === ui.cat}" type="button">${k}</button>`).join("")}</div>
@@ -1127,7 +1141,7 @@
             <label class="field" for="d-due">Abholbar ab<input type="date" id="d-due" value="${d.due}"></label></div>
           <div class="lines">${lines || `<p class="empty">Teile links antippen.</p>`}</div>
           <div class="total"><span>Summe</span><span class="num">${euro(sum)}</span></div>
-          <button class="btn" data-save type="button" ${c && d.lines.length ? "" : "disabled"}>Auftrag speichern</button>
+          <button class="btn" data-save type="button" ${c && d.lines.length ? "" : "disabled"}>Auftrag speichern</button>${ohnePreis ? `<span class="pay-warn">Bei Schuh- und Schlüsseldienst bitte den Preis eintragen.</span>` : ""}
           <p class="hint">${c ? "" : "Erst Kunde wählen. "}Gespeichert wird sofort auf dem Tablet – auch ohne Internet.</p>
         </div></div>`;
     },
@@ -1178,7 +1192,7 @@
       const flt = ui.tfilter || "imhaus";
       const passt = ({ it }, k) => k === "alle" ? true : k === "imhaus" ? !["ausgegeben", "storniert"].includes(it.st) : it.st === k;
       let rows = items;
-      if (tq) rows = rows.filter(({ it, o }) => norm(it.tnr).includes(tq) || norm(o.nr).includes(tq) || norm(cust(o.cust).name).includes(tq) || norm(ITEM[it.id].name).includes(tq));
+      if (tq) rows = rows.filter(({ it, o }) => norm(it.tnr).includes(tq) || norm(o.nr).includes(tq) || norm(cust(o.cust).name).includes(tq) || norm(teilName(it)).includes(tq));
       const basis = rows; rows = rows.filter((r) => passt(r, flt));
       rows.sort((a, b) => b.it.tnr.localeCompare(a.it.tnr));
       const F = [["imhaus", "Im Haus"], ...STATIONEN.filter(([k]) => k !== "storniert"), ["alle", "Alle"]];
@@ -1186,7 +1200,7 @@
       const offenTeil = ui.openTeil && allItems().find(({ it }) => it.tnr === ui.openTeil);
       const detail = offenTeil ? (() => { const { it, o } = offenTeil;
         return `<div class="panel detail"><h2>Teil ${it.tnr}</h2>
-          <dl><dt>Artikel</dt><dd>${esc(ITEM[it.id].name)}</dd><dt>Auftrag</dt><dd><button class="btn ghost small" data-order="${o.nr}" data-goauftrag type="button">${o.nr}</button></dd>
+          <dl><dt>Artikel</dt><dd>${esc(teilName(it))}</dd><dt>Auftrag</dt><dd><button class="btn ghost small" data-order="${o.nr}" data-goauftrag type="button">${o.nr}</button></dd>
           <dt>Kunde</dt><dd>${esc(cust(o.cust).name)}</dd><dt>Station</dt><dd>${stPill(it.st)}${it.platz ? " · " + esc(it.platz) : ""}</dd>
           <dt>Mängel</dt><dd>${maengelVon(it).map((m) => esc(m.art)).join(", ") || "keine erfasst"} <button class="btn small ghost" data-maengel="${it.tnr}" type="button">Mängel ansehen / erfassen</button></dd></dl>
           <h3 style="margin:6px 0 0;font-size:16px">Verlauf</h3><ol class="scanlog">${it.log.map((l) => `<li>${fmtDate(l.am)} · ${ST[l.st]}${l.platz && l.st === "fertig" ? " (" + esc(l.platz) + ")" : ""}</li>`).join("")}</ol>
@@ -1204,7 +1218,7 @@
         <label for="tq" class="field">Teil suchen<input class="search" id="tq" value="${esc(ui.tq || "")}" placeholder="Teilenummer, Auftrag, Kunde oder Artikel" autocomplete="off"></label>
         <div class="chips">${F.map(([k, n]) => `<button class="chip" data-tfilter="${k}" aria-pressed="${k === flt}" type="button">${n}<span class="cnt">${basis.filter((r) => passt(r, k)).length}</span></button>`).join("")}</div>
         <div class="panel"><div class="scroll"><table class="tbl"><thead><tr><th class="l">Teil-Nr.</th><th class="l">Artikel</th><th class="l">Auftrag</th><th class="l">Kunde</th><th>Station</th><th>Platz</th><th>seit</th></tr></thead><tbody>
-        ${rows.slice(0, 80).map(({ it, o }) => `<tr class="click" data-teil="${it.tnr}"><td class="l num"><b>${it.tnr}</b></td><td class="l">${esc(ITEM[it.id].name)}</td><td class="l num">${o.nr}</td><td class="l">${esc(cust(o.cust).name)}</td><td>${stPill(it.st)}</td><td>${esc(it.platz || "")}</td><td class="num">${fmtDate(it.log[it.log.length - 1].am)}</td></tr>`).join("") || `<tr><td class="l" colspan="7">Keine Teile in dieser Auswahl.</td></tr>`}
+        ${rows.slice(0, 80).map(({ it, o }) => `<tr class="click" data-teil="${it.tnr}"><td class="l num"><b>${it.tnr}</b></td><td class="l">${esc(teilName(it))}</td><td class="l num">${o.nr}</td><td class="l">${esc(cust(o.cust).name)}</td><td>${stPill(it.st)}</td><td>${esc(it.platz || "")}</td><td class="num">${fmtDate(it.log[it.log.length - 1].am)}</td></tr>`).join("") || `<tr><td class="l" colspan="7">Keine Teile in dieser Auswahl.</td></tr>`}
         </tbody></table></div>${rows.length > 80 ? `<p class="mini">${rows.length - 80} weitere – bitte Suche oder Filter nutzen.</p>` : ""}</div>`;
     },
 
@@ -1238,7 +1252,7 @@
       const os = db.orders.filter(inStore).filter(zaehlt);
       const bez = os.filter((o) => o.paid);
       const im = (n) => bez.filter((o) => daysSince(o.paid.am) < n).reduce((s, o) => s + total(o), 0);
-      const kat = {}; os.filter((o) => daysSince(o.date) < 30).forEach((o) => { const wd = D(o.date).getDay(); o.lines.forEach((l) => { const c = ITEM[l.id].cat; kat[c] = (kat[c] || 0) + l.qty * unitPrice(l.id, wd, o.lines)[0]; }); });
+      const kat = {}; os.filter((o) => daysSince(o.date) < 30).forEach((o) => { const wd = D(o.date).getDay(); o.lines.forEach((l) => { const c = ITEM[l.id].cat; kat[c] = (kat[c] || 0) + l.qty * linePrice(l, wd, o.lines)[0]; }); });
       const katS = Object.entries(kat).sort((a, b) => b[1] - a[1]); const kmax = katS.length ? katS[0][1] : 1;
       const alle = db.orders.filter(inStore);
       const storno = alle.length ? Math.round(alle.filter((o) => o.status === "storniert").length / alle.length * 100) : 0;
@@ -1320,7 +1334,9 @@
     else if (ds.store) { ui.store = ds.store; }
     else if (ds.filter) { ui.filter = ds.filter; }
     else if (ds.cat) { ui.cat = ds.cat; }
-    else if (ds.add) { const l = d.lines.find((x) => x.id === ds.add); if (l) l.qty++; else d.lines.push({ id: ds.add, qty: ITEM[ds.add].unit === "Stk" ? 1 : 10 }); }
+    else if ("save" in ds && d.lines.some((l) => ITEM[l.id].frei && !l.preis)) { toast("Bei Schuh- und Schlüsseldienst bitte den Preis eintragen"); return; }
+    else if (ds.add) { const l = !ITEM[ds.add].frei && d.lines.find((x) => x.id === ds.add); if (l) l.qty++; else d.lines.push({ id: ds.add, qty: ITEM[ds.add].unit === "Stk" ? 1 : 10 });
+      if (ITEM[ds.add].frei) setTimeout(() => document.getElementById(`lt-${d.lines.length - 1}`)?.focus(), 0); }
     else if (ds.inc) { d.lines[ds.inc].qty++; }
     else if (ds.dec) { const l = d.lines[ds.dec]; l.qty--; if (l.qty <= 0) d.lines.splice(ds.dec, 1); }
     else if (ds.cust) { d.cust = ds.cust; ui.showList = false; d.custQ = ""; }
@@ -1436,7 +1452,7 @@
     ui.scans = ui.scans || [];
     if (!f) ui.scans.unshift({ ok: false, text: fs && !fs.pos ? `${nr}: Das ist die Sammelnummer – bitte das Etikett mit Position scannen (z. B. ${zahl(fs.o.nr)}-1)` : `${nr || "(leer)"}: Teil nicht gefunden` });
     else { setItem(f.it, ziel, ziel === "fertig" ? (ui.scanPlatz || "Stange 1") : undefined); const m = syncOrder(f.o); change(f.o);
-      ui.scans.unshift({ ok: true, text: `${teilLabel(f.o, f.it)} ${ITEM[f.it.id].name} → ${ST[ziel]}${ziel === "fertig" ? " (" + (ui.scanPlatz || "Stange 1") + ")" : ""}${m}` }); }
+      ui.scans.unshift({ ok: true, text: `${teilLabel(f.o, f.it)} ${teilName(f.it)} → ${ST[ziel]}${ziel === "fertig" ? " (" + (ui.scanPlatz || "Stange 1") + ")" : ""}${m}` }); }
     render(); const s = document.getElementById("scan"); if (s) { s.value = ""; s.focus(); }
   });
   // Kundenfeld antippen: Kundenliste klappt automatisch auf
@@ -1449,12 +1465,16 @@
     else if (t.id === "kq") { ui.q = t.value; render(); }
     else if (t.id === "aq") { ui.aq = t.value; render(); }
     else if (t.id === "tq") { ui.tq = t.value; render(); }
+    // Fremdleistung: Beschreibung und Preis merken, Summe erst beim Verlassen des Feldes neu rechnen
+    else if (t.dataset.ltext !== undefined) { ui.draft.lines[+t.dataset.ltext].text = t.value; }
+    else if (t.dataset.lpreis !== undefined) { const v = Math.round(parseFloat(t.value.replace(",", ".")) * 100); ui.draft.lines[+t.dataset.lpreis].preis = v > 0 ? v : 0; }
     else if (t.id === "kq2") { ui.kq2 = t.value; render(); }
     else if (t.id === "t-suche") { ui.tSuche = t.value; render(); }
     else if (t.id === "scan-platz") { ui.scanPlatz = t.value; }
   });
   document.addEventListener("change", (e) => {
     const t = e.target;
+    if (t.dataset.lpreis !== undefined) { render(); return; }
     if (t.id === "bediener") { bediener = t.value; LS.set("lb-bediener", bediener || null); toast(bediener ? `Angemeldet: ${bedienerName()}` : "Kein Mitarbeiter gewählt"); }
     else if (t.id === "ta-art") { ui.taArt = t.value; render(); }
     else if (t.id === "t-foto" && t.files[0]) { const tk = tickets().find((x) => x.id === ui.openTicket); fotoHochladen(tk, t.files[0]).then(render); t.value = ""; }
