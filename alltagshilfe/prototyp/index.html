@@ -4,19 +4,12 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&display=swap">
 <style>
-/* Layout: App mit Reitern unten (Handy) bzw. links (breit); Druckansicht als A4-Blatt im Dialog */
+/* Layout: Kopf mit Rollenwahl (Büro, Begleiterin, Klient, Angehörige), darunter je Rolle Reiter und Inhalt; Druckansicht als A4-Blatt */
 :root {
-  --bg: #F1F4F2;        /* Grund, leicht ins Salbeigrün */
-  --surface: #FFFFFF;
-  --ink: #18242E;       /* Schrift, Tintenblau */
-  --muted: #5B6871;
-  --line: #D8DFDB;
-  --accent: #1E6F63;    /* Salbeigrün, Hauptfarbe */
-  --accent-ink: #FFFFFF;
-  --accent-soft: #DCEDE8;
-  --ok: #2E7D32; --ok-soft: #E3F1E4;
-  --warn: #9A5B00; --warn-soft: #FBEFD9;
-  --bad: #B3261E; --bad-soft: #FBE4E2;
+  --bg: #F1F4F2; --surface: #FFFFFF; --ink: #18242E; --muted: #5B6871; --line: #D8DFDB;
+  --accent: #1E6F63; --accent-ink: #FFFFFF; --accent-soft: #DCEDE8;
+  --ok: #2E7D32; --ok-soft: #E3F1E4; --warn: #9A5B00; --warn-soft: #FBEFD9; --bad: #B3261E; --bad-soft: #FBE4E2;
+  --rolle: #3D4E8A; --rolle-soft: #E3E7F5;
   --paper: #FFFFFF; --paper-ink: #111111;
   --f-display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
   --f-body: "Atkinson Hyperlegible", "Verdana", "Segoe UI", system-ui, sans-serif;
@@ -26,124 +19,134 @@
   --bg: #0F1619; --surface: #172227; --ink: #E7EEEA; --muted: #9DACA6; --line: #2A383E;
   --accent: #5CC2AE; --accent-ink: #062320; --accent-soft: #163A35;
   --ok: #7DD08A; --ok-soft: #173321; --warn: #F0B860; --warn-soft: #3A2A10; --bad: #F2948C; --bad-soft: #3D1916;
-  color-scheme: dark } }
+  --rolle: #AEB9F0; --rolle-soft: #232B4A; color-scheme: dark } }
 :root[data-theme="dark"] {
   --bg: #0F1619; --surface: #172227; --ink: #E7EEEA; --muted: #9DACA6; --line: #2A383E;
   --accent: #5CC2AE; --accent-ink: #062320; --accent-soft: #163A35;
   --ok: #7DD08A; --ok-soft: #173321; --warn: #F0B860; --warn-soft: #3A2A10; --bad: #F2948C; --bad-soft: #3D1916;
-  color-scheme: dark }
+  --rolle: #AEB9F0; --rolle-soft: #232B4A; color-scheme: dark }
 
 * { box-sizing: border-box }
-body { background: var(--bg); color: var(--ink); font: 17px/1.5 var(--f-body); }
+body { background: var(--bg); color: var(--ink); font: 17px/1.5 var(--f-body) }
 body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--surface) }
 h1, h2, h3 { overflow-wrap: anywhere; hyphens: auto; font-family: var(--f-display); line-height: 1.15; text-wrap: balance; margin: 0 }
-h1 { font-size: 1.6rem; font-weight: 800 }
-h2 { font-size: 1.25rem; font-weight: 800 }
-h3 { font-size: 1.05rem; font-weight: 600 }
+h1 { font-size: 1.6rem; font-weight: 800 } h2 { font-size: 1.22rem; font-weight: 800 } h3 { font-size: 1.05rem; font-weight: 600 }
+p { margin: 0 }
 .num { font-variant-numeric: tabular-nums }
 button, input, select, textarea { font: inherit; color: inherit }
 :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px }
+a { color: var(--accent) }
 
-.app { display: grid; grid-template-columns: 1fr; min-height: 100% }
 .top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--surface); border-bottom: 1px solid var(--line);
   padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 10px }
-.top-in { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; max-width: 1040px; margin: 0 auto }
-.logo { font-family: var(--f-display); font-weight: 800; font-size: 1.15rem; display: flex; align-items: center; gap: 8px }
+.top-in { max-width: 1080px; margin: 0 auto; display: grid; gap: 8px }
+.top-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap }
+.logo { font-family: var(--f-display); font-weight: 800; font-size: 1.12rem; display: flex; align-items: center; gap: 8px }
 .logo svg { width: 26px; height: 26px; color: var(--accent) }
-.firma { color: var(--muted); font-size: .9rem; min-width: 0 }
-.test { margin-left: auto; background: var(--warn-soft); color: var(--warn); font-weight: 700; font-size: .78rem; letter-spacing: .04em; text-transform: uppercase; padding: 4px 10px; border-radius: 99px }
+.test { margin-left: auto; background: var(--warn-soft); color: var(--warn); font-weight: 700; font-size: .74rem; letter-spacing: .05em; text-transform: uppercase; padding: 4px 10px; border-radius: 99px }
+.rollen { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; background: var(--bg); padding: 4px; border-radius: 12px }
+.rollen a { text-align: center; text-decoration: none; color: var(--muted); font-weight: 700; font-size: .84rem; padding: 7px 4px; border-radius: 9px; line-height: 1.2 }
+.rollen a[aria-current="page"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 3px rgb(0 0 0 / .12) }
+.wer { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-size: .9rem; color: var(--muted) }
+.wer select { min-height: 36px; padding: 4px 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); max-width: 100% }
 
-main { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 18px 110px }
-.view { max-width: 1040px; margin: 0 auto; display: grid; gap: 16px }
+main { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 16px 48px }
+.view { max-width: 1080px; margin: 0 auto; display: grid; gap: 16px; min-width: 0 }
 .view-head { display: flex; align-items: end; justify-content: space-between; gap: 12px; flex-wrap: wrap }
-.view-head p { margin: 2px 0 0; color: var(--muted) }
-
-nav.tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 6; background: var(--surface); border-top: 1px solid var(--line);
-  display: grid; grid-template-columns: repeat(5, 1fr);
-  padding-left: env(safe-area-inset-left, 0px); padding-right: env(safe-area-inset-right, 0px); padding-bottom: env(safe-area-inset-bottom, 0px) }
-nav.tabs a { display: grid; justify-items: center; gap: 2px; padding: 8px 2px 10px; text-decoration: none; color: var(--muted); font-size: .74rem; font-weight: 700 }
-nav.tabs a svg { width: 24px; height: 24px }
-nav.tabs a[aria-current="page"] { color: var(--accent) }
-@media (min-width: 900px) {
-  .app { grid-template-columns: 210px 1fr }
-  .top { grid-column: 1 / -1 }
-  nav.tabs { position: sticky; top: 64px; align-self: start; display: grid; grid-template-columns: 1fr; gap: 4px; border: 0; background: transparent; padding: 18px 0 0 max(16px, env(safe-area-inset-left, 0px)) }
-  nav.tabs a { grid-template-columns: 24px 1fr; justify-items: start; align-items: center; gap: 10px; font-size: .95rem; padding: 10px 12px; border-radius: 10px }
-  nav.tabs a[aria-current="page"] { background: var(--accent-soft) }
-  main { padding-bottom: 40px }
-}
+.view-head p { color: var(--muted) }
+.reiter { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px }
+.reiter button { border: 1px solid var(--line); background: var(--surface); border-radius: 99px; padding: 8px 14px; font-weight: 700; font-size: .92rem; cursor: pointer; white-space: nowrap; color: var(--muted) }
+.reiter button[aria-pressed="true"] { background: var(--ink); color: var(--surface); border-color: var(--ink) }
+.reiter .zahl { display: inline-block; min-width: 1.4em; margin-left: 6px; background: var(--bad); color: #fff; border-radius: 99px; font-size: .75rem; padding: 0 5px }
 
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; display: grid; gap: 10px; min-width: 0 }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 16px; align-items: start }
 .list { display: grid; gap: 10px }
 .row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap }
 .row .grow { flex: 1; min-width: 0 }
-.muted { color: var(--muted) }
-.small { font-size: .88rem }
+.muted { color: var(--muted) } .small { font-size: .88rem }
 .pill { display: inline-block; font-size: .78rem; font-weight: 700; padding: 3px 10px; border-radius: 99px; white-space: nowrap }
-.p-plan { background: var(--accent-soft); color: var(--accent) }
-.p-ok { background: var(--ok-soft); color: var(--ok) }
-.p-warn { background: var(--warn-soft); color: var(--warn) }
-.p-bad { background: var(--bad-soft); color: var(--bad) }
-.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 46px; padding: 10px 18px; border-radius: 12px; border: 1px solid var(--accent); background: var(--accent); color: var(--accent-ink); font-weight: 700; cursor: pointer; text-decoration: none }
+.p-plan { background: var(--accent-soft); color: var(--accent) } .p-ok { background: var(--ok-soft); color: var(--ok) }
+.p-warn { background: var(--warn-soft); color: var(--warn) } .p-bad { background: var(--bad-soft); color: var(--bad) }
+.p-rolle { background: var(--rolle-soft); color: var(--rolle) }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 46px; padding: 10px 18px; border-radius: 12px; border: 1px solid var(--accent); background: var(--accent); color: var(--accent-ink); font-weight: 700; cursor: pointer; text-decoration: none; text-align: center }
 .btn.ghost { background: transparent; color: var(--accent) }
 .btn.small { min-height: 38px; padding: 6px 12px; font-size: .92rem }
 .btn.danger { background: transparent; color: var(--bad); border-color: var(--bad) }
 .btns { display: flex; gap: 10px; flex-wrap: wrap }
-.einsatz { cursor: pointer; text-align: left; width: 100%; color: inherit }
-.einsatz:hover { border-color: var(--accent) }
-.zeit { font-family: var(--f-display); font-weight: 800; font-size: 1.15rem; min-width: 64px }
+.klick { cursor: pointer; text-align: left; width: 100%; color: inherit; font: inherit }
+.klick:hover { border-color: var(--accent) }
+.zeit { font-family: var(--f-display); font-weight: 800; font-size: 1.12rem; min-width: 58px }
+.avatar { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; background: var(--rolle-soft); color: var(--rolle); flex: none }
 
 .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px }
-.kpi { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px }
+.kpi { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; text-align: left; color: inherit; font: inherit }
+button.kpi { cursor: pointer } button.kpi:hover { border-color: var(--accent) }
 .kpi b { display: block; font-family: var(--f-display); font-size: 1.45rem; font-weight: 800 }
 .kpi span { color: var(--muted); font-size: .85rem }
-.kpi.gewinn b { color: var(--accent) }
+.kpi.warn b { color: var(--warn) } .kpi.bad b { color: var(--bad) } .kpi.gut b { color: var(--accent) }
 
 .budget { height: 10px; background: var(--line); border-radius: 99px; overflow: hidden }
 .budget i { display: block; height: 100%; background: var(--accent); border-radius: 99px }
-.hint { background: var(--warn-soft); color: var(--warn); border-radius: 10px; padding: 8px 12px; font-size: .9rem }
+.hint { background: var(--warn-soft); color: var(--warn); border-radius: 10px; padding: 8px 12px; font-size: .92rem }
 .info { background: var(--accent-soft); border-radius: 10px; padding: 10px 14px; font-size: .92rem }
+.fehler { background: var(--bad-soft); color: var(--bad); border-radius: 10px; padding: 8px 12px; font-size: .92rem }
 
-.bars { display: grid; grid-template-columns: repeat(12, 1fr); gap: 6px; align-items: end; height: 130px; padding-top: 8px; border-bottom: 1px solid var(--line) }
-.bar { display: flex; gap: 2px; align-items: end; height: 100% }
-.bar i { flex: 1; border-radius: 4px 4px 0 0; min-height: 2px }
-.bar .e { background: var(--accent) }
-.bar .a { background: var(--muted); opacity: .55 }
-.bar-labels { display: grid; grid-template-columns: repeat(12, 1fr); gap: 6px; font-size: .72rem; color: var(--muted); text-align: center }
-.legend { display: flex; gap: 14px; font-size: .82rem; color: var(--muted) }
-.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 5px; vertical-align: -1px }
+.tour { display: grid }
+.halt { display: grid; grid-template-columns: 30px 1fr; gap: 12px }
+.halt > span:last-child { min-width: 0 }
+.halt .nr { width: 30px; height: 30px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); display: grid; place-items: center; font-weight: 700; font-size: .9rem }
+.halt.start .nr { background: var(--rolle-soft); color: var(--rolle) }
+.fahrt { display: grid; grid-template-columns: 30px 1fr; gap: 12px; color: var(--muted); font-size: .86rem; min-height: 34px; align-items: center }
+.fahrt span:first-child { justify-self: center; width: 2px; height: 100%; background: var(--line) }
+.karte-svg { width: 100%; height: auto; max-width: 100%; background: var(--bg); border-radius: 12px; display: block }
+
+.woche-wrap { overflow-x: auto }
+.woche { display: grid; grid-template-columns: repeat(7, minmax(120px, 1fr)); gap: 8px; min-width: 860px }
+.tag { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 8px; display: grid; gap: 6px; align-content: start; min-height: 120px }
+.tag.heute { border-color: var(--accent); box-shadow: inset 0 3px 0 var(--accent) }
+.tag-kopf { font-weight: 700; font-size: .85rem; color: var(--muted) }
+.termin { font-size: .82rem; border-radius: 8px; padding: 6px 8px; background: var(--accent-soft); line-height: 1.3; border: 0; text-align: left; cursor: pointer; color: var(--ink) }
+.termin.abgesagt { background: var(--bad-soft); text-decoration: line-through }
+.termin.erledigt { background: var(--ok-soft) }
 
 .table-wrap { overflow-x: auto }
 table { width: 100%; border-collapse: collapse; font-size: .93rem }
 th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--line); vertical-align: top }
 th { font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted) }
 td.r, th.r { text-align: right; white-space: nowrap }
-.buchungen { display: grid }
-.buchung { display: grid; grid-template-columns: 2.2em 1fr auto; gap: 4px 10px; padding: 10px 0; border-bottom: 1px solid var(--line); align-items: start }
-.btxt { display: grid; min-width: 0 } .bnr { color: var(--muted); font-size: .85rem; padding-top: 2px }
-.bbetrag { font-weight: 700; white-space: nowrap } .bbetrag.ein { color: var(--ok) }
-.buchung.storno .btxt b, .buchung.storno .bbetrag { text-decoration: line-through; color: var(--muted) }
-.linkbtn { justify-self: start; border: 0; background: none; padding: 4px 0; color: var(--bad); font-size: .85rem; font-weight: 700; cursor: pointer }
-tr.storno td { color: var(--muted); text-decoration: line-through }
+.protokoll { display: grid }
+.eintrag { display: grid; grid-template-columns: 76px 1fr; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--line) }
+.eintrag > span:last-child { min-width: 0 }
+.eintrag:last-child { border-bottom: 0 }
+.eintrag .d { font-weight: 700; font-size: .88rem; color: var(--muted) }
 
-form.grid, .form { display: grid; gap: 12px }
-.f2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px }
+.form { display: grid; gap: 12px }
+.f2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px }
 label.f { display: grid; gap: 4px; font-weight: 700; font-size: .92rem }
-label.f input, label.f select, label.f textarea { font-weight: 400; min-height: 46px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg) }
+label.f input, label.f select, label.f textarea { font-weight: 400; min-height: 46px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); width: 100% }
 .chips { display: flex; flex-wrap: wrap; gap: 8px }
-.chip { border: 1px solid var(--line); border-radius: 99px; padding: 8px 14px; background: var(--bg); cursor: pointer; font-size: .92rem }
+.chip { border: 1px solid var(--line); border-radius: 99px; padding: 8px 14px; background: var(--bg); cursor: pointer; font-size: .92rem; color: var(--ink) }
 .chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 700 }
-fieldset { border: 0; padding: 0; margin: 0; display: grid; gap: 8px }
-legend { font-weight: 700; font-size: .92rem; margin-bottom: 4px }
+.chip:disabled { cursor: default; opacity: .75 }
+fieldset { border: 0; padding: 0; margin: 0; display: grid; gap: 8px; min-width: 0 }
+legend { font-weight: 700; font-size: .92rem; margin-bottom: 4px; padding: 0 }
+.schalter { display: flex; gap: 10px; align-items: center; font-weight: 700 }
+.schalter input { width: 22px; height: 22px; accent-color: var(--accent); flex: none }
 
-dialog { border: 0; border-radius: 18px; padding: 0; width: min(640px, calc(100vw - 24px)); max-height: calc(100dvh - 24px); background: var(--surface); color: var(--ink) }
+.gross { font-size: 1.2rem }
+.gross h1 { font-size: 2rem } .gross h2 { font-size: 1.45rem }
+.gross .btn { min-height: 60px; font-size: 1.15rem; padding: 14px 22px }
+.naechster { background: var(--accent); color: var(--accent-ink); border-radius: 18px; padding: 20px; display: grid; gap: 6px }
+.naechster b { font-family: var(--f-display); font-size: 1.9rem; line-height: 1.1 }
+
+dialog { border: 0; border-radius: 18px; padding: 0; width: min(660px, calc(100vw - 24px)); max-height: calc(100dvh - 24px); background: var(--surface); color: var(--ink) }
 dialog::backdrop { background: rgb(10 20 25 / .55) }
 .dlg { padding: 20px; display: grid; gap: 14px }
 .dlg-head { display: flex; justify-content: space-between; align-items: start; gap: 10px }
 .x { border: 0; background: transparent; font-size: 1.6rem; line-height: 1; cursor: pointer; color: var(--muted); padding: 4px 8px }
 canvas.sig { width: 100%; height: 170px; background: var(--paper); border: 2px dashed var(--line); border-radius: 12px; touch-action: none; display: block }
 
-/* Druckansicht: A4-Blatt, immer hell */
 dialog.druck { width: min(860px, calc(100vw - 16px)); background: var(--bg) }
 .druck-bar { position: sticky; top: 0; background: var(--surface); border-bottom: 1px solid var(--line); padding: 12px 16px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; z-index: 1 }
 .druck-bar .grow { flex: 1; min-width: 0 }
@@ -157,7 +160,7 @@ dialog.druck { width: min(860px, calc(100vw - 16px)); background: var(--bg) }
 .blatt .fuss { margin-top: auto; font-size: 8pt; color: #666; border-top: 1px solid #CCC; padding-top: 3mm }
 .blatt img.u { height: 26px; max-width: 120px }
 .blatt .absender { font-size: 7.5pt; color: #666; border-bottom: 1px solid #999; display: inline-block; margin-bottom: 2mm }
-
+#druckbereich { display: none }
 @media print {
   @page { size: A4; margin: 0 }
   body { background: #fff }
@@ -165,37 +168,31 @@ dialog.druck { width: min(860px, calc(100vw - 16px)); background: var(--bg) }
   #druckbereich { display: block !important }
   .blatt { box-shadow: none; margin: 0; page-break-after: always }
 }
-#druckbereich { display: none }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important } }
 </style>
 
 <div class="app" lang="de">
   <header class="top"><div class="top-in">
-    <div class="logo"><svg viewBox="0 0 32 32" aria-hidden="true"><path fill="currentColor" d="M16 29 4.6 17.8a7.3 7.3 0 0 1 10.3-10.4L16 8.6l1.1-1.2a7.3 7.3 0 0 1 10.3 10.4z" opacity=".22"/><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="M16 27.5 5.6 17.2a6.3 6.3 0 0 1 8.9-8.9L16 9.8l1.5-1.5a6.3 6.3 0 0 1 8.9 8.9z"/><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" d="M11 16.5h3l2-3 2.5 6 1.5-3h2"/></svg>Alltagshilfe</div>
-    <div class="firma" id="firma"></div>
-    <span class="test">Prototyp · Testdaten</span>
+    <div class="top-row">
+      <div class="logo"><svg viewBox="0 0 32 32" aria-hidden="true"><path fill="currentColor" d="M16 29 4.6 17.8a7.3 7.3 0 0 1 10.3-10.4L16 8.6l1.1-1.2a7.3 7.3 0 0 1 10.3 10.4z" opacity=".22"/><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="M16 27.5 5.6 17.2a6.3 6.3 0 0 1 8.9-8.9L16 9.8l1.5-1.5a6.3 6.3 0 0 1 8.9 8.9z"/><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" d="M11 16.5h3l2-3 2.5 6 1.5-3h2"/></svg>Alltagshilfe</div>
+      <span class="test">Prototyp · Testdaten</span>
+    </div>
+    <nav class="rollen" aria-label="Ansicht wählen">
+      <a href="#buero">Büro</a><a href="#begleitung">Begleiterin</a><a href="#klient">Klient</a><a href="#angehoerige">Angehörige</a>
+    </nav>
+    <div class="wer" id="wer"></div>
   </div></header>
-
-  <nav class="tabs" aria-label="Bereiche">
-    <a href="#heute"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Einsätze</a>
-    <a href="#klienten"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.3-5.5 6.5-5.5s5.7 1.9 6.5 5.5M16 4.5a3.5 3.5 0 0 1 0 7M18 14.8c1.9.7 3.1 2.4 3.5 5.2"/></svg>Klienten</a>
-    <a href="#abrechnung"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 2h9l4 4v16H6z"/><path d="M14 2v5h5M9 12h7M9 16h7"/></svg>Abrechnung</a>
-    <a href="#kassenbuch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 4h12a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3z"/><path d="M4 17a3 3 0 0 1 3-3h12M9 8h6"/></svg>Kassenbuch</a>
-    <a href="#betrieb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 21V9l9-6 9 6v12"/><path d="M9 21v-7h6v7"/></svg>Betrieb</a>
-  </nav>
-
   <main id="main"></main>
 </div>
-
 <dialog id="dlg" lang="de"></dialog>
 <dialog id="druck" class="druck" lang="de"></dialog>
 <div id="druckbereich" lang="de"></div>
 
 <script>
 "use strict";
-// ---------------------------------------------------------------- Grundlagen
-const SPEICHER = "alltagshilfe-prototyp-v1";
-const ENTLASTUNG = 131;                       // € je Monat, § 45b SGB XI
+// ================================================================ Grundlagen
+const SPEICHER = "alltagshilfe-prototyp-v2";
+const ENTLASTUNG = 131;                        // € je Monat, § 45b SGB XI
 const HEUTE = new Date(); HEUTE.setHours(0, 0, 0, 0);
 const JAHR = HEUTE.getFullYear();
 const euro = (n) => new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(n || 0);
@@ -203,23 +200,29 @@ const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0
 const vonIso = (s) => { const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d); };
 const datum = (s) => vonIso(s).toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" });
 const tagKurz = (s) => vonIso(s).toLocaleDateString("de-DE", { weekday: "short", day: "2-digit", month: "2-digit" });
+const tagLang = (s) => vonIso(s).toLocaleDateString("de-DE", { weekday: "long", day: "numeric", month: "long" });
+const plusTage = (n, von = HEUTE) => { const d = new Date(von); d.setDate(d.getDate() + n); return iso(d); };
+const HEUTE_ISO = iso(HEUTE);
 const MONATE = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
+const WOCHENTAGE = ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"];
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const minuten = (von, bis) => { const [a, b] = von.split(":").map(Number); const [c, d] = bis.split(":").map(Number); return c * 60 + d - (a * 60 + b); };
+const zuMin = (t) => { const [a, b] = t.split(":").map(Number); return a * 60 + b; };
 const dauerText = (m) => `${Math.floor(m / 60)}:${String(m % 60).padStart(2, "0")} Std.`;
-const plusTage = (n) => { const d = new Date(HEUTE); d.setDate(d.getDate() + n); return iso(d); };
+const initialen = (n) => n.split(" ").map((w) => w[0]).slice(0, 2).join("");
+const montag = (s) => { const d = vonIso(s); const w = (d.getDay() + 6) % 7; d.setDate(d.getDate() - w); return iso(d); };
+const km1 = (n) => n.toFixed(1).replace(".", ",");
 
-// Tätigkeiten nach den Hinweisen des Landes Niedersachsen (Stand 15.10.2025)
-const TAETIGKEITEN = {
+const TAETIGKEITEN = {   // nach den Hinweisen des Landes Niedersachsen, Stand 15.10.2025
   "Haushalt": ["Einkauf erledigt", "Mahlzeit zubereitet", "Wohnung gereinigt", "Wäsche gewaschen und gelegt", "Bett bezogen", "Blumen versorgt"],
   "Begleitung": ["Begleitung zum Einkauf", "Begleitung zu Arzt oder Therapie", "Botengang Post, Apotheke, Behörde", "Begleitung Friedhof oder Gottesdienst"],
   "Betreuung": ["Gespräch, Vorlesen, Spiele", "Spaziergang", "Gedächtnistraining"],
   "Organisation": ["Hilfe bei Post und Behördenschreiben"],
 };
+const VERMERKE = ["Gut gelaunt", "Wirkte müde", "Ging es heute nicht gut", "Hat wenig gegessen", "Sturzgefahr bemerkt", "Arzttermin wahrgenommen", "Rezept abgeholt", "Bitte Rückruf an Angehörige"];
 const KAT_EIN = { kasse: "Leistungen über Pflegekassen", privat: "Privat bezahlte Leistungen", sonst: "Sonstige Einnahmen" };
-const KAT_AUS = { versicherung: "Versicherungen und Beiträge", fortbildung: "Fortbildung und Kurse", telefon: "Telefon und Internet", buero: "Büro und Arbeitsmittel", werbung: "Werbung", fahrt: "Fahrtkosten (Belege)", sonst: "Sonstige Ausgaben" };
+const KAT_AUS = { versicherung: "Versicherungen und Beiträge", fortbildung: "Fortbildung und Kurse", telefon: "Telefon und Internet", buero: "Büro und Arbeitsmittel", werbung: "Werbung", sonst: "Sonstige Ausgaben" };
 
-// Unterschrift für Testdaten: Name in Schreibschrift auf eine Leinwand
 function testUnterschrift(name) {
   const c = document.createElement("canvas"); c.width = 360; c.height = 90;
   const g = c.getContext("2d"); g.fillStyle = "#1a2a6c"; g.font = "italic 38px 'Segoe Script', 'Brush Script MT', cursive";
@@ -227,397 +230,618 @@ function testUnterschrift(name) {
   return c.toDataURL("image/png");
 }
 
-// ---------------------------------------------------------------- Testdaten
+// ================================================================ Testdaten
 function testdaten() {
-  const k = [
-    { id: "k1", name: "Erna Beispiel", anschrift: "Lindenweg 4, 30457 Hannover", geb: "1938-03-12", pg: 2, kasse: "AOK Niedersachsen", vnr: "A123456789", angeh: "Tochter Petra Beispiel, 0151 0000001", abtretung: `${JAHR}-01-08`, vorjahr: 262 },
-    { id: "k2", name: "Heinz Muster", anschrift: "Am Bach 11, 30457 Hannover", geb: "1941-09-30", pg: 3, kasse: "Techniker Krankenkasse", vnr: "T987654321", angeh: "Sohn Jens Muster, 0151 0000002", abtretung: `${JAHR}-02-03`, vorjahr: 0 },
-    { id: "k3", name: "Gisela Probe", anschrift: "Kirchstraße 2, 30457 Hannover", geb: "1946-06-21", pg: 1, kasse: "BARMER", vnr: "B555666777", angeh: "", abtretung: `${JAHR}-04-15`, vorjahr: 0 },
+  const helfer = [
+    { id: "h1", name: "Sabine Musterfrau", tel: "0151 1000001", ort: "Wettbergen", x: 0, y: 0, satz: 30, quali: "Schulung 30 Std. nach AnerkVO (2026)", ersteHilfe: `${JAHR}-01-28`, fz: `${JAHR}-01-15`, stnr: "25/123/45678", iban: "DE00 1234 5678 0000 0000 01", anerkennung: "LS-AzUA-2027-0815", ik: "461234567" },
+    { id: "h2", name: "Aylin Beispiel", tel: "0151 1000002", ort: "Mühlenberg", x: 2.6, y: 1.4, satz: 30, quali: "Hauswirtschafterin (Fachkraft)", ersteHilfe: `${JAHR - 5}-12-02`, fz: `${JAHR - 1}-05-20`, stnr: "25/321/98765", iban: "DE00 1234 5678 0000 0000 02", anerkennung: "LS-AzUA-2027-0816", ik: "461234568" },
   ];
-  const e = []; let n = 1;
-  const t = (k, d, von, bis, taet, km, status = "bestaetigt") => e.push({ id: "e" + n++, klient: k, datum: d, von, bis, taet, km, notiz: "", status,
-    unterschrift: status === "bestaetigt" ? testUnterschrift(k === "k1" ? "E. Beispiel" : k === "k2" ? "J. Muster" : "G. Probe") : null,
-    wer: status === "bestaetigt" ? (k === "k2" ? "Angehöriger (Jens Muster)" : "Klient/in") : null });
-  // Eingesetzte Monate bis einschließlich Vormonat, dazu der laufende Monat
-  for (let m = 0; m <= HEUTE.getMonth(); m++) {
-    const d = (tag) => iso(new Date(JAHR, m, tag));
-    const lauf = m === HEUTE.getMonth();
-    if (!lauf || HEUTE.getDate() > 5) t("k1", d(5), "09:00", "10:30", ["Wäsche gewaschen und gelegt", "Bett bezogen", "Gespräch, Vorlesen, Spiele"], 4);
-    if (!lauf || HEUTE.getDate() > 12) t("k2", d(12), "14:00", "15:30", ["Begleitung zum Einkauf", "Spaziergang"], 6);
-    if (m >= 3 && (!lauf || HEUTE.getDate() > 19)) t("k3", d(19), "10:00", "11:00", ["Wohnung gereinigt", "Blumen versorgt"], 3);
-    if (!lauf || HEUTE.getDate() > 22) t("k1", d(22), "09:00", "10:00", ["Einkauf erledigt", "Mahlzeit zubereitet"], 4);
+  const klienten = [
+    { id: "k1", name: "Erna Beispiel", anrede: "Frau Beispiel", anschrift: "Lindenweg 4, 30457 Hannover", x: .6, y: .5, tel: "0511 2000001", geb: "1938-03-12", pg: 2, kasse: "AOK Niedersachsen", vnr: "A123456789", abtretung: `${JAHR}-01-08`, vorjahr: 262, pflegegeld: true, beratung: `${JAHR}-05-20`, notiz: "Hört schlecht, bitte laut klingeln. Schlüssel bei Nachbarin Fr. Hahn.", seit: `${JAHR}-01-08`,
+      angeh: { name: "Petra Beispiel", rolle: "Tochter, Pflegeperson", ort: "München", tel: "0151 3000001", mail: "petra@beispiel.invalid", zugang: true, kommunikation: true, vollmacht: true, freigabe: `${JAHR}-01-08` } },
+    { id: "k2", name: "Heinz Muster", anrede: "Herr Muster", anschrift: "Am Bach 11, 30457 Hannover", x: 1.3, y: -.6, tel: "0511 2000002", geb: "1941-09-30", pg: 3, kasse: "Techniker Krankenkasse", vnr: "T987654321", abtretung: `${JAHR}-02-03`, vorjahr: 0, pflegegeld: true, beratung: `${JAHR}-05-11`, notiz: "Diabetiker, beim Einkauf auf zuckerfreie Produkte achten.", seit: `${JAHR}-02-03`,
+      angeh: { name: "Jens Muster", rolle: "Sohn, Pflegeperson", ort: "Hannover-Linden", tel: "0151 3000002", mail: "jens@beispiel.invalid", zugang: true, kommunikation: false, vollmacht: false, freigabe: `${JAHR}-02-03` } },
+    { id: "k3", name: "Gisela Probe", anrede: "Frau Probe", anschrift: "Kirchstraße 2, 30457 Hannover", x: -.9, y: .9, tel: "0511 2000003", geb: "1946-06-21", pg: 1, kasse: "BARMER", vnr: "B555666777", abtretung: `${JAHR}-04-15`, vorjahr: 0, pflegegeld: false, beratung: null, notiz: "", seit: `${JAHR}-04-15`, angeh: null },
+    { id: "k4", name: "Walter Test", anrede: "Herr Test", anschrift: "Mühlenberger Markt 3, 30457 Hannover", x: 2.9, y: 1.0, tel: "0511 2000004", geb: "1936-11-02", pg: 2, kasse: "DAK-Gesundheit", vnr: "D111222333", abtretung: `${JAHR}-03-01`, vorjahr: 120, pflegegeld: true, beratung: `${JAHR}-08-14`, notiz: "Geht gern zum Friedhof (Ehefrau).", seit: `${JAHR}-03-01`,
+      angeh: { name: "Nicole Test", rolle: "Nichte", ort: "Hamburg", tel: "0151 3000004", mail: "nicole@beispiel.invalid", zugang: true, kommunikation: true, vollmacht: true, freigabe: `${JAHR}-03-01` } },
+    { id: "k5", name: "Ilse Demo", anrede: "Frau Demo", anschrift: "Ossietzkyring 20, 30457 Hannover", x: 3.5, y: 2.3, tel: "0511 2000005", geb: "1933-01-17", pg: 4, kasse: "AOK Niedersachsen", vnr: "A555444333", abtretung: `${JAHR}-05-02`, vorjahr: 0, pflegegeld: true, beratung: `${JAHR}-08-25`, notiz: "Rollator. Umwandlung von Sachleistung (bis 40 %) mit Kasse klären.", seit: `${JAHR}-05-02`,
+      angeh: { name: "Frank Demo", rolle: "Sohn, Pflegeperson", ort: "Hannover-Wettbergen", tel: "0151 3000005", mail: "frank@beispiel.invalid", zugang: true, kommunikation: false, vollmacht: true, freigabe: `${JAHR}-05-02` } },
+  ];
+  const serien = [
+    { id: "s1", klient: "k1", helfer: "h1", tag: 1, von: "09:00", bis: "10:00", alle: 1, ab: plusTage(-70), taet: ["Einkauf erledigt", "Gespräch, Vorlesen, Spiele"] },
+    { id: "s2", klient: "k2", helfer: "h1", tag: 1, von: "10:30", bis: "12:00", alle: 2, ab: plusTage(-70), taet: ["Begleitung zum Einkauf", "Spaziergang"] },
+    { id: "s3", klient: "k3", helfer: "h1", tag: 1, von: "13:00", bis: "14:00", alle: 2, ab: plusTage(-63), taet: ["Wohnung gereinigt", "Blumen versorgt"] },
+    { id: "s4", klient: "k4", helfer: "h2", tag: 3, von: "09:30", bis: "10:30", alle: 1, ab: plusTage(-70), taet: ["Begleitung Friedhof oder Gottesdienst", "Gespräch, Vorlesen, Spiele"] },
+    { id: "s5", klient: "k5", helfer: "h2", tag: 4, von: "13:00", bis: "14:00", alle: 1, ab: plusTage(-60), taet: ["Wäsche gewaschen und gelegt", "Mahlzeit zubereitet"] },
+    { id: "s6", klient: "k1", helfer: "h2", tag: 1, von: "15:00", bis: "15:45", alle: 2, ab: plusTage(-56), taet: ["Wäsche gewaschen und gelegt"] },
+  ];
+  const d = { helfer, klienten, serien, einsaetze: [], anfragen: [], abrechnung: {}, kassenbuch: [], rn: 1, n: 1, buero: { name: "FEIN Alltagshilfe · Büro (Testbetrieb)", tel: "0511 4000000" } };
+  for (const s of serien) erzeugeTermine(d, s, plusTage(-70), plusTage(42));
+  const texte = ["Einkauf erledigt, war gut gelaunt.", "Wäsche gemacht, Bett frisch bezogen.", "Spaziergang im Park, danach Kaffee.", "Wirkte müde, hat wenig gegessen. Angehörige informiert.", "Arzttermin begleitet, Rezept in der Apotheke abgeholt.", "Viel erzählt, Fotoalbum angeschaut."];
+  let i = 0;
+  for (const e of d.einsaetze.sort((a, b) => a.datum.localeCompare(b.datum))) {
+    if (e.datum >= HEUTE_ISO) continue;
+    if (i % 11 === 7) { e.status = "abgesagt"; e.grund = "Klient im Krankenhaus"; i++; continue; }
+    const k = d.klienten.find((x) => x.id === e.klient);
+    e.status = "bestaetigt"; e.taet = [...d.serien.find((s) => s.id === e.serie).taet]; e.km = Math.round(abstand(d, e) * 10) / 10;
+    e.protokoll = texte[i % texte.length]; e.vermerke = i % 6 === 3 ? ["Wirkte müde"] : ["Gut gelaunt"];
+    if (k.angeh && k.angeh.vollmacht && i % 2) { e.wer = `${k.angeh.name} (digital)`; e.bestaetigtAm = e.datum; }
+    else { e.wer = k.name; e.unterschrift = testUnterschrift(k.name.split(" ").map((w, j) => (j ? w : w[0] + ".")).join(" ")); }
+    i++;
   }
-  t("k1", plusTage(0), "09:00", "10:30", ["Wäsche gewaschen und gelegt"], 4, "geplant");
-  t("k2", plusTage(0), "14:00", "15:30", [], 6, "geplant");
-  t("k3", plusTage(1), "10:00", "11:00", [], 3, "geplant");
-  t("k1", plusTage(3), "09:00", "10:00", [], 4, "geplant");
-
-  const abrechnung = {}; // "YYYY-MM|klient" -> {status, nr, buchung}
-  const kb = []; let bn = 1;
-  const b = (d, typ, betrag, kat, text, zahlweg = "Konto", ref = null) => kb.push({ nr: bn++, datum: d, typ, betrag, kat, text, zahlweg, ref, storno: false });
-  // Ausgaben
-  b(`${JAHR}-01-10`, "aus", 189, "versicherung", "Betriebshaftpflicht Jahresbeitrag");
-  b(`${JAHR}-01-28`, "aus", 59, "fortbildung", "Erste-Hilfe-Kurs");
-  b(`${JAHR}-03-02`, "aus", 45, "werbung", "Flyer, 250 Stück");
-  b(`${JAHR}-05-14`, "aus", 23.9, "buero", "Ordner, Druckerpapier", "Bar");
-  b(`${JAHR}-09-20`, "aus", 120, "fortbildung", "Aufbaukurs Demenz");
-  for (let m = 0; m < HEUTE.getMonth(); m++) b(iso(new Date(JAHR, m, 3)), "aus", 15, "telefon", "Handyvertrag (beruflicher Anteil)");
-  // Monate vor dem Vormonat: abgerechnet und bezahlt; Vormonat: abgerechnet, Zahlung offen
+  const offen = d.einsaetze.filter((e) => e.klient === "k1" && e.status === "bestaetigt").sort((a, b) => b.datum.localeCompare(a.datum))[0];
+  if (offen) { offen.status = "wartet"; offen.wer = null; offen.unterschrift = null; offen.bestaetigtAm = null; }
+  d.anfragen.push(
+    { id: "a1", von: "Petra Beispiel", rolle: "Angehörige", klient: "k1", art: "Terminwunsch", text: "Kann Mama zusätzlich zum Augenarzt begleitet werden? Termin am Freitag in drei Wochen, 10:15 Uhr.", am: plusTage(-1), status: "neu" },
+    { id: "a2", von: "Heinz Muster", rolle: "Klient", klient: "k2", art: "Rückruf", text: "Bitte um Rückruf wegen der Rechnung.", am: plusTage(-2), status: "neu" },
+    { id: "a3", von: "Aylin Beispiel", rolle: "Begleiterin", klient: null, art: "Abwesenheit", text: "Urlaub vom 22. bis 29. des nächsten Monats.", am: plusTage(-4), status: "erledigt" });
   const proMonat = {};
-  for (const x of e) if (x.status === "bestaetigt") { const key = x.datum.slice(0, 7) + "|" + x.klient; proMonat[key] = (proMonat[key] || 0) + minuten(x.von, x.bis) / 60 * 34; }
-  let rn = 1;
+  for (const e of d.einsaetze) if (e.status === "bestaetigt") { const key = `${e.datum.slice(0, 7)}|${e.helfer}|${e.klient}`; proMonat[key] = (proMonat[key] || 0) + betragVon(d, e); }
+  const akt = HEUTE_ISO.slice(0, 7), vor = plusTage(-HEUTE.getDate()).slice(0, 7);
   for (const key of Object.keys(proMonat).sort()) {
-    const [ym] = key.split("|"); const m = Number(ym.slice(5, 7)) - 1;
-    if (m >= HEUTE.getMonth()) continue;
-    const nr = `${ym.replace("-", "")}-${String(rn++).padStart(3, "0")}`;
-    if (m < HEUTE.getMonth() - 1) {
-      const d = iso(new Date(JAHR, m + 1, 18));
-      b(d, "ein", Math.round(proMonat[key] * 100) / 100, "kasse", `Zahlung Rechnung ${nr}`, "Konto", key);
-      abrechnung[key] = { status: "bezahlt", nr };
-    } else abrechnung[key] = { status: "abgerechnet", nr };
+    const [ym, h] = key.split("|"); if (ym >= akt) continue;
+    const nr = `${ym.replace("-", "")}-${String(d.rn++).padStart(3, "0")}`;
+    if (ym < vor) { const z = vonIso(ym + "-01"); z.setMonth(z.getMonth() + 1); z.setDate(18);
+      d.kassenbuch.push({ helfer: h, datum: iso(z), typ: "ein", betrag: Math.round(proMonat[key] * 100) / 100, kat: "kasse", text: `Zahlung Rechnung ${nr}`, zahlweg: "Konto", ref: key, storno: false });
+      d.abrechnung[key] = { status: "bezahlt", nr }; }
+    else d.abrechnung[key] = { status: "abgerechnet", nr };
   }
-  b(`${JAHR}-06-30`, "ein", 68, "privat", "Privat: Fenster putzen, 2 Std. (nicht über Entlastungsbetrag)", "Bar");
-  kb.sort((a, c) => a.datum.localeCompare(c.datum)); kb.forEach((x, i) => (x.nr = i + 1));
-  return {
-    betrieb: { name: "Alltagshilfe Musterfrau", inhaber: "Sabine Musterfrau", anschrift: "Musterstraße 1, 30457 Hannover", tel: "0511 0000000", stnr: "25/123/45678", ik: "461234567", anerkennung: "LS-AzUA-2027-0815", iban: "DE00 1234 5678 0000 0000 00", satz: 34, km: 0.30, steuer: "klein" },
-    klienten: k, einsaetze: e, abrechnung, kassenbuch: kb, rnZaehler: rn,
-  };
+  for (const h of ["h1", "h2"]) {
+    d.kassenbuch.push({ helfer: h, datum: `${JAHR}-01-10`, typ: "aus", betrag: 189, kat: "versicherung", text: "Betriebshaftpflicht Jahresbeitrag", zahlweg: "Konto", storno: false });
+    d.kassenbuch.push({ helfer: h, datum: plusTage(-20), typ: "aus", betrag: 15, kat: "telefon", text: "Handyvertrag (beruflicher Anteil)", zahlweg: "Konto", storno: false });
+  }
+  d.kassenbuch.push({ helfer: "h1", datum: `${JAHR}-01-28`, typ: "aus", betrag: 59, kat: "fortbildung", text: "Erste-Hilfe-Kurs", zahlweg: "Konto", storno: false });
+  d.kassenbuch.push({ helfer: "h1", datum: plusTage(-12), typ: "ein", betrag: 68, kat: "privat", text: "Privat: Fenster putzen, 2 Std. (nicht über Entlastungsbetrag)", zahlweg: "Bar", storno: false });
+  d.kassenbuch.sort((a, b) => a.datum.localeCompare(b.datum));
+  for (const h of ["h1", "h2"]) d.kassenbuch.filter((x) => x.helfer === h).forEach((x, j) => (x.nr = j + 1));
+  return d;
 }
+
+// Termine einer Serie anlegen: fester Wochentag, jede oder jede 2. Woche
+function erzeugeTermine(d, s, von, bis) {
+  const start = vonIso(s.ab); while (start.getDay() !== s.tag) start.setDate(start.getDate() + 1);
+  const t0 = vonIso(von > s.ab ? von : s.ab); while (t0.getDay() !== s.tag) t0.setDate(t0.getDate() + 1);
+  for (const t = t0; iso(t) <= bis; t.setDate(t.getDate() + 7)) {
+    if (Math.round((t - start) / 6048e5) % s.alle) continue;
+    const tag = iso(t); if (s.bisDatum && tag > s.bisDatum) break;
+    if (d.einsaetze.some((e) => e.serie === s.id && e.datum === tag)) continue;
+    d.einsaetze.push({ id: "e" + d.n++, serie: s.id, klient: s.klient, helfer: s.helfer, datum: tag, von: s.von, bis: s.bis, taet: [], km: 0, protokoll: "", vermerke: [], status: "geplant" });
+  }
+}
+function abstand(d, e) {   // Hin und zurück: Luftlinie mal 1,3 als Straßen-Schätzung
+  const k = d.klienten.find((x) => x.id === e.klient), h = d.helfer.find((x) => x.id === e.helfer);
+  return Math.hypot(k.x - h.x, k.y - h.y) * 1.3 * 2;
+}
+function betragVon(d, e) { const h = d.helfer.find((x) => x.id === e.helfer); return Math.round(minuten(e.von, e.bis) / 60 * h.satz * 100) / 100; }
 
 let db;
 try { db = JSON.parse(localStorage.getItem(SPEICHER)); } catch (_) { db = null; }
-if (!db || !db.betrieb) db = testdaten();
+if (!db || !db.helfer) db = testdaten();
 const speichern = () => { try { localStorage.setItem(SPEICHER, JSON.stringify(db)); } catch (_) {} };
-
 const klient = (id) => db.klienten.find((k) => k.id === id);
-const betrag = (x) => Math.round(minuten(x.von, x.bis) / 60 * db.betrieb.satz * 100) / 100;
-const steuerSatz = () => db.betrieb.steuer === "klein"
-  ? "Gemäß § 19 UStG wird keine Umsatzsteuer berechnet (Kleinunternehmerregelung)."
-  : "Umsatzsteuerfrei nach § 4 Nr. 16 UStG.";
+const helfer = (id) => db.helfer.find((h) => h.id === id);
+const betrag = (e) => betragVon(db, e);
+const ui = { rolle: "buero", buero: "uebersicht", begl: "heute", h: "h1", k: "k1", a: "k1", tourTag: HEUTE_ISO, tourH: "h1", woche: montag(HEUTE_ISO), abMonat: plusTage(-HEUTE.getDate()).slice(0, 7), kbAlle: false };
 
-// ---------------------------------------------------------------- Entlastungsbetrag je Klient
-// Monatlich 131 € ansparen; Rest des Vorjahres zuerst verbrauchen, er verfällt nach dem 30.06.
+// ================================================================ Berechnungen
+// Entlastungsbetrag: monatlich 131 € ansparen, Vorjahresrest zuerst verbrauchen, er verfällt nach dem 30.06.
 function budget(k) {
-  const bestaetigt = db.einsaetze.filter((x) => x.klient === k.id && x.status === "bestaetigt" && x.datum.startsWith(String(JAHR)));
-  const bisJuni = bestaetigt.filter((x) => x.datum <= `${JAHR}-06-30`).reduce((s, x) => s + betrag(x), 0);
-  const gesamt = bestaetigt.reduce((s, x) => s + betrag(x), 0);
+  const best = db.einsaetze.filter((x) => x.klient === k.id && ["bestaetigt", "wartet"].includes(x.status) && x.datum.startsWith(String(JAHR)));
+  const bisJuni = best.filter((x) => x.datum <= `${JAHR}-06-30`).reduce((s, x) => s + betrag(x), 0);
+  const gesamt = best.reduce((s, x) => s + betrag(x), 0);
   const ausVorjahr = Math.min(k.vorjahr, bisJuni);
   const vorjahrOffen = HEUTE <= new Date(JAHR, 5, 30) ? k.vorjahr - ausVorjahr : 0;
   const verfallen = HEUTE > new Date(JAHR, 5, 30) ? k.vorjahr - ausVorjahr : 0;
   const angespart = ENTLASTUNG * (HEUTE.getMonth() + 1);
   const ausJahr = gesamt - ausVorjahr;
-  const rest = angespart - ausJahr + vorjahrOffen;
-  return { angespart, ausJahr, vorjahrOffen, verfallen, rest, anteil: Math.min(1, ausJahr / angespart) };
+  return { angespart, ausJahr, vorjahrOffen, verfallen, rest: angespart - ausJahr + vorjahrOffen, anteil: Math.min(1, ausJahr / angespart) };
 }
+const monatsKosten = (s) => minuten(s.von, s.bis) / 60 * helfer(s.helfer).satz * 52 / 12 / s.alle;
+const kostenSerien = (kid) => db.serien.filter((s) => s.klient === kid && !s.bisDatum).reduce((a, s) => a + monatsKosten(s), 0);
+function beratungFaellig(k) {   // § 37 Abs. 3 SGB XI: Pflegegrad 2–3 halbjährlich, 4–5 vierteljährlich
+  if (!k.pflegegeld || k.pg < 2 || !k.beratung) return null;
+  const d = vonIso(k.beratung); d.setMonth(d.getMonth() + (k.pg >= 4 ? 3 : 6)); return iso(d);
+}
+const fristAblauf = (s, jahre) => { const d = vonIso(s); d.setFullYear(d.getFullYear() + jahre); return iso(d); };
+function konflikt(h, dat, von, bis) {
+  return db.einsaetze.find((e) => e.helfer === h && e.datum === dat && e.status !== "abgesagt" && zuMin(e.von) < zuMin(bis) && zuMin(von) < zuMin(e.bis));
+}
+// Tour eines Tages: Reihenfolge nach Uhrzeit, Strecke und Fahrzeit (25 km/h im Stadtverkehr)
+function tour(hid, dat) {
+  const h = helfer(hid);
+  const halte = db.einsaetze.filter((e) => e.helfer === hid && e.datum === dat && e.status !== "abgesagt").sort((a, b) => a.von.localeCompare(b.von));
+  let pos = { x: h.x, y: h.y }, km = 0, ende = null;
+  const schritte = halte.map((e) => { const k = klient(e.klient); const d = Math.hypot(k.x - pos.x, k.y - pos.y) * 1.3; const min = Math.max(4, Math.round(d / 25 * 60));
+    const knapp = ende !== null && zuMin(e.von) - ende < min; km += d; pos = k; ende = zuMin(e.bis); return { e, k, km: d, min, knapp }; });
+  const heim = halte.length ? Math.hypot(h.x - pos.x, h.y - pos.y) * 1.3 : 0;
+  return { h, schritte, km: km + heim, heim };
+}
+const offeneAnfragen = () => db.anfragen.filter((a) => a.status === "neu");
+const wartendeBestaetigungen = (kid) => db.einsaetze.filter((e) => e.status === "wartet" && (!kid || e.klient === kid));
+const n0 = (n, art = "bad") => (n ? art : "");
 
-// ---------------------------------------------------------------- Ansichten
+// ================================================================ Rahmen und Rollen
 const main = document.getElementById("main");
-const ANSICHTEN = { heute: zeigeEinsaetze, klienten: zeigeKlienten, abrechnung: zeigeAbrechnung, kassenbuch: zeigeKassenbuch, betrieb: zeigeBetrieb };
-let kbAlle = false, kbJahr = JAHR, abMonat = (() => { const d = new Date(HEUTE); d.setMonth(d.getMonth() - 1); return iso(d).slice(0, 7); })();
-
+const ROLLEN = { buero: zeigeBuero, begleitung: zeigeBegleitung, klient: zeigeKlient, angehoerige: zeigeAngehoerige };
 function route() {
-  const name = (location.hash || "#heute").slice(1);
-  const f = ANSICHTEN[name] || zeigeEinsaetze;
-  document.querySelectorAll("nav.tabs a").forEach((a) => a.setAttribute("aria-current", a.getAttribute("href") === "#" + (ANSICHTEN[name] ? name : "heute") ? "page" : "false"));
-  document.getElementById("firma").textContent = `${db.betrieb.name} · ${db.betrieb.inhaber}`;
-  main.innerHTML = `<div class="view">${f()}</div>`;
+  const name = (location.hash || "#buero").slice(1); ui.rolle = ROLLEN[name] ? name : "buero";
+  document.querySelectorAll(".rollen a").forEach((a) => a.setAttribute("aria-current", a.getAttribute("href") === "#" + ui.rolle ? "page" : "false"));
+  const wer = document.getElementById("wer");
+  if (ui.rolle === "buero") wer.innerHTML = `<span>Angemeldet als <b>Büro</b> · ${esc(db.buero.name)}</span>`;
+  else if (ui.rolle === "begleitung") wer.innerHTML = `<label for="wahl-h">Angemeldet als</label><select id="wahl-h">${db.helfer.map((h) => `<option value="${h.id}"${h.id === ui.h ? " selected" : ""}>${esc(h.name)}</option>`).join("")}</select>`;
+  else if (ui.rolle === "klient") wer.innerHTML = `<label for="wahl-k">Angemeldet als</label><select id="wahl-k">${db.klienten.map((k) => `<option value="${k.id}"${k.id === ui.k ? " selected" : ""}>${esc(k.name)}</option>`).join("")}</select>`;
+  else wer.innerHTML = `<label for="wahl-a">Angemeldet als</label><select id="wahl-a">${db.klienten.filter((k) => k.angeh && k.angeh.zugang).map((k) => `<option value="${k.id}"${k.id === ui.a ? " selected" : ""}>${esc(k.angeh.name)} (für ${esc(k.name)})</option>`).join("")}</select>`;
+  main.innerHTML = `<div class="view">${ROLLEN[ui.rolle]()}</div>`;
 }
 addEventListener("hashchange", route);
+const reiter = (feld, liste) => `<div class="reiter" role="group" aria-label="Bereiche">${liste.map(([k, t, z]) => `<button type="button" data-reiter="${feld}:${k}" aria-pressed="${ui[feld] === k}">${t}${z ? `<span class="zahl">${z}</span>` : ""}</button>`).join("")}</div>`;
+const statusPill = (e) => ({ geplant: `<span class="pill p-plan">Geplant</span>`, bestaetigt: `<span class="pill p-ok">Bestätigt</span>`, wartet: `<span class="pill p-warn">Wartet auf Bestätigung</span>`, abgesagt: `<span class="pill p-bad">Abgesagt</span>` }[e.status]);
 
-function zeigeEinsaetze() {
-  const offen = db.einsaetze.filter((x) => x.status === "geplant").sort((a, b) => (a.datum + a.von).localeCompare(b.datum + b.von));
-  const erledigt = db.einsaetze.filter((x) => x.status === "bestaetigt").sort((a, b) => (b.datum + b.von).localeCompare(a.datum + a.von)).slice(0, 6);
-  const karte = (x) => { const k = klient(x.klient); const heute = x.datum === iso(HEUTE);
-    return `<button class="card einsatz" data-einsatz="${x.id}" type="button"><div class="row">
-      <span class="zeit num">${x.von}</span><span class="grow"><b>${esc(k.name)}</b><br><span class="muted small">${heute ? "Heute" : tagKurz(x.datum)} · ${x.von}–${x.bis} · Pflegegrad ${k.pg}</span></span>
-      ${x.status === "geplant" ? `<span class="pill p-plan">${heute ? "Heute" : "Geplant"}</span>` : `<span class="pill p-ok">Bestätigt · ${euro(betrag(x))}</span>`}</div></button>`; };
-  return `<div class="view-head"><div><h1>Einsätze</h1><p>${HEUTE.toLocaleDateString("de-DE", { weekday: "long", day: "numeric", month: "long" })}</p></div>
-      <button class="btn" data-neu-einsatz type="button">+ Einsatz planen</button></div>
-    <section class="list" aria-label="Anstehend">${offen.map(karte).join("") || `<div class="card muted">Keine Einsätze geplant.</div>`}</section>
-    <h2>Zuletzt bestätigt</h2>
-    <section class="list" aria-label="Zuletzt bestätigt">${erledigt.map(karte).join("")}</section>`;
+// ================================================================ BÜRO
+function zeigeBuero() {
+  const inhalt = { uebersicht: bueroUebersicht, klienten: bueroKlienten, planung: bueroPlanung, tour: bueroTour, anfragen: bueroAnfragen, abrechnung: bueroAbrechnung, team: bueroTeam }[ui.buero]();
+  return `${reiter("buero", [["uebersicht", "Übersicht"], ["klienten", "Klienten"], ["planung", "Planung"], ["tour", "Touren"], ["anfragen", "Anfragen", offeneAnfragen().length], ["abrechnung", "Abrechnung"], ["team", "Team"]])}${inhalt}`;
 }
 
-function zeigeKlienten() {
-  return `<div class="view-head"><div><h1>Klienten</h1><p>Entlastungsbetrag ${JAHR}: ${euro(ENTLASTUNG)} je Monat, Rest nutzbar bis 30.06.${JAHR + 1}</p></div>
-      <button class="btn" data-neu-klient type="button">+ Klient aufnehmen</button></div>
-    <section class="list">${db.klienten.map((k) => { const b = budget(k);
-      return `<article class="card"><div class="row"><div class="grow"><h3>${esc(k.name)}</h3><span class="muted small">Pflegegrad ${k.pg} · ${esc(k.kasse)} · ${esc(k.anschrift)}</span></div>
+function bueroUebersicht() {
+  const woche = montag(HEUTE_ISO), wEnde = plusTage(6, vonIso(woche));
+  const inWoche = db.einsaetze.filter((e) => e.datum >= woche && e.datum <= wEnde && e.status !== "abgesagt");
+  const ueberBudget = db.klienten.filter((k) => kostenSerien(k.id) > ENTLASTUNG);
+  const beratung = db.klienten.filter((k) => { const f = beratungFaellig(k); return f && f <= plusTage(30); });
+  const fristen = db.helfer.flatMap((h) => [["Erste-Hilfe-Kurs", fristAblauf(h.ersteHilfe, 5)], ["Führungszeugnis", fristAblauf(h.fz, 5)]].filter(([, d]) => d <= plusTage(60)).map(([t, d]) => ({ h, t, d })));
+  const heute = db.einsaetze.filter((e) => e.datum === HEUTE_ISO && e.status !== "abgesagt").sort((a, b) => a.von.localeCompare(b.von));
+  return `<div class="view-head"><div><h1>Guten Tag</h1><p>${tagLang(HEUTE_ISO)} · ${db.klienten.length} Klienten · ${db.helfer.length} Begleiterinnen</p></div></div>
+    <div class="kpis num">
+      <div class="kpi"><span>Einsätze diese Woche</span><b>${inWoche.length}</b></div>
+      <button class="kpi ${n0(offeneAnfragen().length)}" data-reiter="buero:anfragen" type="button"><span>Neue Anfragen</span><b>${offeneAnfragen().length}</b></button>
+      <div class="kpi ${n0(wartendeBestaetigungen().length, "warn")}"><span>Wartet auf Bestätigung</span><b>${wartendeBestaetigungen().length}</b></div>
+      <button class="kpi ${n0(fristen.length + beratung.length, "warn")}" data-reiter="buero:team" type="button"><span>Fristen in Sicht</span><b>${fristen.length + beratung.length}</b></button>
+    </div>
+    <div class="grid2">
+      <section class="card"><h2>Heute unterwegs</h2>${heute.map((e) => `<div class="row"><span class="zeit num">${e.von}</span><span class="grow"><b>${esc(klient(e.klient).name)}</b><br><span class="small muted">${esc(helfer(e.helfer).name)}</span></span>${statusPill(e)}</div>`).join("") || `<p class="muted">Heute keine Einsätze.</p>`}
+        <div class="btns"><button class="btn small ghost" data-reiter="buero:tour" type="button">Touren ansehen</button></div></section>
+      <section class="card"><h2>Braucht Aufmerksamkeit</h2>
+        ${ueberBudget.map((k) => `<div class="hint">${esc(k.name)}: Die festen Termine kosten etwa ${euro(kostenSerien(k.id))} im Monat, der Entlastungsbetrag ist ${euro(ENTLASTUNG)}. Mehrkosten mit den Angehörigen klären.</div>`).join("")}
+        ${beratung.map((k) => `<div class="hint">${esc(k.name)}: Beratungsbesuch nach § 37 Abs. 3 fällig bis ${datum(beratungFaellig(k))}. Sonst kann die Kasse das Pflegegeld kürzen.</div>`).join("")}
+        ${fristen.map((f) => `<div class="hint">${esc(f.h.name)}: ${f.t} ${f.d < HEUTE_ISO ? "seit" : "läuft am"} ${datum(f.d)} ${f.d < HEUTE_ISO ? "abgelaufen" : "ab"}.</div>`).join("")}
+        ${wartendeBestaetigungen().map((e) => `<div class="info">${esc(klient(e.klient).name)}, ${tagKurz(e.datum)}: Bestätigung durch ${esc(klient(e.klient).angeh?.name || "Klient")} steht aus.</div>`).join("")}
+        ${!ueberBudget.length && !beratung.length && !fristen.length && !wartendeBestaetigungen().length ? `<p class="muted">Alles im grünen Bereich.</p>` : ""}</section>
+    </div>`;
+}
+
+function bueroKlienten() {
+  return `<div class="view-head"><div><h1>Klienten</h1><p>Kontakte, Angehörige, Budget und Verlauf</p></div><button class="btn" data-neu-klient type="button">+ Klient aufnehmen</button></div>
+    <div class="list">${db.klienten.map((k) => { const b = budget(k);
+      return `<button class="card klick" data-klient-akte="${k.id}" type="button"><div class="row"><span class="avatar">${initialen(k.name)}</span><span class="grow"><b>${esc(k.name)}</b><br><span class="small muted">Pflegegrad ${k.pg} · ${esc(k.kasse)} · ${esc(k.anschrift)}</span></span>
         <span class="pill ${b.rest < 40 ? "p-warn" : "p-ok"}">Rest ${euro(b.rest)}</span></div>
-        <div class="budget" role="img" aria-label="${Math.round(b.anteil * 100)} Prozent des angesparten Betrags genutzt"><i style="width:${Math.round(b.anteil * 100)}%"></i></div>
-        <div class="small muted num">${euro(b.ausJahr)} von ${euro(b.angespart)} genutzt (angespart Jan.–${MONATE[HEUTE.getMonth()].slice(0, 3)}.)${b.vorjahrOffen ? ` · dazu ${euro(b.vorjahrOffen)} aus ${JAHR - 1} bis 30.06.` : ""}</div>
-        ${b.verfallen > 0 ? `<div class="hint">${euro(b.verfallen)} aus ${JAHR - 1} sind am 30.06.${JAHR} verfallen.</div>` : ""}
-        ${b.rest > 300 ? `<div class="info">Noch ${euro(b.rest)} offen. Ein zusätzlicher Termin im Monat würde helfen, dass nichts verfällt.</div>` : ""}
-        <div class="small">${k.angeh ? `Angehörige: ${esc(k.angeh)} · ` : ""}Abtretungserklärung vom ${datum(k.abtretung)}</div></article>`; }).join("")}</section>
-    <p class="small muted">Gesundheitsdaten nach Art. 9 DSGVO: nur Pflegegrad und Kasse, keine Diagnosen. In der fertigen App getrennt vom Ladenbuch gespeichert.</p>`;
+        <span class="small muted num">Feste Termine: ${db.serien.filter((s) => s.klient === k.id && !s.bisDatum).map((s) => `${WOCHENTAGE[s.tag].slice(0, 2)} ${s.von}${s.alle > 1 ? " (14-tägig)" : ""}`).join(", ") || "keine"} · ca. ${euro(kostenSerien(k.id))}/Monat${k.angeh ? ` · ${esc(k.angeh.name)} (${esc(k.angeh.rolle.split(",")[0])})` : ""}</span></button>`; }).join("")}</div>`;
 }
 
-// Abrechnung: Monat wählen, je Kasse und Klient eine Rechnung mit Leistungsnachweis
-function zeigeAbrechnung() {
+function klientAkte(kid) {
+  const k = klient(kid); const b = budget(k); const a = k.angeh; const bf = beratungFaellig(k);
+  const verlauf = db.einsaetze.filter((e) => e.klient === kid && e.datum <= HEUTE_ISO && e.status !== "geplant").sort((x, y) => y.datum.localeCompare(x.datum)).slice(0, 8);
+  oeffne(`<div class="dlg-head"><div><h2>${esc(k.name)}</h2><span class="muted small">Klient seit ${datum(k.seit)} · Pflegegrad ${k.pg}</span></div><button class="x" data-zu type="button" aria-label="Schließen">×</button></div>
+    <div class="f2 small"><div><b>Anschrift</b><br>${esc(k.anschrift)}</div><div><b>Telefon</b><br>${esc(k.tel)}</div><div><b>Geburtsdatum</b><br>${datum(k.geb)}</div>
+      <div><b>Pflegekasse</b><br>${esc(k.kasse)}<br>Vers.-Nr. ${esc(k.vnr)}</div><div><b>Abtretungserklärung</b><br>vom ${datum(k.abtretung)}</div><div><b>Pflegegeld</b><br>${k.pflegegeld ? "ja" : "nein"}${bf ? `<br>Beratungsbesuch fällig bis ${datum(bf)}` : ""}</div></div>
+    ${a ? `<div class="card small"><b>${esc(a.name)} · ${esc(a.rolle)}</b><span>${esc(a.ort)} · ${esc(a.tel)} · ${esc(a.mail)}</span>
+      <span>${a.zugang ? `App-Zugang freigegeben von ${esc(k.name)} am ${datum(a.freigabe)}` : "Kein App-Zugang"}${a.vollmacht ? " · Vollmacht liegt vor (darf Leistungen bestätigen)" : ""}${a.kommunikation ? " · <b>übernimmt die Kommunikation</b>" : ""}</span></div>` : `<p class="small muted">Keine Angehörigen hinterlegt.</p>`}
+    <div><b>Entlastungsbetrag ${JAHR}</b><div class="budget"><i style="width:${Math.round(b.anteil * 100)}%"></i></div><span class="small muted num">${euro(b.ausJahr)} von ${euro(b.angespart)} genutzt · Rest ${euro(b.rest)}${b.verfallen ? ` · ${euro(b.verfallen)} aus ${JAHR - 1} am 30.06. verfallen` : ""}</span></div>
+    ${k.notiz ? `<div class="info"><b>Hinweis für Begleiterinnen:</b> ${esc(k.notiz)}</div>` : ""}
+    <div><b>Verlauf</b><div class="protokoll">${verlauf.map((e) => `<div class="eintrag"><span class="d">${tagKurz(e.datum)}</span><span>${e.status === "abgesagt" ? `<span class="pill p-bad">Abgesagt</span> ${esc(e.grund || "")}` : `${esc(e.protokoll)} <span class="small muted">· ${esc(helfer(e.helfer).name)}</span>`}</span></div>`).join("")}</div></div>
+    <div class="btns"><button class="btn small" data-neu-serie="${k.id}" type="button">Festen Termin anlegen</button></div>`);
+}
+
+function bueroPlanung() {
+  const tage = Array.from({ length: 7 }, (_, i) => plusTage(i, vonIso(ui.woche)));
+  return `<div class="view-head"><div><h1>Planung</h1><p>Feste Termine auf Dauer und der Wochenkalender</p></div><button class="btn" data-neu-serie="" type="button">+ Fester Termin</button></div>
+    <section class="card"><h2>Feste Termine</h2><div class="table-wrap"><table class="num"><thead><tr><th>Klient</th><th>Wann</th><th>Begleiterin</th><th class="r">ca. pro Monat</th><th></th></tr></thead><tbody>
+      ${db.serien.filter((s) => !s.bisDatum).map((s) => `<tr><td>${esc(klient(s.klient).name)}</td><td>${WOCHENTAGE[s.tag]}s ${s.von}–${s.bis}${s.alle > 1 ? ", alle 2 Wochen" : ""}<br><span class="small muted">seit ${datum(s.ab)}</span></td><td>${esc(helfer(s.helfer).name)}</td><td class="r">${euro(monatsKosten(s))}</td>
+        <td><button class="btn small danger" data-serie-ende="${s.id}" type="button">Beenden</button></td></tr>`).join("")}</tbody></table></div></section>
+    <section class="card"><div class="row"><h2 class="grow">Woche ab ${datum(ui.woche)}</h2><div class="btns"><button class="btn small ghost" data-woche="-7" type="button">‹ Vorige</button><button class="btn small ghost" data-woche="0" type="button">Heute</button><button class="btn small ghost" data-woche="7" type="button">Nächste ›</button></div></div>
+      <div class="woche-wrap"><div class="woche">${tage.map((t) => `<div class="tag${t === HEUTE_ISO ? " heute" : ""}"><span class="tag-kopf">${tagKurz(t)}</span>
+        ${db.einsaetze.filter((e) => e.datum === t).sort((a, b) => a.von.localeCompare(b.von)).map((e) => `<button type="button" class="termin ${e.status === "abgesagt" ? "abgesagt" : e.status === "geplant" ? "" : "erledigt"}" data-termin="${e.id}"><b>${e.von}</b> ${esc(klient(e.klient).name)}<br><span class="muted">${esc(helfer(e.helfer).name.split(" ")[0])}</span></button>`).join("")}</div>`).join("")}</div></div></section>`;
+}
+
+function bueroTour() {
+  return `<div class="view-head"><div><h1>Touren</h1><p>Reihenfolge, Strecken und Fahrzeiten je Begleiterin</p></div></div>
+    <div class="f2"><label class="f" for="tour-h">Begleiterin<select id="tour-h">${db.helfer.map((h) => `<option value="${h.id}"${h.id === ui.tourH ? " selected" : ""}>${esc(h.name)}</option>`).join("")}</select></label>
+      <label class="f" for="tour-tag">Tag<input id="tour-tag" type="date" value="${ui.tourTag}"></label></div>
+    ${tourKarte(tour(ui.tourH, ui.tourTag), ui.tourTag, false)}`;
+}
+function tourKarte(t, tag, fuerBegleiterin) {
+  if (!t.schritte.length) return `<div class="card muted">${tagLang(tag)}: keine Einsätze.</div>`;
+  const pts = [{ x: t.h.x, y: t.h.y }, ...t.schritte.map((s) => s.k)];
+  const minX = Math.min(...pts.map((p) => p.x)) - .5, maxX = Math.max(...pts.map((p) => p.x)) + 2.4, minY = Math.min(...pts.map((p) => p.y)) - .6, maxY = Math.max(...pts.map((p) => p.y)) + .6;
+  const W = 600, H = Math.round(Math.max(200, Math.min(340, W * (maxY - minY) / (maxX - minX))));
+  const px = (p) => [Math.round((p.x - minX) / (maxX - minX) * W), Math.round(H - (p.y - minY) / (maxY - minY) * H)];
+  const linie = [...pts, pts[0]].map((p) => px(p).join(",")).join(" ");
+  return `<div class="grid2"><section class="card"><h2>${tagLang(tag)}</h2><div class="tour">
+      <div class="halt start"><span class="nr">⌂</span><span><b>Start</b> <span class="muted small">${esc(t.h.ort)}</span></span></div>
+      ${t.schritte.map((s, i) => `<div class="fahrt"><span></span><span class="num">${km1(s.km)} km · ca. ${s.min} Min.${s.knapp ? ` <span class="pill p-warn">knapp</span>` : ""}</span></div>
+        <div class="halt"><span class="nr">${i + 1}</span><span><b class="num">${s.e.von}–${s.e.bis}</b> · ${esc(s.k.name)}<br><span class="small muted">${esc(s.k.anschrift)}</span>
+          ${fuerBegleiterin ? `<span class="btns" style="margin-top:6px"><a class="btn small ghost" href="https://www.google.com/maps/dir/?api=1&amp;destination=${encodeURIComponent(s.k.anschrift)}" target="_blank" rel="noopener">Route</a>${s.e.status === "geplant" ? `<button class="btn small" data-einsatz="${s.e.id}" type="button">Einsatz erfassen</button>` : statusPill(s.e)}</span>` : ` ${statusPill(s.e)}`}</span></div>`).join("")}
+      <div class="fahrt"><span></span><span class="num">${km1(t.heim)} km zurück</span></div>
+      <div class="halt start"><span class="nr">⌂</span><span><b>Ende</b> · gesamt <b class="num">${km1(t.km)} km</b></span></div></div></section>
+    <section class="card"><h2>Lageskizze</h2><svg class="karte-svg" viewBox="-24 -24 ${W + 48} ${H + 48}" role="img" aria-label="Skizze der Tour mit ${t.schritte.length} Stationen">
+      <polyline points="${linie}" fill="none" stroke="var(--accent)" stroke-width="3" stroke-dasharray="8 6"/>
+      ${pts.map((p, i) => { const [x, y] = px(p); return `<circle cx="${x}" cy="${y}" r="20" fill="${i ? "var(--accent)" : "var(--rolle)"}"/><text x="${x}" y="${y + 7}" text-anchor="middle" font-size="19" font-weight="700" fill="${i ? "var(--accent-ink)" : "var(--surface)"}">${i || "⌂"}</text>${i ? `<text x="${x + 27}" y="${y + 7}" font-size="21" font-weight="700" fill="var(--ink)">${esc(t.schritte[i - 1].k.name)}</text>` : ""}`; }).join("")}
+    </svg><p class="small muted">Skizze nach Luftlinie. Die fertige App rechnet Strecken über einen Kartendienst.</p></section></div>`;
+}
+
+function bueroAnfragen() {
+  const liste = [...db.anfragen].sort((a, b) => (a.status === "neu" ? 0 : 1) - (b.status === "neu" ? 0 : 1) || b.am.localeCompare(a.am));
+  return `<div class="view-head"><div><h1>Anfragen</h1><p>Von Klienten, Angehörigen und Begleiterinnen. Das Büro kümmert sich.</p></div></div>
+    <div class="list">${liste.map((a) => `<article class="card"><div class="row"><span class="avatar">${initialen(a.von)}</span><span class="grow"><b>${esc(a.von)}</b> <span class="pill p-rolle">${esc(a.rolle)}</span><br><span class="small muted">${datum(a.am)}${a.klient ? ` · betrifft ${esc(klient(a.klient).name)}` : ""}</span></span>
+      <span class="pill ${a.status === "neu" ? "p-bad" : "p-ok"}">${a.status === "neu" ? "Neu" : "Erledigt"}</span></div>
+      <p><b>${esc(a.art)}:</b> ${esc(a.text)}</p>
+      ${a.status === "neu" ? `<div class="btns">${a.art === "Terminwunsch" ? `<button class="btn small" data-neu-serie="${a.klient}" type="button">Termin anlegen</button>` : ""}<button class="btn small ghost" data-anfrage-ok="${a.id}" type="button">Als erledigt markieren</button></div>` : ""}</article>`).join("")}</div>`;
+}
+
+function bueroAbrechnung() {
   const monate = [...new Set(db.einsaetze.filter((x) => x.status === "bestaetigt").map((x) => x.datum.slice(0, 7)))].sort().reverse();
-  const imMonat = db.einsaetze.filter((x) => x.status === "bestaetigt" && x.datum.startsWith(abMonat));
-  const nachKasse = {};
-  for (const x of imMonat) { const k = klient(x.klient); ((nachKasse[k.kasse] ||= {})[k.id] ||= []).push(x); }
-  const [y, m] = abMonat.split("-").map(Number);
-  return `<div class="view-head"><div><h1>Abrechnung</h1><p>Rechnungen an die Pflegekassen mit Leistungsnachweis</p></div>
-      <label class="f" for="ab-monat">Monat<select id="ab-monat">${monate.map((mm) => `<option value="${mm}"${mm === abMonat ? " selected" : ""}>${MONATE[Number(mm.slice(5)) - 1]} ${mm.slice(0, 4)}</option>`).join("")}</select></label></div>
-    ${Object.keys(nachKasse).length ? Object.entries(nachKasse).map(([kasse, proK]) => `<section class="card"><h2>${esc(kasse)}</h2>
-      ${Object.entries(proK).map(([kid, liste]) => { const k = klient(kid); const key = abMonat + "|" + kid; const a = db.abrechnung[key];
-        const summe = liste.reduce((s, x) => s + betrag(x), 0); const std = liste.reduce((s, x) => s + minuten(x.von, x.bis), 0);
-        return `<div class="row" style="border-top:1px solid var(--line);padding-top:10px"><div class="grow"><b>${esc(k.name)}</b><br><span class="small muted num">${liste.length} Einsätze · ${dauerText(std)} · ${euro(summe)}</span></div>
-          <span class="pill ${!a ? "p-warn" : a.status === "bezahlt" ? "p-ok" : "p-plan"}">${!a ? "Offen" : a.status === "bezahlt" ? "Bezahlt" : "Abgerechnet " + a.nr}</span>
-          <div class="btns"><button class="btn small ghost" data-rechnung="${key}" type="button">Rechnung ansehen</button>
-          ${!a ? `<button class="btn small" data-abrechnen="${key}" type="button">Abrechnen</button>` : a.status === "abgerechnet" ? `<button class="btn small" data-bezahlt="${key}" type="button">Zahlung eingegangen</button>` : ""}</div></div>`; }).join("")}</section>`).join("")
-      : `<div class="card muted">Keine bestätigten Einsätze im ${MONATE[m - 1]} ${y}.</div>`}
-    <p class="small muted">„Zahlung eingegangen“ bucht den Betrag automatisch als Einnahme ins Kassenbuch.</p>`;
+  const im = db.einsaetze.filter((x) => x.status === "bestaetigt" && x.datum.startsWith(ui.abMonat));
+  const gruppen = {}; for (const e of im) (gruppen[`${ui.abMonat}|${e.helfer}|${e.klient}`] ||= []).push(e);
+  const warten = db.einsaetze.filter((x) => x.status === "wartet" && x.datum.startsWith(ui.abMonat)).length;
+  return `<div class="view-head"><div><h1>Abrechnung</h1><p>Das Büro rechnet im Auftrag der Begleiterinnen mit den Pflegekassen ab</p></div>
+      <label class="f" for="ab-monat">Monat<select id="ab-monat">${monate.map((m) => `<option value="${m}"${m === ui.abMonat ? " selected" : ""}>${MONATE[Number(m.slice(5)) - 1]} ${m.slice(0, 4)}</option>`).join("")}</select></label></div>
+    ${warten ? `<div class="hint">${warten === 1 ? "1 Einsatz wartet" : `${warten} Einsätze warten`} noch auf Bestätigung und ${warten === 1 ? "wird" : "werden"} erst danach abgerechnet.</div>` : ""}
+    <section class="card">${Object.entries(gruppen).map(([key, l]) => { const [, h, kid] = key.split("|"); const k = klient(kid); const a = db.abrechnung[key]; const summe = l.reduce((s, x) => s + betrag(x), 0);
+      return `<div class="row" style="border-bottom:1px solid var(--line);padding-bottom:10px"><div class="grow"><b>${esc(k.name)}</b> · ${esc(k.kasse)}<br><span class="small muted num">${esc(helfer(h).name)} · ${l.length} Einsätze · ${euro(summe)}</span></div>
+        <span class="pill ${!a ? "p-warn" : a.status === "bezahlt" ? "p-ok" : "p-plan"}">${!a ? "Offen" : a.status === "bezahlt" ? "Bezahlt" : "Abgerechnet " + a.nr}</span>
+        <div class="btns"><button class="btn small ghost" data-rechnung="${key}" type="button">Rechnung</button>${!a ? `<button class="btn small" data-abrechnen="${key}" type="button">Abrechnen</button>` : a.status === "abgerechnet" ? `<button class="btn small" data-bezahlt="${key}" type="button">Zahlung da</button>` : ""}</div></div>`; }).join("") || `<p class="muted">Keine bestätigten Einsätze in diesem Monat.</p>`}
+    <p class="small muted">„Zahlung da“ bucht den Betrag automatisch ins Kassenbuch der jeweiligen Begleiterin.</p></section>`;
 }
 
-// Kassenbuch und Einnahmenüberschussrechnung
-function eur(jahr) {
-  const kb = db.kassenbuch.filter((x) => !x.storno && x.datum.startsWith(String(jahr)));
+function bueroTeam() {
+  return `<div class="view-head"><div><h1>Team</h1><p>Begleiterinnen, Qualifikation und Fristen</p></div></div>
+    <div class="grid2">${db.helfer.map((h) => { const eh = fristAblauf(h.ersteHilfe, 5), fz = fristAblauf(h.fz, 5);
+      const std = db.einsaetze.filter((e) => e.helfer === h.id && e.status === "bestaetigt" && e.datum.startsWith(HEUTE_ISO.slice(0, 7))).reduce((s, e) => s + minuten(e.von, e.bis), 0);
+      const f = (t, d) => `<div class="row"><span class="grow">${t}</span><span class="pill ${d < HEUTE_ISO ? "p-bad" : d <= plusTage(60) ? "p-warn" : "p-ok"}">${d < HEUTE_ISO ? "abgelaufen" : "gültig bis"} ${datum(d)}</span></div>`;
+      return `<section class="card"><div class="row"><span class="avatar">${initialen(h.name)}</span><span class="grow"><b>${esc(h.name)}</b><br><span class="small muted">${esc(h.ort)} · ${esc(h.tel)}</span></span></div>
+        <span class="small">${esc(h.quali)} · Stundensatz ${euro(h.satz)} · Anerkennung ${esc(h.anerkennung)}</span>
+        ${f("Erste-Hilfe-Kurs (alle 5 Jahre)", eh)}${f("Erweitertes Führungszeugnis (alle 5 Jahre)", fz)}
+        <span class="small muted num">Diesen Monat ${dauerText(std)} · ${db.serien.filter((s) => s.helfer === h.id && !s.bisDatum).length} feste Termine</span></section>`; }).join("")}</div>
+    <section class="card"><h2>Beratungsbesuche der Klienten</h2><p class="small muted">Wer Pflegegeld bekommt, braucht den Beratungsbesuch nach § 37 Abs. 3 SGB XI: Pflegegrad 2 und 3 halbjährlich, 4 und 5 vierteljährlich.</p>
+      ${db.klienten.filter((k) => beratungFaellig(k)).map((k) => { const f = beratungFaellig(k); return `<div class="row"><span class="grow">${esc(k.name)} · Pflegegrad ${k.pg}</span><span class="pill ${f < HEUTE_ISO ? "p-bad" : f <= plusTage(30) ? "p-warn" : "p-ok"}">fällig bis ${datum(f)}</span></div>`; }).join("")}</section>`;
+}
+
+// ================================================================ BEGLEITERIN
+function zeigeBegleitung() {
+  const h = helfer(ui.h);
+  const inhalt = { heute: beglHeute, woche: beglWoche, zahlen: beglZahlen }[ui.begl]();
+  return `<div class="view-head"><div><h1>Hallo ${esc(h.name.split(" ")[0])}</h1><p>${tagLang(HEUTE_ISO)}</p></div><button class="btn ghost" data-abwesend type="button">Abwesenheit melden</button></div>
+    ${reiter("begl", [["heute", "Heute"], ["woche", "Woche"], ["zahlen", "Meine Zahlen"]])}${inhalt}`;
+}
+function beglHeute() {
+  const t = tour(ui.h, HEUTE_ISO);
+  const offen = db.einsaetze.filter((e) => e.helfer === ui.h && e.status === "geplant" && e.datum < HEUTE_ISO);
+  return `${offen.length ? `<div class="hint">${offen.length} vergangene Einsätze sind noch nicht erfasst.</div>` : ""}
+    <div class="info">Abrechnung, Rechnungen und Absprachen mit Kassen und Angehörigen macht das Büro. Du erfasst nur, was du gemacht hast.</div>
+    ${tourKarte(t, HEUTE_ISO, true)}
+    ${t.schritte.filter((s) => s.k.notiz).map((s) => `<div class="info"><b>${esc(s.k.name)}:</b> ${esc(s.k.notiz)}</div>`).join("")}`;
+}
+function beglWoche() {
+  const tage = Array.from({ length: 7 }, (_, i) => plusTage(i, vonIso(ui.woche)));
+  return `<section class="card"><div class="row"><h2 class="grow">Woche ab ${datum(ui.woche)}</h2><div class="btns"><button class="btn small ghost" data-woche="-7" type="button" aria-label="Vorige Woche">‹</button><button class="btn small ghost" data-woche="0" type="button">Heute</button><button class="btn small ghost" data-woche="7" type="button" aria-label="Nächste Woche">›</button></div></div>
+    <div class="woche-wrap"><div class="woche">${tage.map((t) => `<div class="tag${t === HEUTE_ISO ? " heute" : ""}"><span class="tag-kopf">${tagKurz(t)}</span>
+      ${db.einsaetze.filter((e) => e.helfer === ui.h && e.datum === t).sort((a, b) => a.von.localeCompare(b.von)).map((e) => `<button type="button" class="termin ${e.status === "abgesagt" ? "abgesagt" : e.status === "geplant" ? "" : "erledigt"}" data-einsatz="${e.id}"><b>${e.von}</b> ${esc(klient(e.klient).name)}</button>`).join("")}</div>`).join("")}</div></div></section>`;
+}
+function beglZahlen() {
+  const r = eur(ui.h, JAHR);
+  const monat = db.einsaetze.filter((e) => e.helfer === ui.h && ["bestaetigt", "wartet"].includes(e.status) && e.datum.startsWith(HEUTE_ISO.slice(0, 7)));
+  const alle = db.kassenbuch.filter((x) => x.helfer === ui.h && x.datum.startsWith(String(JAHR))).sort((a, b) => b.nr - a.nr);
+  return `<div class="kpis num"><div class="kpi"><span>Stunden ${MONATE[HEUTE.getMonth()]}</span><b>${dauerText(monat.reduce((s, e) => s + minuten(e.von, e.bis), 0))}</b></div>
+      <div class="kpi gut"><span>Verdient ${MONATE[HEUTE.getMonth()]}</span><b>${euro(monat.reduce((s, e) => s + betrag(e), 0))}</b></div>
+      <div class="kpi"><span>Gewinn ${JAHR} bisher</span><b>${euro(r.gewinn)}</b></div></div>
+    <section class="card"><div class="row"><div class="grow"><h2>Kassenbuch und EÜR ${JAHR}</h2><span class="small muted">Zahlungen der Kassen bucht das Büro automatisch. Du trägst nur Ausgaben und Barzahlungen ein.</span></div></div>
+      <div class="btns"><button class="btn small" data-buchung="aus" type="button">+ Ausgabe</button><button class="btn small ghost" data-buchung="ein" type="button">+ Einnahme</button><button class="btn small ghost" data-eur type="button">EÜR als PDF</button></div>
+      ${eurTabelle(r)}
+      <h3>Buchungen</h3><div class="protokoll">${alle.slice(0, ui.kbAlle ? alle.length : 6).map((x) => `<div class="eintrag"><span class="d num">Nr. ${x.nr}<br>${tagKurz(x.datum)}</span><span class="row"><span class="grow${x.storno ? " muted" : ""}"${x.storno ? ' style="text-decoration:line-through"' : ""}>${esc(x.text)}<br><span class="small muted">${x.typ === "ein" ? KAT_EIN[x.kat] : KAT_AUS[x.kat]} · ${x.zahlweg}</span></span>
+        <b class="num" style="color:${x.typ === "ein" ? "var(--ok)" : "var(--ink)"}">${x.typ === "ein" ? "+" : "−"}${euro(x.betrag)}</b>${x.storno || x.ref ? "" : `<button class="btn small danger" data-storno="${x.helfer}:${x.nr}" type="button">Stornieren</button>`}</span></div>`).join("")}</div>
+      ${alle.length > 6 ? `<button class="btn small ghost" data-kb-alle type="button">${ui.kbAlle ? "Weniger zeigen" : `Alle ${alle.length} zeigen`}</button>` : ""}
+      <p class="small muted">Fortlaufend nummeriert, stornieren statt löschen.</p></section>`;
+}
+function eur(hid, jahr) {
+  const kb = db.kassenbuch.filter((x) => x.helfer === hid && !x.storno && x.datum.startsWith(String(jahr)));
   const ein = {}, aus = {};
-  for (const x of kb) (x.typ === "ein" ? ein : aus)[x.kat] = ((x.typ === "ein" ? ein : aus)[x.kat] || 0) + x.betrag;
-  const km = db.einsaetze.filter((x) => x.status === "bestaetigt" && x.datum.startsWith(String(jahr))).reduce((s, x) => s + (x.km || 0), 0);
-  const kmKosten = Math.round(km * db.betrieb.km * 100) / 100;
-  const summeEin = Object.values(ein).reduce((s, v) => s + v, 0);
-  const summeAus = Object.values(aus).reduce((s, v) => s + v, 0) + kmKosten;
-  const proMonat = Array.from({ length: 12 }, (_, i) => { const mm = `${jahr}-${String(i + 1).padStart(2, "0")}`;
-    return { e: kb.filter((x) => x.typ === "ein" && x.datum.startsWith(mm)).reduce((s, x) => s + x.betrag, 0), a: kb.filter((x) => x.typ === "aus" && x.datum.startsWith(mm)).reduce((s, x) => s + x.betrag, 0) }; });
-  return { ein, aus, km, kmKosten, summeEin, summeAus, gewinn: summeEin - summeAus, proMonat, kb };
+  for (const x of kb) { const z = x.typ === "ein" ? ein : aus; z[x.kat] = (z[x.kat] || 0) + x.betrag; }
+  const km = db.einsaetze.filter((e) => e.helfer === hid && ["bestaetigt", "wartet"].includes(e.status) && e.datum.startsWith(String(jahr))).reduce((s, e) => s + (e.km || 0), 0);
+  const kmKosten = Math.round(km * 0.30 * 100) / 100;
+  const summeEin = Object.values(ein).reduce((s, v) => s + v, 0), summeAus = Object.values(aus).reduce((s, v) => s + v, 0) + kmKosten;
+  return { ein, aus, km: Math.round(km), kmKosten, summeEin, summeAus, gewinn: summeEin - summeAus, kb };
 }
-
-function zeigeKassenbuch() {
-  const r = eur(kbJahr); const alle = db.kassenbuch.filter((x) => x.datum.startsWith(String(kbJahr))).sort((a, b) => b.nr - a.nr); const max = Math.max(1, ...r.proMonat.map((x) => Math.max(x.e, x.a)));
-  return `<div class="view-head"><div><h1>Kassenbuch</h1><p>Einnahmen und Ausgaben ${kbJahr}, daraus die Einnahmenüberschussrechnung</p></div>
-      <div class="btns"><button class="btn" data-buchung="ein" type="button">+ Einnahme</button><button class="btn ghost" data-buchung="aus" type="button">+ Ausgabe</button></div></div>
-    <div class="kpis num"><div class="kpi"><span>Einnahmen</span><b>${euro(r.summeEin)}</b></div><div class="kpi"><span>Ausgaben</span><b>${euro(r.summeAus)}</b></div><div class="kpi gewinn"><span>Gewinn</span><b>${euro(r.gewinn)}</b></div></div>
-    <section class="card"><div class="row"><h2 class="grow">Monate</h2><div class="legend"><span><i style="background:var(--accent)"></i>Einnahmen</span><span><i style="background:var(--muted);opacity:.55"></i>Ausgaben</span></div></div>
-      <div class="bars" role="img" aria-label="Einnahmen und Ausgaben je Monat">${r.proMonat.map((x) => `<div class="bar"><i class="e" style="height:${x.e / max * 100}%"></i><i class="a" style="height:${x.a / max * 100}%"></i></div>`).join("")}</div>
-      <div class="bar-labels">${MONATE.map((m) => `<span>${m.slice(0, 3)}</span>`).join("")}</div></section>
-    <section class="card"><div class="row"><div class="grow"><h2>EÜR ${kbJahr}</h2><span class="small muted">Einnahmenüberschussrechnung, Stand heute</span></div><button class="btn" data-eur type="button">EÜR als PDF</button></div>
-      ${eurTabelle(r)}</section>
-    <section class="card"><div class="row"><h2 class="grow">Buchungen</h2><span class="small muted">${alle.length} in ${kbJahr}</span></div>
-      <div class="buchungen">${alle.slice(0, kbAlle ? alle.length : 8).map((x) => `<div class="buchung${x.storno ? " storno" : ""}">
-        <span class="bnr num">${x.nr}</span>
-        <span class="btxt"><b>${esc(x.text)}</b><span class="small muted">${datum(x.datum)} · ${x.typ === "ein" ? KAT_EIN[x.kat] : KAT_AUS[x.kat]} · ${x.zahlweg}${x.beleg ? " · mit Beleg" : ""}${x.storno ? " · storniert" : ""}</span>
-          ${x.storno || x.ref ? "" : `<button class="linkbtn" data-storno="${x.nr}" type="button">Stornieren</button>`}</span>
-        <span class="bbetrag num ${x.typ}">${x.typ === "ein" ? "+" : "−"}${euro(x.betrag)}</span></div>`).join("")}</div>
-      ${alle.length > 8 ? `<button class="btn ghost small" data-kb-alle type="button">${kbAlle ? "Weniger zeigen" : `Alle ${alle.length} Buchungen zeigen`}</button>` : ""}
-      <p class="small muted">Buchungen werden fortlaufend nummeriert und nicht gelöscht, sondern storniert. So bleibt das Kassenbuch nachvollziehbar.</p></section>`;
-}
-
 function eurTabelle(r) {
   const z = (t, v) => `<tr><td>${t}</td><td class="r">${euro(v)}</td></tr>`;
   return `<div class="table-wrap"><table class="num"><tbody>
-    <tr><th colspan="2">Betriebseinnahmen</th></tr>${Object.entries(KAT_EIN).map(([k, t]) => r.ein[k] ? z(t, r.ein[k]) : "").join("")}
+    <tr><th colspan="2">Betriebseinnahmen</th></tr>${Object.entries(KAT_EIN).map(([k, t]) => (r.ein[k] ? z(t, r.ein[k]) : "")).join("")}
     <tr class="summe"><td><b>Summe Einnahmen</b></td><td class="r"><b>${euro(r.summeEin)}</b></td></tr>
-    <tr><th colspan="2">Betriebsausgaben</th></tr>${Object.entries(KAT_AUS).map(([k, t]) => r.aus[k] ? z(t, r.aus[k]) : "").join("")}
-    ${z(`Fahrten mit dem eigenen Auto (${r.km} km × ${euro(db.betrieb.km)}, aus den Einsätzen)`, r.kmKosten)}
+    <tr><th colspan="2">Betriebsausgaben</th></tr>${Object.entries(KAT_AUS).map(([k, t]) => (r.aus[k] ? z(t, r.aus[k]) : "")).join("")}
+    ${z(`Fahrten mit dem eigenen Auto (${r.km} km × 0,30 €, aus den Einsätzen)`, r.kmKosten)}
     <tr class="summe"><td><b>Summe Ausgaben</b></td><td class="r"><b>${euro(r.summeAus)}</b></td></tr>
     <tr class="summe"><td><b>Gewinn</b></td><td class="r"><b>${euro(r.gewinn)}</b></td></tr></tbody></table></div>`;
 }
 
-function zeigeBetrieb() {
-  const b = db.betrieb; const f = (id, t, v, typ = "text") => `<label class="f" for="b-${id}">${t}<input id="b-${id}" type="${typ}" value="${esc(v)}"${typ === "number" ? ' step="0.01" inputmode="decimal"' : ""}></label>`;
-  return `<div class="view-head"><div><h1>Betrieb</h1><p>Diese Angaben stehen auf Rechnungen und auf der EÜR</p></div></div>
-    <form class="card form" id="betrieb-form">
-      <div class="f2">${f("name", "Name des Angebots", b.name)}${f("inhaber", "Inhaberin / Inhaber", b.inhaber)}</div>
-      ${f("anschrift", "Anschrift", b.anschrift)}
-      <div class="f2">${f("tel", "Telefon", b.tel)}${f("stnr", "Steuernummer", b.stnr)}</div>
-      <div class="f2">${f("ik", "Institutionskennzeichen (IK)", b.ik)}${f("anerkennung", "Aktenzeichen der Anerkennung", b.anerkennung)}</div>
-      ${f("iban", "IBAN für Zahlungen", b.iban)}
-      <div class="f2">${f("satz", "Stundensatz in €", b.satz, "number")}${f("km", "Kilometerpauschale in €", b.km, "number")}</div>
-      <label class="f" for="b-steuer">Umsatzsteuer-Hinweis auf Rechnungen<select id="b-steuer"><option value="klein"${b.steuer === "klein" ? " selected" : ""}>Kleinunternehmerregelung (§ 19 UStG)</option><option value="frei"${b.steuer === "frei" ? " selected" : ""}>Steuerfrei als anerkanntes Angebot (§ 4 Nr. 16 UStG)</option></select></label>
-      <div class="btns"><button class="btn" type="submit">Speichern</button></div>
-      <p class="small muted">Welcher Steuerhinweis richtig ist, klärt man einmal mit dem Steuerberater.</p>
-    </form>
-    <section class="card"><h2>Prototyp</h2><p class="muted">Alle Namen, Nummern und Beträge sind erfunden. Änderungen bleiben nur in diesem Browser.</p>
-      <div class="btns"><button class="btn danger" data-reset type="button">Testdaten zurücksetzen</button></div><p class="small muted" id="reset-hinweis" hidden>Zum Bestätigen noch einmal tippen.</p></section>`;
+// ================================================================ KLIENT (groß und einfach)
+function zeigeKlient() {
+  const k = klient(ui.k); const b = budget(k);
+  const kommend = db.einsaetze.filter((e) => e.klient === k.id && e.datum >= HEUTE_ISO && e.status === "geplant").sort((a, c) => (a.datum + a.von).localeCompare(c.datum + c.von));
+  const n = kommend[0];
+  const zuletzt = db.einsaetze.filter((e) => e.klient === k.id && ["bestaetigt", "wartet"].includes(e.status)).sort((a, c) => c.datum.localeCompare(a.datum)).slice(0, 5);
+  return `<div class="gross view">
+    <h1>Guten Tag, ${esc(k.anrede)}</h1>
+    ${n ? `<div class="naechster"><span>Ihr nächster Besuch</span><b>${n.datum === HEUTE_ISO ? "Heute" : tagLang(n.datum)}, ${n.von} Uhr</b><span>Es kommt ${esc(helfer(n.helfer).name)}.</span></div>` : ""}
+    ${k.angeh && k.angeh.kommunikation ? `<div class="info">Ihre ${esc(k.angeh.rolle.split(",")[0])} ${esc(k.angeh.name.split(" ")[0])} kümmert sich um Ihre Termine. Sie können trotzdem jederzeit selbst Bescheid geben.</div>` : ""}
+    <div class="btns"><button class="btn" data-anfrage="Rückruf" type="button">Bitte rufen Sie mich an</button>${n ? `<button class="btn ghost" data-absage="${n.id}" type="button">Nächsten Termin absagen</button>` : ""}</div>
+    <section class="card"><h2>Ihre nächsten Termine</h2>${kommend.slice(0, 5).map((e) => `<div><b>${tagLang(e.datum)}</b><br>${e.von} bis ${e.bis} Uhr · ${esc(helfer(e.helfer).name)}</div>`).join("") || `<p>Keine Termine geplant.</p>`}</section>
+    <section class="card"><h2>Das wurde gemacht</h2><div class="protokoll">${zuletzt.map((e) => `<div class="eintrag"><span class="d">${tagKurz(e.datum)}</span><span>${esc(e.protokoll || e.taet.join(", "))}<br><span class="small muted">${esc(helfer(e.helfer).name)} · ${e.von}–${e.bis}</span></span></div>`).join("")}</div></section>
+    <section class="card"><h2>Ihr Entlastungsbetrag</h2><p>Für dieses Jahr sind noch <b>${euro(b.rest)}</b> übrig.</p><p class="small muted">Ihre Pflegekasse zahlt jeden Monat ${euro(ENTLASTUNG)} dazu. Wir rechnen direkt mit der Kasse ab.</p></section>
+    <p class="small muted">Fragen? Das Büro erreichen Sie unter ${esc(db.buero.tel)}.</p></div>`;
 }
 
-// ---------------------------------------------------------------- Dialoge
+// ================================================================ ANGEHÖRIGE / PFLEGEPERSON
+function zeigeAngehoerige() {
+  const k = klient(ui.a); const a = k.angeh; const b = budget(k); const bf = beratungFaellig(k);
+  const kommend = db.einsaetze.filter((e) => e.klient === k.id && e.datum >= HEUTE_ISO && ["geplant", "abgesagt"].includes(e.status)).sort((x, y) => (x.datum + x.von).localeCompare(y.datum + y.von)).slice(0, 8);
+  const verlauf = db.einsaetze.filter((e) => e.klient === k.id && e.datum < HEUTE_ISO && e.status !== "geplant").sort((x, y) => y.datum.localeCompare(x.datum)).slice(0, 8);
+  const warten = wartendeBestaetigungen(k.id);
+  return `<div class="view-head"><div><h1>${esc(k.name)}</h1><p>Sie sind angemeldet als ${esc(a.name)} · ${esc(a.rolle)} · ${esc(a.ort)}</p></div>
+      <div class="btns"><button class="btn" data-wunsch="${k.id}" type="button">Termin wünschen</button><button class="btn ghost" data-anfrage="Nachricht" type="button">Nachricht ans Büro</button></div></div>
+    ${warten.length ? `<section class="card" style="border-color:var(--warn)"><h2>Bitte bestätigen</h2>${warten.map((e) => `<div class="form" style="border-bottom:1px solid var(--line);padding-bottom:12px"><div><b>${tagLang(e.datum)}, ${e.von}–${e.bis}</b><br>${esc(helfer(e.helfer).name)} · ${esc(e.taet.join(", "))}<br><span class="small muted">Vermerk: ${esc(e.protokoll)}</span></div>
+      ${a.vollmacht ? `<button class="btn" data-digital-ok="${e.id}" type="button">Leistung bestätigen</button>` : `<span class="small muted">Bestätigen geht nur mit Vollmacht.</span>`}</div>`).join("")}
+      <p class="small muted">Ihre Bestätigung wird mit Datum gespeichert und ersetzt die Unterschrift auf dem Leistungsnachweis.</p></section>` : ""}
+    <div class="grid2">
+      <section class="card"><h2>Nächste Termine</h2>${kommend.map((e) => `<div class="row"><span class="grow"><b>${tagKurz(e.datum)}</b> ${e.von}–${e.bis}<br><span class="small muted">${esc(helfer(e.helfer).name)}</span></span>${e.status === "abgesagt" ? statusPill(e) : `<button class="btn small ghost" data-absage="${e.id}" type="button">Absagen</button>`}</div>`).join("") || `<p class="muted">Keine Termine.</p>`}
+        <p class="small muted">Feste Termine: ${db.serien.filter((s) => s.klient === k.id && !s.bisDatum).map((s) => `${WOCHENTAGE[s.tag]}s ${s.von} Uhr${s.alle > 1 ? " (alle 2 Wochen)" : ""}`).join(", ") || "keine"}</p></section>
+      <section class="card"><h2>Was gemacht wurde</h2><div class="protokoll">${verlauf.map((e) => { const auff = (e.vermerke || []).filter((v) => v !== "Gut gelaunt");
+        return `<div class="eintrag"><span class="d">${tagKurz(e.datum)}</span><span>${e.status === "abgesagt" ? `<span class="pill p-bad">Abgesagt</span> ${esc(e.grund || "")}` : `${esc(e.protokoll)}${auff.length ? ` <span class="pill p-warn">${esc(auff.join(", "))}</span>` : ""}<br><span class="small muted">${esc(helfer(e.helfer).name)} · ${e.status === "wartet" ? "wartet auf Ihre Bestätigung" : "bestätigt von " + esc(e.wer)}</span>`}</span></div>`; }).join("")}</div></section>
+      <section class="card"><h2>Entlastungsbetrag ${JAHR}</h2><div class="budget"><i style="width:${Math.round(b.anteil * 100)}%"></i></div>
+        <p class="num">${euro(b.ausJahr)} von ${euro(b.angespart)} genutzt · <b>Rest ${euro(b.rest)}</b></p>
+        <p class="small muted">Was bis Jahresende übrig ist, kann noch bis 30.06.${JAHR + 1} genutzt werden, danach verfällt es.${b.verfallen ? ` Aus ${JAHR - 1} sind am 30.06.${JAHR} ${euro(b.verfallen)} verfallen.` : ""}</p>
+        ${kostenSerien(k.id) > ENTLASTUNG ? `<div class="hint">Die festen Termine kosten etwa ${euro(kostenSerien(k.id))} im Monat. Was über ${euro(ENTLASTUNG)} hinausgeht, wird privat berechnet, sobald kein Rest mehr da ist.</div>` : ""}</section>
+      <section class="card"><h2>Ihre Aufgaben als Pflegeperson</h2>
+        ${bf ? `<div class="row"><span class="grow">Beratungsbesuch nach § 37 Abs. 3 SGB XI</span><span class="pill ${bf <= plusTage(30) ? "p-warn" : "p-ok"}">fällig bis ${datum(bf)}</span></div><p class="small muted">Pflicht, solange Pflegegeld bezogen wird (Pflegegrad 2–3 halbjährlich, 4–5 vierteljährlich).</p>` : `<p class="small muted">Kein Beratungsbesuch nötig.</p>`}
+        <div class="row"><span class="grow">Abtretungserklärung</span><span class="pill p-ok">liegt vor (${datum(k.abtretung)})</span></div>
+        <div class="row"><span class="grow">Vollmacht für Bestätigungen</span><span class="pill ${a.vollmacht ? "p-ok" : "p-warn"}">${a.vollmacht ? "liegt vor" : "fehlt"}</span></div>
+        <label class="schalter" for="komm"><input id="komm" type="checkbox"${a.kommunikation ? " checked" : ""}> Ich übernehme die Kommunikation für ${esc(k.anrede)}</label>
+        <p class="small muted">Dann gehen Terminfragen und Rückfragen zuerst an Sie. ${esc(k.anrede)} sieht weiterhin die eigenen Termine.</p></section>
+    </div>`;
+}
+
+// ================================================================ Dialoge
 const dlg = document.getElementById("dlg"), druck = document.getElementById("druck");
 function oeffne(html) { dlg.innerHTML = `<div class="dlg">${html}</div>`; if (!dlg.open) dlg.showModal(); }
 
 function einsatzDialog(id) {
-  const x = db.einsaetze.find((e) => e.id === id); const k = klient(x.klient); const fertig = x.status === "bestaetigt";
-  const gew = new Set(x.taet);
-  oeffne(`<div class="dlg-head"><div><h2>${esc(k.name)}</h2><span class="muted small">${tagKurz(x.datum)} · Pflegegrad ${k.pg} · ${esc(k.anschrift)}</span></div><button class="x" data-zu type="button" aria-label="Schließen">×</button></div>
-    <div class="f2"><label class="f" for="e-von">Beginn<input id="e-von" type="time" value="${x.von}"${fertig ? " disabled" : ""}></label><label class="f" for="e-bis">Ende<input id="e-bis" type="time" value="${x.bis}"${fertig ? " disabled" : ""}></label>
-      <label class="f" for="e-km">Gefahrene km<input id="e-km" type="number" inputmode="numeric" value="${x.km}"${fertig ? " disabled" : ""}></label></div>
+  const e = db.einsaetze.find((x) => x.id === id); const k = klient(e.klient); const fertig = e.status !== "geplant";
+  const gew = new Set(e.taet.length ? e.taet : (db.serien.find((s) => s.id === e.serie)?.taet || [])); const verm = new Set(e.vermerke || []);
+  oeffne(`<div class="dlg-head"><div><h2>${esc(k.name)}</h2><span class="muted small">${tagKurz(e.datum)} · ${e.von}–${e.bis} · Pflegegrad ${k.pg} · ${esc(helfer(e.helfer).name)}</span></div><button class="x" data-zu type="button" aria-label="Schließen">×</button></div>
+    ${k.notiz ? `<div class="info">${esc(k.notiz)}</div>` : ""}
+    <div class="f2"><label class="f" for="e-von">Beginn<input id="e-von" type="time" value="${e.von}"${fertig ? " disabled" : ""}></label><label class="f" for="e-bis">Ende<input id="e-bis" type="time" value="${e.bis}"${fertig ? " disabled" : ""}></label>
+      <label class="f" for="e-km">Gefahrene km<input id="e-km" type="number" inputmode="decimal" value="${e.km || Math.round(abstand(db, e) * 10) / 10}"${fertig ? " disabled" : ""}></label></div>
     ${Object.entries(TAETIGKEITEN).map(([g, l]) => `<fieldset><legend>${g}</legend><div class="chips">${l.map((t) => `<button type="button" class="chip" aria-pressed="${gew.has(t)}" data-taet="${esc(t)}"${fertig ? " disabled" : ""}>${t}</button>`).join("")}</div></fieldset>`).join("")}
-    <label class="f" for="e-notiz">Notiz (nur intern)<textarea id="e-notiz" rows="2"${fertig ? " disabled" : ""}>${esc(x.notiz)}</textarea></label>
-    ${fertig ? `<div class="info">Bestätigt von ${esc(x.wer)} · ${euro(betrag(x))}</div><img src="${x.unterschrift}" alt="Unterschrift" style="max-height:80px;background:#fff;border-radius:8px;padding:4px">`
-      : `<p class="small muted">Dauer ${dauerText(minuten(x.von, x.bis))} · ${euro(betrag(x))} bei ${euro(db.betrieb.satz)} je Stunde</p>
-         <div class="btns"><button class="btn" data-unterschrift="${x.id}" type="button">Abschließen und unterschreiben</button></div>`}`);
+    <fieldset><legend>Kurzvermerk (sehen Büro und Angehörige)</legend><div class="chips">${VERMERKE.map((t) => `<button type="button" class="chip" aria-pressed="${verm.has(t)}" data-vermerk="${esc(t)}"${fertig ? " disabled" : ""}>${t}</button>`).join("")}</div></fieldset>
+    <label class="f" for="e-prot">In wenigen Worten<input id="e-prot" value="${esc(e.protokoll)}" placeholder="z. B. Einkauf erledigt, war gut gelaunt" autocomplete="off"${fertig ? " disabled" : ""}></label>
+    <p class="fehler" id="e-fehler" hidden></p>
+    ${fertig ? `<div class="info">${e.status === "wartet" ? `Wartet auf Bestätigung durch ${esc(k.angeh?.name || "")}` : e.status === "abgesagt" ? `Abgesagt${e.grund ? ": " + esc(e.grund) : ""}` : `Bestätigt von ${esc(e.wer)}`}</div>${e.unterschrift ? `<img src="${e.unterschrift}" alt="Unterschrift" style="max-height:80px;background:#fff;border-radius:8px;padding:4px">` : ""}`
+      : `<div class="btns"><button class="btn" data-unterschrift="${e.id}" type="button">Unterschreiben lassen</button>${k.angeh && k.angeh.vollmacht ? `<button class="btn ghost" data-digital="${e.id}" type="button">${esc(k.angeh.name.split(" ")[0])} bestätigen lassen</button>` : ""}<button class="btn danger" data-ausfall="${e.id}" type="button">Fand nicht statt</button></div>`}`);
   dlg.dataset.einsatz = id;
 }
 function einsatzLesen() {
-  const x = db.einsaetze.find((e) => e.id === dlg.dataset.einsatz); if (!x || x.status === "bestaetigt" || !dlg.querySelector("#e-von")) return x;
-  x.von = dlg.querySelector("#e-von").value; x.bis = dlg.querySelector("#e-bis").value; x.km = Number(dlg.querySelector("#e-km").value) || 0;
-  x.taet = [...dlg.querySelectorAll("[data-taet][aria-pressed=true]")].map((b) => b.dataset.taet); x.notiz = dlg.querySelector("#e-notiz").value;
-  speichern(); return x;
+  const e = db.einsaetze.find((x) => x.id === dlg.dataset.einsatz); if (!e || e.status !== "geplant" || !dlg.querySelector("#e-von")) return e;
+  e.von = dlg.querySelector("#e-von").value; e.bis = dlg.querySelector("#e-bis").value; e.km = Number(dlg.querySelector("#e-km").value) || 0;
+  e.taet = [...dlg.querySelectorAll("[data-taet][aria-pressed=true]")].map((b) => b.dataset.taet);
+  e.vermerke = [...dlg.querySelectorAll("[data-vermerk][aria-pressed=true]")].map((b) => b.dataset.vermerk);
+  e.protokoll = dlg.querySelector("#e-prot").value.trim();
+  speichern(); return e;
 }
-
-function unterschriftDialog(x) {
-  delete dlg.dataset.einsatz; const k = klient(x.klient);
-  oeffne(`<div class="dlg-head"><div><h2>Leistung bestätigen</h2><span class="muted small">${tagKurz(x.datum)} · ${x.von}–${x.bis} · ${euro(betrag(x))}</span></div><button class="x" data-zu type="button" aria-label="Schließen">×</button></div>
-    <div class="card small"><b>${esc(k.name)}</b>${x.taet.length ? x.taet.map((t) => `<span>✓ ${t}</span>`).join("") : `<span class="muted">Noch keine Tätigkeit gewählt.</span>`}</div>
-    <fieldset><legend>Wer bestätigt?</legend><div class="chips" id="wer">
-      <button type="button" class="chip" aria-pressed="true" data-wer="Klient/in">${esc(k.name)} selbst</button>
-      ${k.angeh ? `<button type="button" class="chip" aria-pressed="false" data-wer="Angehörige/r (${esc(k.angeh.split(",")[0])})">${esc(k.angeh.split(",")[0])}</button>` : ""}</div></fieldset>
-    <label class="f" for="sig">Bitte hier mit dem Finger unterschreiben<canvas id="sig" class="sig"></canvas></label>
-    <p class="small muted">Später möglich: Bestätigung durch Angehörige per Link aufs Handy.</p>
-    <div class="btns"><button class="btn" data-bestaetigen="${x.id}" type="button">Bestätigen</button><button class="btn ghost" data-sig-neu type="button">Neu unterschreiben</button></div>
-    <p class="small" id="sig-fehler" hidden style="color:var(--bad)">Bitte erst unterschreiben und mindestens eine Tätigkeit wählen.</p>`);
+function pruefen(e) {
+  const f = dlg.querySelector("#e-fehler"); if (!e.taet.length) { f.textContent = "Bitte mindestens eine Tätigkeit wählen."; f.hidden = false; return false; }
+  if (!e.protokoll) e.protokoll = [e.taet.slice(0, 2).join(", "), (e.vermerke || []).join(", ")].filter(Boolean).join(". ");
+  return true;
+}
+function unterschriftDialog(e) {
+  delete dlg.dataset.einsatz; const k = klient(e.klient);
+  oeffne(`<div class="dlg-head"><div><h2>Leistung bestätigen</h2><span class="muted small">${tagKurz(e.datum)} · ${e.von}–${e.bis}</span></div><button class="x" data-zu type="button" aria-label="Schließen">×</button></div>
+    <div class="card small"><b>${esc(k.name)}</b>${e.taet.map((t) => `<span>✓ ${t}</span>`).join("")}<span class="muted">${esc(e.protokoll)}</span></div>
+    <label class="f" for="sig">${esc(k.name)}, bitte hier mit dem Finger unterschreiben<canvas id="sig" class="sig"></canvas></label>
+    <div class="btns"><button class="btn" data-bestaetigen="${e.id}" type="button">Bestätigen</button><button class="btn ghost" data-sig-neu type="button">Neu unterschreiben</button></div>
+    <p class="fehler" id="sig-fehler" hidden>Bitte erst unterschreiben.</p>`);
   const c = dlg.querySelector("#sig"); const r = c.getBoundingClientRect(); const s = devicePixelRatio || 1;
   c.width = r.width * s; c.height = r.height * s; const g = c.getContext("2d"); g.scale(s, s); g.lineWidth = 2.4; g.lineCap = "round"; g.strokeStyle = "#1a2a6c";
-  let zeichnet = false; c.dataset.leer = "1";
-  const p = (e) => { const b = c.getBoundingClientRect(); return [e.clientX - b.left, e.clientY - b.top]; };
-  c.addEventListener("pointerdown", (e) => { zeichnet = true; c.setPointerCapture(e.pointerId); g.beginPath(); g.moveTo(...p(e)); });
-  c.addEventListener("pointermove", (e) => { if (!zeichnet) return; g.lineTo(...p(e)); g.stroke(); c.dataset.leer = "0"; });
-  c.addEventListener("pointerup", () => (zeichnet = false));
+  let an = false; c.dataset.leer = "1"; const p = (ev) => { const b = c.getBoundingClientRect(); return [ev.clientX - b.left, ev.clientY - b.top]; };
+  c.addEventListener("pointerdown", (ev) => { an = true; c.setPointerCapture(ev.pointerId); g.beginPath(); g.moveTo(...p(ev)); });
+  c.addEventListener("pointermove", (ev) => { if (!an) return; g.lineTo(...p(ev)); g.stroke(); c.dataset.leer = "0"; });
+  c.addEventListener("pointerup", () => (an = false));
 }
-
-function klientDialog() {
-  oeffne(`<div class="dlg-head"><h2>Klient aufnehmen</h2><button class="x" data-zu type="button" aria-label="Schließen">×</button></div>
-    <form class="form" id="klient-form">
-      <label class="f" for="k-name">Name<input id="k-name" required autocomplete="off"></label>
-      <label class="f" for="k-anschrift">Anschrift<input id="k-anschrift" autocomplete="off"></label>
-      <div class="f2"><label class="f" for="k-pg">Pflegegrad<select id="k-pg">${[1, 2, 3, 4, 5].map((n) => `<option>${n}</option>`).join("")}</select></label>
-        <label class="f" for="k-kasse">Pflegekasse<input id="k-kasse" required autocomplete="off" placeholder="z. B. AOK Niedersachsen"></label></div>
-      <div class="f2"><label class="f" for="k-vnr">Versichertennummer<input id="k-vnr" autocomplete="off"></label><label class="f" for="k-vorjahr">Rest aus ${JAHR - 1} in €<input id="k-vorjahr" type="number" inputmode="decimal" value="0"></label></div>
-      <label class="f" for="k-angeh">Angehörige (Name, Telefon)<input id="k-angeh" autocomplete="off"></label>
-      <label class="f" for="k-abtretung">Abtretungserklärung unterschrieben am<input id="k-abtretung" type="date" value="${iso(HEUTE)}"></label>
-      <p class="small muted">Nur was für Einsatz und Abrechnung nötig ist. Keine Diagnosen.</p>
-      <div class="btns"><button class="btn" type="submit">Aufnehmen</button></div></form>`);
+function serieDialog(kid) {
+  oeffne(`<div class="dlg-head"><h2>Fester Termin</h2><button class="x" data-zu type="button" aria-label="Schließen">×</button></div>
+    <form class="form" id="serie-form">
+      <label class="f" for="s-klient">Klient<select id="s-klient">${db.klienten.map((k) => `<option value="${k.id}"${k.id === kid ? " selected" : ""}>${esc(k.name)}</option>`).join("")}</select></label>
+      <div class="f2"><label class="f" for="s-tag">Wochentag<select id="s-tag">${[1, 2, 3, 4, 5, 6].map((t) => `<option value="${t}"${t === 5 ? " selected" : ""}>${WOCHENTAGE[t]}</option>`).join("")}</select></label>
+        <label class="f" for="s-von">Beginn<input id="s-von" type="time" value="10:00"></label><label class="f" for="s-bis">Ende<input id="s-bis" type="time" value="11:00"></label></div>
+      <div class="f2"><label class="f" for="s-alle">Wie oft<select id="s-alle"><option value="1">Jede Woche</option><option value="2">Alle 2 Wochen</option></select></label>
+        <label class="f" for="s-helfer">Begleiterin<select id="s-helfer">${db.helfer.map((h) => `<option value="${h.id}">${esc(h.name)}</option>`).join("")}</select></label>
+        <label class="f" for="s-ab">Ab<input id="s-ab" type="date" value="${plusTage(1)}"></label></div>
+      <p class="small" id="s-vorschau"></p>
+      <p class="fehler" id="s-fehler" hidden></p>
+      <div class="btns"><button class="btn" type="submit">Anlegen</button></div></form>`);
+  serieVorschau();
 }
-
-function einsatzNeuDialog() {
-  oeffne(`<div class="dlg-head"><h2>Einsatz planen</h2><button class="x" data-zu type="button" aria-label="Schließen">×</button></div>
-    <form class="form" id="einsatz-form">
-      <label class="f" for="n-klient">Klient<select id="n-klient">${db.klienten.map((k) => `<option value="${k.id}">${esc(k.name)}</option>`).join("")}</select></label>
-      <div class="f2"><label class="f" for="n-datum">Datum<input id="n-datum" type="date" value="${plusTage(1)}"></label><label class="f" for="n-von">Beginn<input id="n-von" type="time" value="10:00"></label><label class="f" for="n-bis">Ende<input id="n-bis" type="time" value="11:30"></label></div>
-      <div class="btns"><button class="btn" type="submit">Einplanen</button></div></form>`);
+function serieVorschau() {
+  const f = dlg.querySelector("#serie-form"); if (!f) return; const v = (id) => f.querySelector("#" + id).value;
+  const s = { klient: v("s-klient"), helfer: v("s-helfer"), tag: Number(v("s-tag")), von: v("s-von"), bis: v("s-bis"), alle: Number(v("s-alle")) };
+  delete f.dataset.trotzdem; f.querySelector("#s-fehler").hidden = true;
+  if (!s.von || !s.bis || minuten(s.von, s.bis) <= 0) { f.querySelector("#s-vorschau").textContent = "Das Ende muss nach dem Beginn liegen."; return; }
+  const neu = monatsKosten(s), bisher = kostenSerien(s.klient);
+  f.querySelector("#s-vorschau").innerHTML = `Kostet etwa <b>${euro(neu)}</b> im Monat. Mit den bisherigen festen Terminen ${euro(neu + bisher)} bei ${euro(ENTLASTUNG)} Entlastungsbetrag.${neu + bisher > ENTLASTUNG ? ` <span class="pill p-warn">über Budget</span>` : ""}`;
 }
-
+function wunschDialog(kid) {
+  oeffne(`<div class="dlg-head"><h2>Termin wünschen</h2><button class="x" data-zu type="button" aria-label="Schließen">×</button></div>
+    <form class="form" id="wunsch-form" data-klient="${kid}">
+      <fieldset><legend>Was brauchen Sie?</legend><div class="chips">${["Einmaliger Termin", "Fester Termin jede Woche", "Begleitung zum Arzt"].map((t, i) => `<button type="button" class="chip" aria-pressed="${!i}" data-wunschart="${t}">${t}</button>`).join("")}</div></fieldset>
+      <div class="f2"><label class="f" for="w-datum">Wann ungefähr<input id="w-datum" type="date" value="${plusTage(7)}"></label><label class="f" for="w-zeit">Uhrzeit<input id="w-zeit" type="time" value="10:00"></label></div>
+      <label class="f" for="w-text">Hinweis<input id="w-text" autocomplete="off" placeholder="z. B. Augenarzt Dr. Meier, Lindener Marktplatz"></label>
+      <div class="btns"><button class="btn" type="submit">Anfrage senden</button></div>
+      <p class="small muted">Das Büro plant den Termin und meldet sich bei Ihnen.</p></form>`);
+}
+function nachrichtDialog(art) {
+  const titel = { "Rückruf": "Rückruf erbitten", "Abwesenheit": "Abwesenheit melden" }[art] || "Nachricht ans Büro";
+  oeffne(`<div class="dlg-head"><h2>${titel}</h2><button class="x" data-zu type="button" aria-label="Schließen">×</button></div>
+    <form class="form" id="nachricht-form" data-art="${art}"><label class="f" for="m-text">${art === "Rückruf" ? "Worum geht es? (freiwillig)" : art === "Abwesenheit" ? "Von wann bis wann, und warum?" : "Ihre Nachricht"}<textarea id="m-text" rows="3"></textarea></label>
+      <div class="btns"><button class="btn" type="submit">Senden</button></div></form>`);
+}
+function absageDialog(eid) {
+  const e = db.einsaetze.find((x) => x.id === eid);
+  oeffne(`<div class="dlg-head"><h2>Termin absagen</h2><button class="x" data-zu type="button" aria-label="Schließen">×</button></div>
+    <p>${tagLang(e.datum)}, ${e.von} Uhr · ${esc(klient(e.klient).name)}</p>
+    <form class="form" id="absage-form" data-einsatz="${eid}"><label class="f" for="ab-grund">Grund (freiwillig)<input id="ab-grund" autocomplete="off" placeholder="z. B. Arzttermin, Besuch der Familie"></label>
+      <div class="btns"><button class="btn danger" type="submit">Absagen</button></div><p class="small muted">Bitte möglichst 24 Stunden vorher absagen.</p></form>`);
+}
 function buchungDialog(typ) {
-  const kat = typ === "ein" ? KAT_EIN : KAT_AUS; const erste = Object.keys(kat)[typ === "ein" ? 1 : 0];
+  const kat = typ === "ein" ? KAT_EIN : KAT_AUS; const erste = typ === "ein" ? "privat" : "buero";
   oeffne(`<div class="dlg-head"><h2>${typ === "ein" ? "Einnahme" : "Ausgabe"} erfassen</h2><button class="x" data-zu type="button" aria-label="Schließen">×</button></div>
     <form class="form" id="buchung-form" data-typ="${typ}">
-      <div class="f2"><label class="f" for="bu-betrag">Betrag in €<input id="bu-betrag" type="number" step="0.01" min="0.01" inputmode="decimal" required></label><label class="f" for="bu-datum">Datum<input id="bu-datum" type="date" value="${iso(HEUTE)}" required></label></div>
-      <fieldset><legend>Wofür?</legend><div class="chips">${Object.entries(kat).filter(([k]) => typ === "aus" || k !== "kasse").map(([k, t]) => `<button type="button" class="chip" aria-pressed="${k === erste}" data-kat="${k}">${t}</button>`).join("")}</div></fieldset>
-      <label class="f" for="bu-text">Beschreibung<input id="bu-text" required autocomplete="off" placeholder="${typ === "ein" ? "z. B. Privat: Gardinen aufhängen" : "z. B. Druckerpatrone"}"></label>
+      <div class="f2"><label class="f" for="bu-betrag">Betrag in €<input id="bu-betrag" type="number" step="0.01" min="0.01" inputmode="decimal" required></label><label class="f" for="bu-datum">Datum<input id="bu-datum" type="date" value="${HEUTE_ISO}" required></label></div>
+      <fieldset><legend>Wofür?</legend><div class="chips">${Object.entries(kat).filter(([k]) => k !== "kasse").map(([k, t]) => `<button type="button" class="chip" aria-pressed="${k === erste}" data-kat="${k}">${t}</button>`).join("")}</div></fieldset>
+      <label class="f" for="bu-text">Beschreibung<input id="bu-text" required autocomplete="off"></label>
       <fieldset><legend>Bezahlt</legend><div class="chips"><button type="button" class="chip" aria-pressed="true" data-zahl="Konto">Über das Konto</button><button type="button" class="chip" aria-pressed="false" data-zahl="Bar">Bar</button></div></fieldset>
       <label class="f" for="bu-beleg">Beleg (Foto, freiwillig)<input id="bu-beleg" type="file" accept="image/*"></label>
       <div class="btns"><button class="btn" type="submit">Buchen</button></div></form>`);
 }
+function klientNeuDialog() {
+  oeffne(`<div class="dlg-head"><h2>Klient aufnehmen</h2><button class="x" data-zu type="button" aria-label="Schließen">×</button></div>
+    <form class="form" id="klient-form">
+      <div class="f2"><label class="f" for="k-name">Name<input id="k-name" required autocomplete="off"></label><label class="f" for="k-anrede">Anrede<input id="k-anrede" placeholder="z. B. Frau Müller" autocomplete="off"></label></div>
+      <label class="f" for="k-anschrift">Anschrift<input id="k-anschrift" autocomplete="off"></label>
+      <div class="f2"><label class="f" for="k-pg">Pflegegrad<select id="k-pg">${[1, 2, 3, 4, 5].map((n) => `<option>${n}</option>`).join("")}</select></label><label class="f" for="k-kasse">Pflegekasse<input id="k-kasse" required autocomplete="off"></label><label class="f" for="k-tel">Telefon<input id="k-tel" autocomplete="off"></label></div>
+      <fieldset><legend>Angehörige / Pflegeperson</legend><div class="f2"><label class="f" for="k-aname">Name<input id="k-aname" autocomplete="off"></label><label class="f" for="k-atel">Telefon<input id="k-atel" autocomplete="off"></label></div>
+        <label class="schalter" for="k-azugang"><input id="k-azugang" type="checkbox" checked> App-Zugang (Einwilligung des Klienten liegt vor)</label></fieldset>
+      <p class="small muted">Nur was für Einsatz und Abrechnung nötig ist. Keine Diagnosen.</p>
+      <div class="btns"><button class="btn" type="submit">Aufnehmen</button></div></form>`);
+}
 
-// ---------------------------------------------------------------- Druckansichten (A4)
-function absenderZeile() { const b = db.betrieb; return `${esc(b.name)} · ${esc(b.inhaber)} · ${esc(b.anschrift)}`; }
-function fuss() { const b = db.betrieb; return `<div class="fuss">${esc(b.name)}, Inh. ${esc(b.inhaber)} · ${esc(b.anschrift)} · Tel. ${esc(b.tel)} · Steuernummer ${esc(b.stnr)} · IK ${esc(b.ik)} · IBAN ${esc(b.iban)}</div>`; }
-
+// ================================================================ Druck
+function fussH(h) { return `<div class="fuss">${esc(h.name)} · Angebot zur Unterstützung im Alltag · Steuernummer ${esc(h.stnr)} · IK ${esc(h.ik)} · IBAN ${esc(h.iban)} · Abrechnung durch ${esc(db.buero.name)}</div>`; }
 function rechnungHtml(key) {
-  const [ym, kid] = key.split("|"); const k = klient(kid); const b = db.betrieb; const a = db.abrechnung[key];
-  const liste = db.einsaetze.filter((x) => x.klient === kid && x.status === "bestaetigt" && x.datum.startsWith(ym)).sort((p, q) => p.datum.localeCompare(q.datum));
-  const summe = liste.reduce((s, x) => s + betrag(x), 0); const [y, m] = ym.split("-").map(Number);
-  const nr = a ? a.nr : "(wird beim Abrechnen vergeben)";
-  return `<section class="blatt"><div><span class="absender">${absenderZeile()}</span><br><b>${esc(k.kasse)}</b><br>Abrechnung Entlastungsbetrag</div>
-    <div class="kopf"><div><h1>Rechnung</h1>Nr. ${nr}<br>Datum ${datum(iso(HEUTE))}</div><div style="text-align:right">Leistungszeitraum<br><b>${MONATE[m - 1]} ${y}</b></div></div>
+  const [ym, hid, kid] = key.split("|"); const k = klient(kid), h = helfer(hid), a = db.abrechnung[key];
+  const l = db.einsaetze.filter((e) => e.klient === kid && e.helfer === hid && e.status === "bestaetigt" && e.datum.startsWith(ym)).sort((p, q) => p.datum.localeCompare(q.datum));
+  const summe = l.reduce((s, e) => s + betrag(e), 0); const [y, m] = ym.split("-").map(Number); const nr = a ? a.nr : "(wird beim Abrechnen vergeben)";
+  return `<section class="blatt"><div><span class="absender">${esc(h.name)} · Angebot zur Unterstützung im Alltag</span><br><b>${esc(k.kasse)}</b><br>Abrechnung Entlastungsbetrag</div>
+    <div class="kopf"><div><h1>Rechnung</h1>Nr. ${nr}<br>Datum ${datum(HEUTE_ISO)}</div><div style="text-align:right">Leistungszeitraum<br><b>${MONATE[m - 1]} ${y}</b></div></div>
     <div>Versicherte Person: <b>${esc(k.name)}</b>, geb. ${datum(k.geb)}, ${esc(k.anschrift)}<br>Versichertennummer ${esc(k.vnr)} · Pflegegrad ${k.pg} · Abtretungserklärung vom ${datum(k.abtretung)}</div>
-    <div>Leistungen eines Angebots zur Unterstützung im Alltag nach § 45a SGB XI, abgerechnet über den Entlastungsbetrag nach § 45b SGB XI. Anerkennung ${esc(b.anerkennung)}.</div>
-    <table class="num"><thead><tr><th>Datum</th><th>Zeit</th><th>Leistung</th><th class="r">Std.</th><th class="r">Betrag</th></tr></thead><tbody>
-      ${liste.map((x) => `<tr><td>${datum(x.datum)}</td><td>${x.von}–${x.bis}</td><td>${x.taet.join(", ")}</td><td class="r">${(minuten(x.von, x.bis) / 60).toLocaleString("de-DE", { minimumFractionDigits: 2 })}</td><td class="r">${euro(betrag(x))}</td></tr>`).join("")}
-      <tr class="summe"><td colspan="4">Gesamtbetrag (Stundensatz ${euro(b.satz)})</td><td class="r">${euro(summe)}</td></tr></tbody></table>
-    <div>${steuerSatz()}<br>Bitte überweisen Sie den Betrag innerhalb von 30 Tagen auf IBAN ${esc(b.iban)}, Verwendungszweck ${nr}.</div>
-    ${fuss()}</section>
-  <section class="blatt"><h1>Leistungsnachweis ${MONATE[m - 1]} ${y}</h1>
-    <div>${esc(k.name)} · Versichertennummer ${esc(k.vnr)} · Pflegegrad ${k.pg}<br>Anlage zu Rechnung ${nr}</div>
-    <table class="num"><thead><tr><th>Datum</th><th>Zeit</th><th>Tätigkeiten</th><th>Bestätigt von</th><th>Unterschrift</th></tr></thead><tbody>
-      ${liste.map((x) => `<tr><td>${datum(x.datum)}</td><td>${x.von}–${x.bis}</td><td>${x.taet.join(", ")}</td><td>${esc(x.wer || "")}</td><td>${x.unterschrift ? `<img class="u" src="${x.unterschrift}" alt="Unterschrift">` : ""}</td></tr>`).join("")}</tbody></table>
-    <div>Erbracht durch ${esc(b.inhaber)}.</div>${fuss()}</section>`;
+    <div>Leistungen nach § 45a SGB XI, abgerechnet über den Entlastungsbetrag nach § 45b SGB XI. Anerkennung ${esc(h.anerkennung)}.</div>
+    <table class="num"><thead><tr><th>Datum</th><th>Zeit</th><th>Leistung</th><th class="r">Betrag</th></tr></thead><tbody>
+      ${l.map((e) => `<tr><td>${datum(e.datum)}</td><td>${e.von}–${e.bis}</td><td>${e.taet.join(", ")}</td><td class="r">${euro(betrag(e))}</td></tr>`).join("")}
+      <tr class="summe"><td colspan="3">Gesamtbetrag (Stundensatz ${euro(h.satz)})</td><td class="r">${euro(summe)}</td></tr></tbody></table>
+    <div>Gemäß § 19 UStG wird keine Umsatzsteuer berechnet.<br>Bitte überweisen Sie den Betrag innerhalb von 30 Tagen auf IBAN ${esc(h.iban)}, Verwendungszweck ${nr}.</div>${fussH(h)}</section>
+  <section class="blatt"><h1>Leistungsnachweis ${MONATE[m - 1]} ${y}</h1><div>${esc(k.name)} · Vers.-Nr. ${esc(k.vnr)} · Anlage zu Rechnung ${nr} · erbracht durch ${esc(h.name)}</div>
+    <table class="num"><thead><tr><th>Datum</th><th>Zeit</th><th>Tätigkeiten</th><th>Bestätigt</th></tr></thead><tbody>
+      ${l.map((e) => `<tr><td>${datum(e.datum)}</td><td>${e.von}–${e.bis}</td><td>${e.taet.join(", ")}</td><td>${e.unterschrift ? `<img class="u" src="${e.unterschrift}" alt="Unterschrift">` : `${esc(e.wer)}<br>digital am ${datum(e.bestaetigtAm || e.datum)}`}</td></tr>`).join("")}</tbody></table>${fussH(h)}</section>`;
 }
-
-function eurHtml(jahr) {
-  const r = eur(jahr); const b = db.betrieb; const bis = jahr === JAHR ? `bis ${datum(iso(HEUTE))}` : "ganzes Jahr";
-  return `<section class="blatt"><div class="kopf"><div><h1>Einnahmenüberschussrechnung ${jahr}</h1>Zeitraum 01.01.${jahr} ${bis}</div><div style="text-align:right">${esc(b.name)}<br>${esc(b.inhaber)}<br>Steuernummer ${esc(b.stnr)}</div></div>
-    <div class="blatt-eur">${eurTabelle(r)}</div>
-    <h2>Buchungen</h2>
-    <table class="num"><thead><tr><th>Nr.</th><th>Datum</th><th>Beschreibung</th><th>Art</th><th class="r">Betrag</th></tr></thead><tbody>
-      ${r.kb.map((x) => `<tr><td>${x.nr}</td><td>${datum(x.datum)}</td><td>${esc(x.text)}</td><td>${x.typ === "ein" ? KAT_EIN[x.kat] : KAT_AUS[x.kat]}, ${x.zahlweg}</td><td class="r">${x.typ === "ein" ? "" : "−"}${euro(x.betrag)}</td></tr>`).join("")}</tbody></table>
-    <div class="small">Übersicht aus dem Kassenbuch der App. Die amtliche Anlage EÜR wird über ELSTER übermittelt; diese Aufstellung dient als Grundlage dafür und für die Steuerberatung.</div>
-    ${fuss()}</section>`;
+function eurHtml(hid) {
+  const h = helfer(hid), r = eur(hid, JAHR);
+  return `<section class="blatt"><div class="kopf"><div><h1>Einnahmenüberschussrechnung ${JAHR}</h1>Zeitraum 01.01.${JAHR} bis ${datum(HEUTE_ISO)}</div><div style="text-align:right">${esc(h.name)}<br>Steuernummer ${esc(h.stnr)}</div></div>
+    ${eurTabelle(r)}<h2>Buchungen</h2>
+    <table class="num"><thead><tr><th>Nr.</th><th>Datum</th><th>Beschreibung</th><th class="r">Betrag</th></tr></thead><tbody>
+      ${[...r.kb].sort((a, b) => a.nr - b.nr).map((x) => `<tr><td>${x.nr}</td><td>${datum(x.datum)}</td><td>${esc(x.text)}<br><span style="color:#666">${x.typ === "ein" ? KAT_EIN[x.kat] : KAT_AUS[x.kat]}, ${x.zahlweg}</span></td><td class="r">${x.typ === "ein" ? "" : "−"}${euro(x.betrag)}</td></tr>`).join("")}</tbody></table>
+    <div>Übersicht aus dem Kassenbuch der App. Die amtliche Anlage EÜR wird über ELSTER übermittelt; diese Aufstellung dient als Grundlage dafür und für die Steuerberatung.</div>${fussH(h)}</section>`;
 }
-
 function zeigeDruck(titel, html) {
   druck.innerHTML = `<div class="druck-bar"><div class="grow"><b>${titel}</b><br><span class="small muted">A4-Ansicht. In der fertigen App öffnet „Drucken“ den Druckdialog, dort auch „Als PDF sichern“.</span></div>
     <button class="btn" data-drucken type="button">Drucken</button><button class="btn ghost" data-druck-zu type="button">Schließen</button></div><div class="blatt-wrap">${html}</div>`;
-  document.getElementById("druckbereich").innerHTML = html;
-  druck.showModal();
+  document.getElementById("druckbereich").innerHTML = html; druck.showModal();
 }
 
-// ---------------------------------------------------------------- Ereignisse
-document.addEventListener("click", (e) => {
-  const t = e.target.closest("button, [data-einsatz]"); if (!t) return;
-  const d = t.dataset;
+// ================================================================ Ereignisse
+function anfrage(art, text, kid, extra = {}) {
+  const von = ui.rolle === "angehoerige" ? { von: klient(ui.a).angeh.name, rolle: "Angehörige", klient: ui.a } : ui.rolle === "klient" ? { von: klient(ui.k).name, rolle: "Klient", klient: ui.k } : { von: helfer(ui.h).name, rolle: "Begleiterin", klient: kid || null };
+  db.anfragen.push({ id: "a" + Date.now(), art, text, am: HEUTE_ISO, status: "neu", ...von, ...extra });
+}
+function bestaetigt(e, wer, bild) { e.status = "bestaetigt"; e.wer = wer; e.unterschrift = bild || null; e.bestaetigtAm = HEUTE_ISO; speichern(); }
+function hinweis(t) { const p = document.createElement("div"); p.className = "info"; p.textContent = t; p.setAttribute("role", "status"); main.querySelector(".view")?.prepend(p); setTimeout(() => p.remove(), 4000); }
+
+document.addEventListener("click", (ev) => {
+  const t = ev.target.closest("button, [data-einsatz]"); if (!t) return; const d = t.dataset;
   if ("zu" in d) dlg.close();
   else if ("druckZu" in d) druck.close();
   else if ("drucken" in d) window.print();
+  else if (d.reiter) { const [f, w] = d.reiter.split(":"); ui[f] = w; route(); }
   else if (d.einsatz) einsatzDialog(d.einsatz);
-  else if (d.taet !== undefined && !t.disabled) t.setAttribute("aria-pressed", t.getAttribute("aria-pressed") !== "true");
-  else if (d.unterschrift) unterschriftDialog(einsatzLesen());
-  else if (d.wer) dlg.querySelectorAll("[data-wer]").forEach((b) => b.setAttribute("aria-pressed", b === t));
+  else if (d.termin) einsatzDialog(d.termin);
+  else if (d.taet !== undefined || d.vermerk !== undefined) { if (!t.disabled) t.setAttribute("aria-pressed", t.getAttribute("aria-pressed") !== "true"); }
+  else if (d.unterschrift) { const e = einsatzLesen(); if (pruefen(e)) unterschriftDialog(e); }
+  else if (d.digital) { const e = einsatzLesen(); if (!pruefen(e)) return; e.status = "wartet"; speichern(); delete dlg.dataset.einsatz; dlg.close(); route(); hinweis(`${klient(e.klient).angeh.name} wurde um Bestätigung gebeten.`); }
+  else if (d.ausfall) { const e = einsatzLesen(); e.status = "abgesagt"; e.grund = e.protokoll || "Nicht angetroffen"; speichern(); delete dlg.dataset.einsatz; dlg.close(); route(); }
   else if ("sigNeu" in d) { const c = dlg.querySelector("#sig"); c.getContext("2d").clearRect(0, 0, c.width, c.height); c.dataset.leer = "1"; }
-  else if (d.bestaetigen) {
-    const x = db.einsaetze.find((y) => y.id === d.bestaetigen); const c = dlg.querySelector("#sig");
-    if (c.dataset.leer === "1" || !x.taet.length) { dlg.querySelector("#sig-fehler").hidden = false; return; }
-    x.status = "bestaetigt"; x.unterschrift = c.toDataURL("image/png"); x.wer = dlg.querySelector("[data-wer][aria-pressed=true]").dataset.wer;
-    speichern(); dlg.close(); route();
-  }
-  else if ("neuEinsatz" in d) einsatzNeuDialog();
-  else if ("neuKlient" in d) klientDialog();
+  else if (d.bestaetigen) { const e = db.einsaetze.find((x) => x.id === d.bestaetigen); const c = dlg.querySelector("#sig");
+    if (c.dataset.leer === "1") { dlg.querySelector("#sig-fehler").hidden = false; return; } bestaetigt(e, klient(e.klient).name, c.toDataURL("image/png")); dlg.close(); route(); hinweis("Leistung bestätigt."); }
+  else if (d.digitalOk) { const e = db.einsaetze.find((x) => x.id === d.digitalOk); bestaetigt(e, `${klient(e.klient).angeh.name} (digital)`); route(); hinweis("Danke, die Leistung ist bestätigt."); }
+  else if (d.woche !== undefined) { ui.woche = d.woche === "0" ? montag(HEUTE_ISO) : plusTage(Number(d.woche), vonIso(ui.woche)); route(); }
+  else if (d.neuSerie !== undefined) serieDialog(d.neuSerie || db.klienten[0].id);
+  else if (d.serieEnde) { const s = db.serien.find((x) => x.id === d.serieEnde); if (!t.dataset.sicher) { t.dataset.sicher = "1"; t.textContent = "Sicher? Noch einmal tippen"; return; }
+    s.bisDatum = HEUTE_ISO; db.einsaetze = db.einsaetze.filter((e) => !(e.serie === s.id && e.status === "geplant" && e.datum > HEUTE_ISO)); speichern(); route(); }
+  else if (d.klientAkte) klientAkte(d.klientAkte);
+  else if ("neuKlient" in d) klientNeuDialog();
+  else if (d.anfrageOk) { db.anfragen.find((a) => a.id === d.anfrageOk).status = "erledigt"; speichern(); route(); }
   else if (d.rechnung) zeigeDruck("Rechnung und Leistungsnachweis", rechnungHtml(d.rechnung));
-  else if (d.abrechnen) { db.abrechnung[d.abrechnen] = { status: "abgerechnet", nr: `${d.abrechnen.slice(0, 7).replace("-", "")}-${String(db.rnZaehler++).padStart(3, "0")}` }; speichern(); route(); }
-  else if (d.bezahlt) {
-    const a = db.abrechnung[d.bezahlt]; const [ym, kid] = d.bezahlt.split("|");
-    const summe = db.einsaetze.filter((x) => x.klient === kid && x.status === "bestaetigt" && x.datum.startsWith(ym)).reduce((s, x) => s + betrag(x), 0);
-    db.kassenbuch.push({ nr: db.kassenbuch.length + 1, datum: iso(HEUTE), typ: "ein", betrag: summe, kat: "kasse", text: `Zahlung Rechnung ${a.nr} (${klient(kid).kasse})`, zahlweg: "Konto", ref: d.bezahlt, storno: false });
-    a.status = "bezahlt"; speichern(); route();
-  }
+  else if (d.abrechnen) { db.abrechnung[d.abrechnen] = { status: "abgerechnet", nr: `${d.abrechnen.slice(0, 7).replace("-", "")}-${String(db.rn++).padStart(3, "0")}` }; speichern(); route(); }
+  else if (d.bezahlt) { const a = db.abrechnung[d.bezahlt]; const [ym, hid, kid] = d.bezahlt.split("|");
+    const summe = db.einsaetze.filter((e) => e.klient === kid && e.helfer === hid && e.status === "bestaetigt" && e.datum.startsWith(ym)).reduce((s, e) => s + betrag(e), 0);
+    db.kassenbuch.push({ helfer: hid, nr: db.kassenbuch.filter((x) => x.helfer === hid).length + 1, datum: HEUTE_ISO, typ: "ein", betrag: Math.round(summe * 100) / 100, kat: "kasse", text: `Zahlung Rechnung ${a.nr} (${klient(kid).kasse})`, zahlweg: "Konto", ref: d.bezahlt, storno: false });
+    a.status = "bezahlt"; speichern(); route(); }
   else if (d.buchung) buchungDialog(d.buchung);
   else if (d.kat) dlg.querySelectorAll("[data-kat]").forEach((b) => b.setAttribute("aria-pressed", b === t));
   else if (d.zahl) dlg.querySelectorAll("[data-zahl]").forEach((b) => b.setAttribute("aria-pressed", b === t));
-  else if (d.storno) { const x = db.kassenbuch.find((y) => y.nr === Number(d.storno)); if (t.dataset.sicher) { x.storno = true; speichern(); route(); } else { t.dataset.sicher = "1"; t.textContent = "Wirklich stornieren? Noch einmal tippen."; } }
-  else if ("kbAlle" in d) { kbAlle = !kbAlle; route(); }
-  else if ("eur" in d) zeigeDruck(`Einnahmenüberschussrechnung ${kbJahr}`, eurHtml(kbJahr));
-  else if ("reset" in d) { const h = document.getElementById("reset-hinweis"); if (h.hidden) { h.hidden = false; return; } db = testdaten(); speichern(); location.hash = "#heute"; route(); }
+  else if (d.wunschart) dlg.querySelectorAll("[data-wunschart]").forEach((b) => b.setAttribute("aria-pressed", b === t));
+  else if (d.storno) { const [hid, nr] = d.storno.split(":"); const x = db.kassenbuch.find((y) => y.helfer === hid && y.nr === Number(nr));
+    if (!t.dataset.sicher) { t.dataset.sicher = "1"; t.textContent = "Sicher?"; return; } x.storno = true; speichern(); route(); }
+  else if ("kbAlle" in d) { ui.kbAlle = !ui.kbAlle; route(); }
+  else if ("eur" in d) zeigeDruck(`Einnahmenüberschussrechnung ${JAHR}`, eurHtml(ui.h));
+  else if (d.wunsch) wunschDialog(d.wunsch);
+  else if (d.anfrage) nachrichtDialog(d.anfrage);
+  else if (d.absage) absageDialog(d.absage);
+  else if ("abwesend" in d) nachrichtDialog("Abwesenheit");
 });
 dlg.addEventListener("close", () => { if (dlg.dataset.einsatz) { einsatzLesen(); delete dlg.dataset.einsatz; route(); } });
-document.addEventListener("change", (e) => { if (e.target.id === "ab-monat") { abMonat = e.target.value; route(); } });
-document.addEventListener("submit", async (e) => {
-  e.preventDefault(); const f = e.target; const v = (id) => f.querySelector("#" + id).value.trim();
-  if (f.id === "betrieb-form") {
-    Object.assign(db.betrieb, { name: v("b-name"), inhaber: v("b-inhaber"), anschrift: v("b-anschrift"), tel: v("b-tel"), stnr: v("b-stnr"), ik: v("b-ik"), anerkennung: v("b-anerkennung"), iban: v("b-iban"), satz: Number(v("b-satz")) || 0, km: Number(v("b-km")) || 0, steuer: v("b-steuer") });
-    speichern(); route(); return;
-  }
-  if (f.id === "klient-form") {
-    db.klienten.push({ id: "k" + Date.now(), name: v("k-name"), anschrift: v("k-anschrift"), geb: "1940-01-01", pg: Number(v("k-pg")), kasse: v("k-kasse"), vnr: v("k-vnr"), angeh: v("k-angeh"), abtretung: v("k-abtretung") || iso(HEUTE), vorjahr: Number(v("k-vorjahr")) || 0 });
-  } else if (f.id === "einsatz-form") {
-    db.einsaetze.push({ id: "e" + Date.now(), klient: v("n-klient"), datum: v("n-datum"), von: v("n-von"), bis: v("n-bis"), taet: [], km: 0, notiz: "", status: "geplant", unterschrift: null, wer: null });
-  } else if (f.id === "buchung-form") {
-    let beleg = null; const datei = f.querySelector("#bu-beleg").files[0];
-    if (datei) beleg = await verkleinern(datei);
-    db.kassenbuch.push({ nr: db.kassenbuch.length + 1, datum: v("bu-datum"), typ: f.dataset.typ, betrag: Math.round(Number(v("bu-betrag")) * 100) / 100,
-      kat: f.querySelector("[data-kat][aria-pressed=true]").dataset.kat, text: v("bu-text"), zahlweg: f.querySelector("[data-zahl][aria-pressed=true]").dataset.zahl, ref: null, storno: false, beleg });
-  }
-  speichern(); dlg.close(); route();
+document.addEventListener("change", (ev) => {
+  const id = ev.target.id;
+  if (id === "wahl-h") { ui.h = ev.target.value; ui.kbAlle = false; route(); }
+  else if (id === "wahl-k") { ui.k = ev.target.value; route(); }
+  else if (id === "wahl-a") { ui.a = ev.target.value; route(); }
+  else if (id === "tour-h") { ui.tourH = ev.target.value; route(); }
+  else if (id === "tour-tag") { ui.tourTag = ev.target.value || HEUTE_ISO; route(); }
+  else if (id === "ab-monat") { ui.abMonat = ev.target.value; route(); }
+  else if (id === "komm") { klient(ui.a).angeh.kommunikation = ev.target.checked; speichern(); route(); }
+  else if (ev.target.closest("#serie-form")) serieVorschau();
 });
-// Belegfoto klein rechnen, damit der Speicher reicht
+document.addEventListener("input", (ev) => { if (ev.target.closest("#serie-form")) serieVorschau(); });
+document.addEventListener("submit", async (ev) => {
+  ev.preventDefault(); const f = ev.target; const v = (id) => f.querySelector("#" + id).value.trim();
+  if (f.id === "serie-form") {
+    const s = { id: "s" + Date.now(), klient: v("s-klient"), helfer: v("s-helfer"), tag: Number(v("s-tag")), von: v("s-von"), bis: v("s-bis"), alle: Number(v("s-alle")), ab: v("s-ab") || plusTage(1), taet: [] };
+    if (minuten(s.von, s.bis) <= 0) return;
+    const erst = vonIso(s.ab); while (erst.getDay() !== s.tag) erst.setDate(erst.getDate() + 1);
+    const k = konflikt(s.helfer, iso(erst), s.von, s.bis);
+    if (k && !f.dataset.trotzdem) { const p = f.querySelector("#s-fehler"); p.textContent = `${helfer(s.helfer).name} hat am ${tagKurz(iso(erst))} schon ${k.von}–${k.bis} bei ${klient(k.klient).name}. Noch einmal „Anlegen“ tippen, um trotzdem zu speichern.`; p.hidden = false; f.dataset.trotzdem = "1"; return; }
+    db.serien.push(s); erzeugeTermine(db, s, s.ab, plusTage(42)); speichern(); dlg.close(); route(); hinweis(`Fester Termin angelegt: ${WOCHENTAGE[s.tag]}s ${s.von} Uhr bei ${klient(s.klient).name}.`); return;
+  }
+  if (f.id === "wunsch-form") { const art = f.querySelector("[data-wunschart][aria-pressed=true]").dataset.wunschart; anfrage("Terminwunsch", `${art}: ${tagKurz(v("w-datum"))}, ${v("w-zeit")} Uhr. ${v("w-text")}`.trim(), f.dataset.klient); speichern(); dlg.close(); route(); hinweis("Ihre Anfrage ist im Büro angekommen."); return; }
+  if (f.id === "nachricht-form") { anfrage(f.dataset.art, f.querySelector("#m-text").value.trim() || "Bitte um Rückruf."); speichern(); dlg.close(); route(); hinweis("Ihre Nachricht ist im Büro angekommen."); return; }
+  if (f.id === "absage-form") { const e = db.einsaetze.find((x) => x.id === f.dataset.einsatz);
+    anfrage("Absage", `${tagKurz(e.datum)} ${e.von} Uhr${v("ab-grund") ? ": " + v("ab-grund") : ""}`, e.klient, { einsatz: e.id }); e.status = "abgesagt"; e.grund = v("ab-grund") || "abgesagt"; speichern(); dlg.close(); route(); hinweis("Der Termin ist abgesagt. Das Büro und die Begleiterin wissen Bescheid."); return; }
+  if (f.id === "klient-form") {
+    db.klienten.push({ id: "k" + Date.now(), name: v("k-name"), anrede: v("k-anrede") || v("k-name"), anschrift: v("k-anschrift"), x: Math.random() * 3, y: Math.random() * 2, tel: v("k-tel"), geb: "1940-01-01", pg: Number(v("k-pg")), kasse: v("k-kasse"), vnr: "", abtretung: HEUTE_ISO, vorjahr: 0, pflegegeld: true, beratung: HEUTE_ISO, notiz: "", seit: HEUTE_ISO,
+      angeh: v("k-aname") ? { name: v("k-aname"), rolle: "Angehörige", ort: "", tel: v("k-atel"), mail: "", zugang: f.querySelector("#k-azugang").checked, kommunikation: false, vollmacht: false, freigabe: HEUTE_ISO } : null });
+    speichern(); dlg.close(); route(); return; }
+  if (f.id === "buchung-form") { let beleg = null; const datei = f.querySelector("#bu-beleg").files[0]; if (datei) beleg = await verkleinern(datei);
+    db.kassenbuch.push({ helfer: ui.h, nr: db.kassenbuch.filter((x) => x.helfer === ui.h).length + 1, datum: v("bu-datum"), typ: f.dataset.typ, betrag: Math.round(Number(v("bu-betrag")) * 100) / 100,
+      kat: f.querySelector("[data-kat][aria-pressed=true]").dataset.kat, text: v("bu-text"), zahlweg: f.querySelector("[data-zahl][aria-pressed=true]").dataset.zahl, storno: false, beleg });
+    speichern(); dlg.close(); route(); }
+});
 function verkleinern(datei) {
   return new Promise((ok) => { const img = new Image(); img.onload = () => { const s = Math.min(1, 600 / img.width); const c = document.createElement("canvas");
     c.width = img.width * s; c.height = img.height * s; c.getContext("2d").drawImage(img, 0, 0, c.width, c.height); ok(c.toDataURL("image/jpeg", .7)); };
     img.onerror = () => ok(null); img.src = URL.createObjectURL(datei); });
 }
-
 route();
 </script>
