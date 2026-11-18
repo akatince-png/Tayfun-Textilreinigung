@@ -2,6 +2,32 @@
 
 Markenauftritt und Website für Tayfun Textilpflege, An der Kirche 10, 30457 Hannover-Wettbergen.
 
+Dieses Repository bündelt alles rund um das Familienunternehmen: Website, Ladenbuch, Marke, Alltagshilfe, die Weiterentwicklung zur Dachmarke „FEIN“ und die Projektunterlagen.
+
+## Wo fange ich an?
+
+1. [**Stand**](stand/README.md): Ziel, Bausteine, offene Entscheidungen, letzte Übergabe
+2. [**Projektzentrale**](stand/projektzentrale.md): „Jetzt gerade“, nächste Schritte, Logbuch
+3. [**Aufgaben**](stand/aufgaben.md): alle offenen Punkte nach Dringlichkeit
+
+## Projektunterlagen
+
+| Thema | Datei |
+|---|---|
+| Website | [bereiche/01-website.md](bereiche/01-website.md) |
+| Ladenbuch (Laden-App) | [bereiche/02-ladenbuch.md](bereiche/02-ladenbuch.md) |
+| Kasse | [bereiche/03-kasse.md](bereiche/03-kasse.md) |
+| Marketing & Social Media | [bereiche/04-marketing.md](bereiche/04-marketing.md) |
+| Google & SEO | [bereiche/05-google-seo.md](bereiche/05-google-seo.md) |
+| Soziale Angebote (AktivPass, § 45a SGB XI) | [bereiche/06-soziale-angebote.md](bereiche/06-soziale-angebote.md) |
+| Technik & Zugänge (ohne Passwörter) | [bereiche/07-technik.md](bereiche/07-technik.md) |
+| Dachmarke FEIN (Konzept, Namensprüfung, Fahrplan) | [fein/konzept-dachmarke.md](fein/konzept-dachmarke.md) |
+| Alltagshilfe-App (Plan und Prototyp) | [alltagshilfe/PLAN.md](alltagshilfe/PLAN.md) |
+| E-Transporter + Wallbox (Entscheidungsvorlage, Kalkulation) | [e-transporter/](e-transporter/README.md) |
+| Archiv: Vorarbeiten aus Notion (Google-Profil-Texte, WhatsApp-Schnellantworten, AGB-Entwurf, Kundenbindung) | [archiv/notion-vorarbeiten/](archiv/notion-vorarbeiten/README.md) |
+
+Das Repository ist **öffentlich**. Keine Passwörter, Zugangsdaten, Kunden- oder Gesundheitsdaten hier ablegen.
+
 ## Inhalt
 
 | Ordner | Was drin ist |
@@ -13,6 +39,10 @@ Markenauftritt und Website für Tayfun Textilpflege, An der Kirche 10, 30457 Han
 | `marke/_werkzeug/` | `logo_dateien.py` schreibt die SVGs, `logo.js` erzeugt daraus PNG und PDF. |
 | `marke/archiv/` | Der verworfene Entwurf „feine Textilpflege“ (Siegel in Nachtblau). Nur zur Ablage. |
 | `website/` | Die Website als statische Dateien, ohne Baukasten. Läuft auf jedem Webspace. Runde Formen kommen aus `rund.css`; ohne diese Datei ist die Seite eckig. |
+| `ladenbuch/` | Laden-App „TT Laden“ (siehe unten). |
+| `alltagshilfe/` | Plan und klickbarer Prototyp der Alltagshilfe-App (nur Testdaten). |
+| `entwuerfe/` | Unveröffentlichte Entwürfe, z. B. `fein-alltagshilfe.html` (noindex). |
+| `stand/`, `bereiche/`, `fein/`, `e-transporter/`, `archiv/` | Projektunterlagen, siehe oben. |
 
 ## Logo
 
@@ -77,7 +107,7 @@ python3 website/_vorlagen/seiten.py
 
 ## Ladenbuch (TT Laden)
 
-Auftrags-, Teile- und Kundenverwaltung für den Laden, läuft unter `tt-laden.de` als Web-App (Home-Bildschirm des iPads).
+Auftrags-, Teile- und Kundenverwaltung für den Laden, soll unter `laden.tayfun-textilpflege.de` laufen (statt `tt-laden.de`, verworfen am 28.10.2026), als Web-App (Home-Bildschirm des iPads).
 
 | Ordner / Datei | Was drin ist |
 |---|---|
